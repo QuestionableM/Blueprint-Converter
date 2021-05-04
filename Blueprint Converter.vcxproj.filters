@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="Code\Main.cpp" />
+    <ClCompile Include="Code\Blueprint Converter\BlueprintConverter.cpp" />
+    <ClCompile Include="Code\Blueprint Converter\Blueprint Writer\BlueprintWriter.cpp" />
+    <ClCompile Include="Code\Blueprint Converter\Cache Manager\CacheManager.cpp" />
+    <ClCompile Include="Code\Blueprint Converter\Object Definitions\ObjectDefinitions.cpp" />
+    <ClCompile Include="Code\Gui\Implementation\About.cpp" />
+    <ClCompile Include="Code\Gui\Implementation\GeneratorSettings.cpp" />
+    <ClCompile Include="Code\Gui\Implementation\MainGUI.cpp" />
+    <ClCompile Include="Code\Gui\Implementation\SettingsGUI.cpp" />
+    <ClCompile Include="Code\Object Database\ObjectDatabase.cpp" />
+    <ClCompile Include="Code\Object Database\Keyword Replacer\KeywordReplacer.cpp" />
+    <ClCompile Include="Code\Object Database\Language Database\LanguageDatabase.cpp" />
+    <ClCompile Include="Code\Object Database\Texture Database\TextureDatabase.cpp" />
+    <ClCompile Include="Code\Lib\File\FileFunc.cpp" />
+    <ClCompile Include="Code\Lib\Functions\Functions.cpp" />
+    <ClCompile Include="Code\Lib\GuiLib\GuiLib.cpp" />
+    <ClCompile Include="Code\Lib\Json\JsonFunc.cpp" />
+    <ClCompile Include="Code\Lib\OtherFunc\OtherFunc.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Code\Blueprint Converter\BlueprintConverter.h" />
+    <ClInclude Include="Code\Blueprint Converter\Blueprint Writer\BlueprintWriter.h" />
+    <ClInclude Include="Code\Blueprint Converter\Cache Manager\CacheManager.h" />
+    <ClInclude Include="Code\Blueprint Converter\Object Definitions\ObjectDefinitions.h" />
+    <ClInclude Include="Code\Gui\About.h" />
+    <ClInclude Include="Code\Gui\GeneratorSettings.h" />
+    <ClInclude Include="Code\Gui\MainGUI.h" />
+    <ClInclude Include="Code\Gui\SettingsGUI.h" />
+    <ClInclude Include="Code\Object Database\ObjectDatabase.h" />
+    <ClInclude Include="Code\Object Database\Keyword Replacer\KeywordReplacer.h" />
+    <ClInclude Include="Code\Object Database\Language Database\LanguageDatabase.h" />
+    <ClInclude Include="Code\Object Database\Texture Database\TextureDatabase.h" />
+    <ClInclude Include="Code\Lib\File\FileFunc.h" />
+    <ClInclude Include="Code\Lib\Functions\Functions.h" />
+    <ClInclude Include="Code\Lib\GuiLib\GuiLib.h" />
+    <ClInclude Include="Code\Lib\Json\JsonFunc.h" />
+    <ClInclude Include="Code\Lib\OtherFunc\OtherFunc.h" />
+  </ItemGroup>
+</Project>
