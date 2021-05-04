@@ -1,0 +1,19 @@
+{
+    "ProgramSettings": {
+        "Keywords": {
+            "$CHALLENGE_DATA": "$GAME_FOLDER/ChallengeData",
+            "$GAME_DATA": "$GAME_FOLDER/Data",
+            "$SURVIVAL_DATA": "$GAME_FOLDER/Survival"
+        },
+        "LanguageDirectories": [
+            "$GAME_DATA/Gui/Language/English",
+            "$SURVIVAL_DATA/Gui/Language/English",
+            "$CHALLENGE_DATA/Gui/Language/English"
+        ],
+        "ScrapObjectDatabase": [
+            "$CHALLENGE_DATA/Objects/Database/ShapeSets",
+            "$SURVIVAL_DATA/Objects/Database/ShapeSets",
+            "$GAME_DATA/Objects/Database/ShapeSets"
+        ]
+    }
+}
