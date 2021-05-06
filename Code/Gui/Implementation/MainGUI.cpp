@@ -63,27 +63,23 @@ System::Void SMBC::MainGUI::Start_BTN_Click(System::Object^ sender, System::Even
 	if (_DirEntr.is_directory()) {
 		std::wstring _BPFileDesc = (_BlueprintPath + L"/description.json");
 
-		nlohmann::json* _DescrJson = SMBC::JSON::OpenParseJson(_BPFileDesc, true);
-		if (!_DescrJson) {
+		nlohmann::json _DescrJson;
+
+		if (!SMBC::JSON::OpenParseJson(_BPFileDesc, _DescrJson, true)) {
 			SHOW_WARNING("Parse Error", "Couldn't parse the \"description.json\" file");
-			goto json_file_cleanup;
+			return;
 		}
 
-		std::wstring* _BPType = SMBC::JSON::GetJsonWstr(_DescrJson, "type");
-		std::wstring* _BPName = SMBC::JSON::GetJsonWstr(_DescrJson, "name");
+		std::wstring _BPType = SMBC::JSON::GetJsonWstr(_DescrJson, "type");
+		std::wstring _BPName = SMBC::JSON::GetJsonWstr(_DescrJson, "name");
 
-		if (!(_BPType && *_BPType == L"Blueprint" && _BPName)) {
+		if (_BPType != L"Blueprint" || _BPName.empty()) {
 			SHOW_WARNING("No Data", "The specified folder does not contain any information about the blueprint!");
-			goto json_data_cleanup;
+			return;
 		}
 
 		_BlueprintFile = (_BlueprintPath + L"/blueprint.json");
-		_BlueprintName = SMBC::Blueprint::FixBlueprintName(std::wstring(*_BPName));
-
-	json_data_cleanup:
-		delete _BPType, _BPName;
-	json_file_cleanup:
-		delete _DescrJson;
+		_BlueprintName = SMBC::Blueprint::FixBlueprintName(_BPName);
 
 		if (_BlueprintFile.empty() || _BlueprintName.empty()) return;
 	}
@@ -100,21 +96,22 @@ System::Void SMBC::MainGUI::Start_BTN_Click(System::Object^ sender, System::Even
 	}
 
 	if (!_BlueprintName.empty() && !_BlueprintFile.empty()) {
-		SMBC::GeneratorSettings^ _GenSettings = gcnew SMBC::GeneratorSettings();
+		SMBC::GeneratorSettings^ _GenSettings = gcnew SMBC::GeneratorSettings(_BlueprintName);
 		_GenSettings->ShowDialog();
 
-		if (_GenSettings->Success) {
+		if (_GenSettings->BlueprintName_TB->TextLength > 0 && _GenSettings->Success) {
 			this->ChangeGUIState(true, true, false);
 
-			System::Array^ _ThreadData = gcnew cli::array<System::Object^>(7);
+			System::Array^ _ThreadData = gcnew cli::array<System::Object^>(8);
 
 			_ThreadData->SetValue(gcnew System::String(_BlueprintFile.c_str()), (int)0);
-			_ThreadData->SetValue(gcnew System::String(_BlueprintName.c_str()), (int)1);
+			_ThreadData->SetValue(_GenSettings->BlueprintName_TB->Text, (int)1);
 			_ThreadData->SetValue(_GenSettings->SeparateParts_CB->Checked, (int)2);
 			_ThreadData->SetValue(_GenSettings->ExportTexPaths_CB->Checked, (int)3);
 			_ThreadData->SetValue(_GenSettings->ApplyTextures_CB->Checked, (int)4);
 			_ThreadData->SetValue(_GenSettings->ExportUVs_CB->Checked, (int)5);
 			_ThreadData->SetValue(_GenSettings->ExportNormals_CB->Checked, (int)6);
+			_ThreadData->SetValue(_GenSettings->MaterialsByColor_CB->Checked, (int)7);
 
 			this->ObjectGenerator->RunWorkerAsync(_ThreadData);
 			this->GuiUpdater->Start();
@@ -141,11 +138,10 @@ System::Void SMBC::MainGUI::ObjectGenerator_DoWork(System::Object^ sender, Syste
 	bool _ApplyTextures = safe_cast<bool>(_Data->GetValue((int)4));
 	bool _ExportUvs = safe_cast<bool>(_Data->GetValue((int)5));
 	bool _ExportNormals = safe_cast<bool>(_Data->GetValue((int)6));
+	bool _MaterialsByColor = safe_cast<bool>(_Data->GetValue((int)7));
 
 	std::wstring _BlueprintPath = msclr::interop::marshal_as<std::wstring>(_BlueprintPathS);
 	std::wstring _BlueprintName = msclr::interop::marshal_as<std::wstring>(_BlueprintNameS);
-
-	delete _Data, _BlueprintPathS, _BlueprintNameS;
 
 	SMBC::BlueprintConversionData::SetNewStage(0, 0);
 	SMBC::LastGenerationOutput = SMBC::BPFunction::ConvertBlueprintToObj(
@@ -155,7 +151,8 @@ System::Void SMBC::MainGUI::ObjectGenerator_DoWork(System::Object^ sender, Syste
 		_ExportTexPaths,
 		_ApplyTextures && _ExportUvs,
 		_ExportUvs,
-		_ExportNormals
+		_ExportNormals,
+		_MaterialsByColor && _ApplyTextures && _ExportUvs
 	);
 }
 
@@ -222,19 +219,17 @@ System::Void SMBC::MainGUI::BlueprintLoader_DoWork(System::Object^ sender, Syste
 			if (!Folder.is_directory()) continue;
 
 			std::wstring BlueprintJson = (Folder.path().wstring() + L"/description.json");
-			nlohmann::json* _BlueprintDesc = SMBC::JSON::OpenParseJson(BlueprintJson, true);
+			nlohmann::json _BlueprintDesc;
 
-			if (_BlueprintDesc) {
-				std::wstring _BPName = SMBC::JSON::GetJsonWstrA(_BlueprintDesc, "name");
-				std::wstring _BPType = SMBC::JSON::GetJsonWstrA(_BlueprintDesc, "type");
+			if (!SMBC::JSON::OpenParseJson(BlueprintJson, _BlueprintDesc, true)) continue;
 
-				if (_BPName.empty() || (_BPType.empty() || _BPType != L"Blueprint")) continue;
+			std::wstring _BPName = SMBC::JSON::GetJsonWstr(_BlueprintDesc, "name");
+			std::wstring _BPType = SMBC::JSON::GetJsonWstr(_BlueprintDesc, "type");
 
-				SMBC::Blueprint _NewBlueprint(_BPName, BlueprintJson, Folder.path().wstring());
-				this->Blueprints->push_back(_NewBlueprint);
-			}
+			if (_BPName.empty() || _BPType != L"Blueprint") continue;
 
-			delete _BlueprintDesc;
+			SMBC::Blueprint _NewBlueprint(_BPName, BlueprintJson, Folder.path().wstring());
+			this->Blueprints->push_back(_NewBlueprint);
 		}
 	}
 }
@@ -388,4 +383,18 @@ System::Void SMBC::MainGUI::OpenOutputFolder_BTN_Click(System::Object^ sender, S
 		std::filesystem::create_directory(L".\\Converted Models");
 
 	SMBC::GUI::OpenFolderInExplorer(L".\\Converted Models");
+}
+
+System::Void SMBC::MainGUI::MainGUI_FormClosing(System::Object^ sender, System::Windows::Forms::FormClosingEventArgs^ e) {
+	if (this->ObjectGenerator->IsBusy) {
+		System::Windows::Forms::DialogResult dr = System::Windows::Forms::MessageBox::Show(
+			"Are you sure that you want to close the program while it's converting a blueprint?\n\nThis might corrupt the file it's currently converting!",
+			"Close",
+			System::Windows::Forms::MessageBoxButtons::YesNo,
+			System::Windows::Forms::MessageBoxIcon::Question
+		);
+
+		if (dr != System::Windows::Forms::DialogResult::Yes)
+			e->Cancel = true;
+	}
 }

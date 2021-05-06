@@ -4,6 +4,25 @@
 namespace fs = std::filesystem;
 namespace _File = SMBC::FILE;
 
+_File::ExistsType _File::FileExistsA(const std::wstring& path) {
+	try {
+		if (fs::exists(path))
+			return _File::ExistsType::Exists;
+	}
+	catch (...) {
+		return _File::ExistsType::BadFile;
+	}
+
+	return _File::ExistsType::NExists;
+}
+
+bool _File::IsBadPath(const std::wstring& path) {
+	if (_File::FileExistsA(path) == _File::ExistsType::BadFile)
+		return true;
+
+	return false;
+}
+
 bool _File::FileExists(const std::wstring& path) {
 	try {
 		bool _Exists = fs::exists(path);
@@ -21,4 +40,15 @@ bool _File::IsEquivalent(const std::wstring& p1, const std::wstring& p2) {
 	catch (fs::filesystem_error& fe) { fs::filesystem_error& a = fe; }
 
 	return false;
+}
+
+bool _File::CreateDirectory(const std::wstring& path) {
+	if (_File::FileExists(path)) return true;
+
+	try {
+		fs::create_directory(path);
+	}
+	catch (...) {}
+
+	return _File::FileExists(path);
 }

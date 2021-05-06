@@ -33,81 +33,41 @@ std::string _JSON::ReadWholeFile(std::ifstream& input) {
 	return _Output;
 }
 
-nlohmann::json* _JSON::OpenParseJson(const std::wstring& path, const bool _stringify) {
-	nlohmann::json* output = nullptr;
-
+bool _JSON::OpenParseJson(const std::wstring& path, nlohmann::json& obj, const bool _stringify) {
 	try {
 		std::ifstream _InputFile(path);
+
+		if (!_InputFile.is_open()) return false;
 
 		std::string _RawJson;
 
-		if (_InputFile.is_open()) {
-			if (_stringify)
-				_RawJson = _JSON::ReadWholeFile(_InputFile);
-			else {
-				std::stringstream sstream;
-
-				sstream << _InputFile.rdbuf();
-
-				_RawJson = sstream.str();
-			}
-
-			nlohmann::json& _PJson = nlohmann::json::parse(_RawJson, nullptr, true, true);
-
-			output = new nlohmann::json(_PJson);
-
-			_InputFile.close();
-		}
-	}
-	catch (nlohmann::json::parse_error& p_err) {
-		nlohmann::json::parse_error& p = p_err;
-	}
-
-	return output;
-}
-
-nlohmann::json _JSON::OpenParseJsonA(const std::wstring& path) {
-	nlohmann::json _Output;
-
-	try {
-		std::ifstream _InputFile(path);
-
-		if (_InputFile.is_open()) {
+		if (_stringify)
+			_RawJson = _JSON::ReadWholeFile(_InputFile);
+		else {
 			std::stringstream sstream;
 
 			sstream << _InputFile.rdbuf();
 
-			nlohmann::json& _PJson = nlohmann::json::parse(sstream.str(), nullptr, true, true);
-
-			_Output = _PJson;
-
-			_InputFile.close();
+			_RawJson = sstream.str();
 		}
+
+		obj = nlohmann::json::parse(_RawJson, nullptr, true, true);
+		return true;
 	}
-	catch (nlohmann::json::parse_error& p_err) {
-		nlohmann::json::parse_error& p = p_err;
+	catch (...) {}
+
+	return false;
+}
+
+std::wstring _JSON::GetJsonWstr(nlohmann::json& json, const std::string& key) {
+	std::wstring _Output = L"";
+	
+	if (json.contains(key)) {
+		auto& _value = json.at(key);
+
+		if (_value.is_string())
+			_Output.append(SMBC::Other::Utf8ToWide(_value.get<std::string>()));
 	}
 
 	return _Output;
-}
-
-std::wstring* _JSON::GetJsonWstr(nlohmann::json*& json, const std::string& key) {
-	std::wstring* _Output = nullptr;
-
-	if (json->contains(key) && json->at(key).is_string())
-		_Output = new std::wstring(SMBC::Other::Utf8ToWide(json->at(key).get<std::string>()));
-
-	return _Output;
-}
-
-std::wstring _JSON::GetJsonWstrA(nlohmann::json*& json, const std::string& key, const std::wstring& replacement) {
-	if (!json->contains(key)) goto return_empty;
-
-	auto& _ResStr = json->at(key);
-	if (!_ResStr.is_string()) goto return_empty;
-
-	return SMBC::Other::Utf8ToWide(_ResStr.get<std::string>());
-
-return_empty:
-	return replacement;
 }

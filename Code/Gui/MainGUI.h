@@ -323,6 +323,7 @@ namespace BlueprintConverter {
 			this->Name = L"MainGUI";
 			this->ShowIcon = false;
 			this->Text = L"SM Blueprint to Model Converter";
+			this->FormClosing += gcnew System::Windows::Forms::FormClosingEventHandler(this, &MainGUI::MainGUI_FormClosing);
 			this->Shown += gcnew System::EventHandler(this, &MainGUI::MainGUI_Shown);
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->BlueprintImage))->EndInit();
 			this->menuStrip1->ResumeLayout(false);
@@ -355,5 +356,6 @@ namespace BlueprintConverter {
 		System::Void MainGUI_Shown(System::Object^ sender, System::EventArgs^ e);
 		System::Void OpenBlueprint_Click(System::Object^ sender, System::EventArgs^ e);
 		System::Void OpenOutputFolder_BTN_Click(System::Object^ sender, System::EventArgs^ e);
+		System::Void MainGUI_FormClosing(System::Object^ sender, System::Windows::Forms::FormClosingEventArgs^ e);
 	};
 }

@@ -72,6 +72,14 @@
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Code\Gui\GeneratorSettings.resx">
+      <DependentUpon>Code\Gui\GeneratorSettings.h</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Code\Gui\MainGUI.resx">
+      <DependentUpon>Code\Gui\MainGUI.h</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <ProjectGuid>{BECA80D1-065D-426E-B270-1C5DDE6D5CA3}</ProjectGuid>

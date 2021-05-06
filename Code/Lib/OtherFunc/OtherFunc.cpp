@@ -56,3 +56,12 @@ std::string _Other::VecToString(glm::vec3& vec3) {
 
 	return _Output;
 }
+
+bool _Other::IsLetterAllowed(const wchar_t& ch) {
+	if (System::Char::IsLetterOrDigit(ch)) return true;
+
+	for (const wchar_t& _c : _Other::_allowed_letters)
+		if (ch == _c) return true;
+
+	return false;
+}

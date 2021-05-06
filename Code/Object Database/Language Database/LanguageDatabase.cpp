@@ -18,11 +18,11 @@ SMBC::LangDB::LangDB(const std::wstring& environment) {
 }
 
 void SMBC::LangDB::LoadLanguageFile(const std::wstring& path) {
-	nlohmann::json* _LangFile = SMBC::JSON::OpenParseJson(path);
+	nlohmann::json _LangFile;
 
-	if (!(_LangFile && _LangFile->is_object())) goto skip_other_actions;
+	if (!SMBC::JSON::OpenParseJson(path, _LangFile) || !_LangFile.is_object()) return;
 
-	for (auto& trans : _LangFile->items()) {
+	for (auto& trans : _LangFile.items()) {
 		if (!trans.value().is_object()) continue;
 
 		auto& _Title = trans.value()["title"];
@@ -35,9 +35,6 @@ void SMBC::LangDB::LoadLanguageFile(const std::wstring& path) {
 
 		this->_translations.push_back(SMBC::LangTrans(_WstrKey, _WstrTitle));
 	}
-
-skip_other_actions:
-	delete _LangFile;
 }
 
 bool SMBC::LangDB::UuidExists(const std::wstring& uuid) {

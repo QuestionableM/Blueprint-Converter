@@ -6,57 +6,61 @@
 #include "Blueprint Converter/Object Definitions/ObjectDefinitions.h"
 
 namespace SMBC {
-	struct SubMeshCache {
-		std::wstring _MeshName;
-		std::wstring _TexPath;
-		std::vector<std::vector<std::vector<long long>>> _DataIdx;
+	struct SubMeshData {
+		std::wstring MaterialName;
+		int SubMeshIndex;
+
+		std::vector<std::vector<std::vector<long long>>> DataIdx;
 	};
 
-	struct ModelDataChunk {
-		std::wstring name;
+	struct Model {
+		std::vector<glm::vec3> vertices;
 		std::vector<glm::vec3> normals;
 		std::vector<glm::vec2> uvs;
-		std::vector<glm::vec3> vertices;
+		std::vector<SMBC::SubMeshData> subMeshData;
 
-		std::vector<SMBC::SubMeshCache> SubMeshCache;
-	};
-
-	struct CachedMesh {
-		std::vector<glm::vec3> Vertices;
-		std::vector<glm::vec3> Normals;
-		std::vector<glm::vec2> TexturePoints;
-		std::vector<SMBC::SubMeshCache> SubMeshCache;
-
-		std::wstring MeshUuid;
-		std::wstring MeshPath;
-		std::wstring MeshName;
-		SMBC::Texture::Texture TexPaths;
-
-		~CachedMesh();
+		std::wstring meshPath;
 	};
 
 	struct CachedBlock {
-		std::wstring name;
 		std::wstring uuid;
-		SMBC::Texture::TextureList TexList;
+		std::wstring name;
+		SMBC::Texture::TextureList texList;
+	};
+
+	struct CachedPart {
+		std::wstring uuid;
+		std::wstring name;
+		std::wstring meshPath;
+
+		SMBC::Texture::Texture texPaths;
 	};
 
 	class CacheManager {
+		std::vector<SMBC::Model> CachedModels;
 		std::vector<SMBC::CachedBlock> CachedBlocks;
-		std::vector<SMBC::CachedMesh> CachedParts;
+		std::vector<SMBC::CachedPart> CachedParts;
 
 		Assimp::Importer Importer;
 	public:
-		void LoadBlockIntoCache(SMBC::SM_Block& block);
-		void LoadPartIntoCache(
-			SMBC::SM_Part& part,
-			SMBC::CachedMesh& _CachedMesh,
+		bool LoadModel(
+			std::wstring& path,
+			SMBC::Model& model,
 			const bool& load_uvs,
 			const bool& load_normals
 		);
+		void LoadPart(
+			SMBC::SM_Part& part,
+			SMBC::CachedPart& cached_part,
+			const bool& load_uvs,
+			const bool& load_normal,
+			const bool& mat_by_color
+		);
+		void LoadBlock(SMBC::SM_Block& block, const bool& mat_by_color);
 
-		void ClearCachedMeshList();
-		bool GetCachedMesh(const std::wstring& uuid, SMBC::CachedMesh& c_mesh);
+		bool GetModel(const std::wstring& path, SMBC::Model& model);
+
+		void ClearCache();
 
 		void WriteMtlFile(const std::wstring& path);
 		void WriteTexturePaths(const std::wstring& path);

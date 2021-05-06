@@ -207,10 +207,11 @@ void SMBC::ObjectDatabase::GetRenderableData(
 }
 
 void SMBC::ObjectDatabase::LoadObjectFile(const std::wstring& path, SMBC::LangDB& translations) {
-	nlohmann::json* _ObjectFile = SMBC::JSON::OpenParseJson(path);
+	nlohmann::json _ObjectFile;
+	if (!SMBC::JSON::OpenParseJson(path, _ObjectFile)) return;
 
-	if (_ObjectFile && _ObjectFile->contains("blockList") && _ObjectFile->at("blockList").is_array()) {
-		auto& _BlockList = _ObjectFile->at("blockList");
+	if (_ObjectFile.contains("blockList") && _ObjectFile.at("blockList").is_array()) {
+		auto& _BlockList = _ObjectFile.at("blockList");
 
 		SMBC::BlueprintConversionData::ProgressBarMax += (int32_t)_BlockList.size();
 		for (auto& _Block : _BlockList) {
@@ -245,8 +246,8 @@ void SMBC::ObjectDatabase::LoadObjectFile(const std::wstring& path, SMBC::LangDB
 		}
 	}
 
-	if (_ObjectFile && _ObjectFile->contains("partList") && _ObjectFile->at("partList").is_array()) {
-		auto& _PartList = _ObjectFile->at("partList");
+	if (_ObjectFile.contains("partList") && _ObjectFile.at("partList").is_array()) {
+		auto& _PartList = _ObjectFile.at("partList");
 
 		SMBC::BlueprintConversionData::ProgressBarMax += (int32_t)_PartList.size();
 		for (auto& _Part : _PartList) {
@@ -276,27 +277,23 @@ void SMBC::ObjectDatabase::LoadObjectFile(const std::wstring& path, SMBC::LangDB
 			else if (_Renderable.is_string()) {
 				std::wstring _RenderableWstr = SMBC::Other::Utf8ToWide(_Renderable.get<std::string>());
 				_RenderableWstr = SMBC::PathReplacer::ReplaceKey(_RenderableWstr);
+				nlohmann::json _RendFile;
 
-				nlohmann::json* _RendFile = SMBC::JSON::OpenParseJson(_RenderableWstr);
-				if (_RendFile) {
-					std::wstring _Mesh = L"";
-					SMBC::Texture::Texture _TextureList(SMBC::Texture::TextureType::None);
+				if (!SMBC::JSON::OpenParseJson(_RenderableWstr, _RendFile)) continue;
 
-					SMBC::ObjectDatabase::GetRenderableData(*_RendFile, _TextureList, _Mesh);
+				std::wstring _Mesh = L"";
+				SMBC::Texture::Texture _TextureList(SMBC::Texture::TextureType::None);
 
-					if (_Mesh.empty() || _TextureList.TexType == SMBC::Texture::TextureType::None) continue;
+				SMBC::ObjectDatabase::GetRenderableData(_RendFile, _TextureList, _Mesh);
 
-					SMBC::ObjectData _ObjData(_WstrUuid, _Mesh, _ObjName, _TextureList, _ObjectBounds);
-					SMBC::ObjectDatabase::AddObjectToDatabase(_ObjData);
-					SMBC::BlueprintConversionData::ProgressBarValue++;
-				}
+				if (_Mesh.empty() || _TextureList.TexType == SMBC::Texture::TextureType::None) continue;
 
-				delete _RendFile;
+				SMBC::ObjectData _ObjData(_WstrUuid, _Mesh, _ObjName, _TextureList, _ObjectBounds);
+				SMBC::ObjectDatabase::AddObjectToDatabase(_ObjData);
+				SMBC::BlueprintConversionData::ProgressBarValue++;
 			}
 		}
 	}
-
-	delete _ObjectFile;
 }
 
 void SMBC::ObjectDatabase::LoadGameDatabase() {
@@ -328,44 +325,45 @@ void SMBC::ObjectDatabase::LoadModDatabase() {
 			if (!dir.is_directory()) continue;
 
 			std::wstring _ModDescription = dir.path().wstring() + L"/description.json";
-			nlohmann::json* _DescJson = SMBC::JSON::OpenParseJson(_ModDescription, true);
-			if (_DescJson) {
-				std::wstring _ModType = SMBC::JSON::GetJsonWstrA(_DescJson, "type");
-				if (_ModType.empty() || _ModType != L"Blocks and Parts") continue;
+			nlohmann::json _DescJson;
 
-				std::wstring _ModUuid = SMBC::JSON::GetJsonWstrA(_DescJson, "localId");
-				if (_ModUuid.empty()) continue;
+			if (!SMBC::JSON::OpenParseJson(_ModDescription, _DescJson, true)) continue;
 
-				std::wstring _ObjectsPath = dir.path().wstring() + L"/Objects/Database/ShapeSets";
-				if (!SMBC::FILE::FileExists(_ObjectsPath)) continue;
+			std::wstring _ModType = SMBC::JSON::GetJsonWstr(_DescJson, "type");
+			if (_ModType != L"Blocks and Parts") continue;
 
-				SMBC::PathReplacer::SetContentKey(_ModUuid);
-				SMBC::PathReplacer::SetModKey(dir.path().wstring());
+			std::wstring _ModUuid = SMBC::JSON::GetJsonWstr(_DescJson, "localId");
+			if (_ModUuid.empty()) continue;
 
-				std::wstring _LanguageDBPath = dir.path().wstring() + L"/Gui/Language/English/inventoryDescriptions.json";
+			std::wstring _ObjectsPath = dir.path().wstring() + L"/Objects/Database/ShapeSets";
+			if (!SMBC::FILE::FileExists(_ObjectsPath)) continue;
 
-				std::wstring _ModName = SMBC::JSON::GetJsonWstrA(_DescJson, "name", L"NO MOD NAME");
-				SMBC::LangDB _LangDB(_ModName);
-				_LangDB.LoadLanguageFile(_LanguageDBPath);
+			SMBC::PathReplacer::SetContentKey(_ModUuid);
+			SMBC::PathReplacer::SetModKey(dir.path().wstring());
 
-				fs::recursive_directory_iterator RecDirIter(_ObjectsPath, fs::directory_options::skip_permission_denied);
-				for (auto& m_dir : RecDirIter) {
-					if (!m_dir.is_regular_file() || !m_dir.path().has_extension() || m_dir.path().extension() != ".json") continue;
+			std::wstring _LanguageDBPath = dir.path().wstring() + L"/Gui/Language/English/inventoryDescriptions.json";
 
-					SMBC::ObjectDatabase::LoadObjectFile(m_dir.path().wstring(), _LangDB);
-				}
+			std::wstring _ModName = SMBC::JSON::GetJsonWstr(_DescJson, "name");
+			if (_ModName.empty()) _ModName = L"NO MOD NAME";
+
+			SMBC::LangDB _LangDB(_ModName);
+			_LangDB.LoadLanguageFile(_LanguageDBPath);
+
+			fs::recursive_directory_iterator RecDirIter(_ObjectsPath, fs::directory_options::skip_permission_denied);
+			for (auto& m_dir : RecDirIter) {
+				if (!m_dir.is_regular_file() || !m_dir.path().has_extension() || m_dir.path().extension() != ".json") continue;
+
+				SMBC::ObjectDatabase::LoadObjectFile(m_dir.path().wstring(), _LangDB);
 			}
-
-			delete _DescJson;
 		}
 	}
 }
 
 void SMBC::ObjectDatabase::LoadConfig(const std::wstring& path) {
-	nlohmann::json* _ConfigFile = SMBC::JSON::OpenParseJson(path);
+	nlohmann::json _ConfigFile;
 
-	if (_ConfigFile) {
-		auto& _ConfigData = *_ConfigFile;
+	if (SMBC::JSON::OpenParseJson(path, _ConfigFile)) {
+		auto& _ConfigData = _ConfigFile;
 
 		auto& _UserSettings = _ConfigData["UserSettings"];
 		if (_UserSettings.is_object()) {
@@ -407,8 +405,6 @@ void SMBC::ObjectDatabase::LoadConfig(const std::wstring& path) {
 				SMBC::ObjectDatabase::LoadLanguageFile(_str);
 		}
 	}
-
-	delete _ConfigFile;
 }
 
 void SMBC::ObjectDatabase::LoadJsonWstrArray(const nlohmann::json& file, const std::string& keyword, std::vector<std::wstring>& _array) {
@@ -428,7 +424,8 @@ void SMBC::ObjectDatabase::LoadJsonWstrArray(const nlohmann::json& file, const s
 }
 
 void SMBC::ObjectDatabase::SaveConfigFile(const bool sm_path, const bool bp_list, const bool mod_list) {
-	nlohmann::json _JsonOutput = SMBC::JSON::OpenParseJsonA(L"./Resources/Config.json");
+	nlohmann::json _JsonOutput;
+	SMBC::JSON::OpenParseJson(L"./Resources/Config.json", _JsonOutput);
 
 	std::filesystem::create_directory(L"./Resources");
 	std::ofstream _ConfigJson("./Resources/Config.json");

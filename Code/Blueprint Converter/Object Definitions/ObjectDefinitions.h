@@ -9,6 +9,7 @@ namespace SMBC {
 		std::wstring object_path;
 		std::wstring name;
 		std::wstring uuid;
+		std::wstring color;
 		glm::vec3 position;
 		glm::vec3 bounds;
 		int xAxis;
@@ -22,7 +23,8 @@ namespace SMBC {
 			const glm::vec3& bounds,
 			const int& _XAxis,
 			const int& _ZAxis,
-			const std::wstring& uuid
+			const std::wstring& uuid,
+			const std::wstring& color
 		);
 	};
 
@@ -35,6 +37,7 @@ namespace SMBC {
 		SMBC::Texture::TextureList tex_list;
 		std::wstring uuid;
 		int tiling;
+		std::wstring color;
 
 		SM_Block(
 			const glm::vec3& pos,
@@ -44,7 +47,8 @@ namespace SMBC {
 			const std::wstring& name,
 			const SMBC::Texture::TextureList& tex_list,
 			const std::wstring& uuid,
-			const int& tiling
+			const int& tiling,
+			const std::wstring& color
 		);
 	};
 

@@ -1,40 +1,23 @@
 #include "Blueprint Converter/Cache Manager/CacheManager.h"
 #include "Lib/OtherFunc/OtherFunc.h"
 
-SMBC::CachedMesh::~CachedMesh() {
-	this->MeshName.clear();
-	this->MeshPath.clear();
-	this->MeshUuid.clear();
-	this->Normals.clear();
-	this->SubMeshCache.clear();
-	this->TexPaths.TexList.clear();
-	this->TexturePoints.clear();
-	this->Vertices.clear();
-}
-
-void SMBC::CacheManager::LoadBlockIntoCache(SMBC::SM_Block& block) {
-	for (SMBC::CachedBlock& blk : this->CachedBlocks)
-		if (blk.uuid == block.uuid) return;
-
-	SMBC::CachedBlock NewBlock;
-	NewBlock.name = block.name;
-	NewBlock.uuid = block.uuid;
-	NewBlock.TexList = block.tex_list;
-
-	this->CachedBlocks.push_back(NewBlock);
-}
-
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
-void SMBC::CacheManager::LoadPartIntoCache(
-	SMBC::SM_Part& part,
-	SMBC::CachedMesh& _CachedMesh,
+bool SMBC::CacheManager::LoadModel(
+	std::wstring& path,
+	SMBC::Model& model,
 	const bool& load_uvs,
 	const bool& load_normals
 ) {
-	const aiScene* _ModelScene = this->Importer.ReadFile(
-		SMBC::Other::WideToUtf8(part.object_path).c_str(),
+	for (SMBC::Model& _m : this->CachedModels)
+		if (_m.meshPath == path) {
+			model = _m;
+			return true;
+		}
+
+	const aiScene* ModelScene = this->Importer.ReadFile(
+		SMBC::Other::WideToUtf8(path).c_str(),
 		aiProcess_FindInvalidData |
 		aiProcess_RemoveComponent |
 		aiProcess_RemoveRedundantMaterials |
@@ -43,142 +26,151 @@ void SMBC::CacheManager::LoadPartIntoCache(
 		aiProcess_OptimizeMeshes
 	);
 
-	long long _FaceOffset = 0;
-	long long _TexturePointOffset = 0;
-	long long _NormalOffset = 0;
-	if (_ModelScene && _ModelScene->HasMeshes()) {
+	bool _HasMaterials = ModelScene->HasMaterials();
 
-		_CachedMesh.SubMeshCache.reserve(_ModelScene->mNumMeshes);
-		for (uint32_t a = 0u; a < _ModelScene->mNumMeshes; a++) {
-			_FaceOffset = (long long)_CachedMesh.Vertices.size();
-			_TexturePointOffset = (long long)_CachedMesh.TexturePoints.size();
-			_NormalOffset = (long long)_CachedMesh.Normals.size();
+	long long FaceOffset = 0ll;
+	long long TexturePointOffset = 0ll;
+	long long NormalOffset = 0ll;
 
-			const aiMesh* _Mesh = _ModelScene->mMeshes[a];
+	if (ModelScene && ModelScene->HasMeshes()) {
+		model.subMeshData.reserve(ModelScene->mNumMeshes);
+		for (uint32_t a = 0u; a < ModelScene->mNumMeshes; a++) {
+			FaceOffset = (long long)model.vertices.size();
+			TexturePointOffset = (long long)model.uvs.size();
+			NormalOffset = (long long)model.normals.size();
 
-			_CachedMesh.Vertices.reserve(_Mesh->mNumVertices);
-			bool _HasTextureCoords = (load_uvs && _Mesh->mTextureCoords[0] != NULL);
-			bool _HasNormals = (load_normals && _Mesh->HasNormals());
+			const aiMesh* Mesh = ModelScene->mMeshes[a];
 
-			if (_HasTextureCoords) _CachedMesh.TexturePoints.reserve(_Mesh->mNumVertices);
-			if (_HasNormals) _CachedMesh.Normals.reserve(_Mesh->mNumVertices);
+			bool _HasTextureCoords = (load_uvs && Mesh->mTextureCoords[0] != NULL);
+			bool _HasNormals = (load_normals && Mesh->HasNormals());
 
-			for (uint32_t b = 0u; b < _Mesh->mNumVertices; b++) {
-				aiVector3D& _OldVertex = _Mesh->mVertices[b];
-				_CachedMesh.Vertices.push_back({ _OldVertex.x, _OldVertex.y, _OldVertex.z });
+			if (_HasTextureCoords) model.uvs.reserve(Mesh->mNumVertices);
+			if (_HasNormals) model.normals.reserve(Mesh->mNumVertices);
+
+			model.vertices.reserve(Mesh->mNumVertices);
+			for (uint32_t b = 0u; b < Mesh->mNumVertices; b++) {
+				aiVector3D& aiVert = Mesh->mVertices[b];
+				model.vertices.push_back({ aiVert.x, aiVert.y, aiVert.z });
 
 				if (!_HasTextureCoords && !_HasNormals) continue;
 
 				if (_HasTextureCoords) {
-					aiVector3D& UVpt = _Mesh->mTextureCoords[0][b];
-					_CachedMesh.TexturePoints.push_back({ UVpt.x, UVpt.y });
+					aiVector3D& Uv = Mesh->mTextureCoords[0][b];
+					model.uvs.push_back({ Uv.x, Uv.y });
 				}
 
 				if (_HasNormals) {
-					aiVector3D& NormalPt = _Mesh->mNormals[b];
-					_CachedMesh.Normals.push_back({ NormalPt.x, NormalPt.y, NormalPt.z });
+					aiVector3D& Normal = Mesh->mNormals[b];
+					model.normals.push_back({ Normal.x, Normal.y, Normal.z });
 				}
 			}
 
-			SMBC::SubMeshCache _SubMeshCache;
-			_SubMeshCache._MeshName = part.uuid + L" " + std::to_wstring(a);
+			SMBC::SubMeshData subMeshData;
+			subMeshData.SubMeshIndex = a;
+			subMeshData.MaterialName = L"";
 
-			SMBC::Texture::TextureList _TList;
-			bool _Success = false;
+			if (_HasMaterials) {
+				const aiMaterial* MeshMat = ModelScene->mMaterials[Mesh->mMaterialIndex];
+				aiString MatName;
+				MeshMat->Get(AI_MATKEY_NAME, MatName);
 
-			switch (part.tex.TexType) {
-			case SMBC::Texture::TextureType::SubMeshList:
-				_Success = part.tex.GetTextureByName(std::to_wstring(a), _TList);
-				break;
-			case SMBC::Texture::TextureType::SubMeshMap:
-				const aiMaterial* _MeshMat = _ModelScene->mMaterials[_Mesh->mMaterialIndex];
-				aiString _MatName;
-				_MeshMat->Get(AI_MATKEY_NAME, _MatName);
-
-				std::string _StrName = std::string(_MatName.C_Str(), _MatName.length);
-				std::wstring _WstrName = SMBC::Other::Utf8ToWide(_StrName);
-
-				_Success = part.tex.GetTextureByName(_WstrName, _TList);
-				break;
+				std::string StrMatName = std::string(MatName.C_Str(), MatName.length);
+				subMeshData.MaterialName = SMBC::Other::Utf8ToWide(StrMatName);
 			}
 
-			if (_Success && !_TList.dif.empty())
-				_SubMeshCache._TexPath = _TList.dif;
+			subMeshData.DataIdx.reserve(Mesh->mNumFaces);
+			for (uint32_t b = 0u; b < Mesh->mNumFaces; b++) {
+				const aiFace& Face = Mesh->mFaces[b];
 
-			_SubMeshCache._DataIdx.reserve(_Mesh->mNumFaces);
-			for (uint32_t b = 0; b < _Mesh->mNumFaces; b++) {
-				const aiFace& _Face = _Mesh->mFaces[b];
+				std::vector<std::vector<long long>> DIdx;
 
-				std::vector<std::vector<long long>> _DIdx;
+				DIdx.reserve(Face.mNumIndices);
+				for (uint32_t c = 0u; c < Face.mNumIndices; c++) {
+					long long indIdx = (long long)Face.mIndices[c];
 
-				_DIdx.reserve(_Face.mNumIndices);
-				for (uint32_t c = 0; c < _Face.mNumIndices; c++) {
-					long long _indIdx = (long long)_Face.mIndices[c];
-
-					_DIdx.push_back({
-						_indIdx + _FaceOffset,
-						(_HasTextureCoords ? (_indIdx + _TexturePointOffset) : -1),
-						(_HasNormals ? (_indIdx + _NormalOffset) : -1)
-						});
+					DIdx.push_back({
+						indIdx + FaceOffset,
+						(_HasTextureCoords ? (indIdx + TexturePointOffset) : -1),
+						(_HasNormals ? (indIdx + NormalOffset) : -1)
+					});
 				}
 
-				_SubMeshCache._DataIdx.push_back(_DIdx);
+				subMeshData.DataIdx.push_back(DIdx);
 			}
 
-			_CachedMesh.SubMeshCache.push_back(_SubMeshCache);
+			model.subMeshData.push_back(subMeshData);
 		}
 
-		_CachedMesh.MeshUuid = part.uuid;
-		_CachedMesh.TexPaths = part.tex;
-		_CachedMesh.MeshName = part.name;
-		_CachedMesh.MeshPath = part.object_path;
+		model.meshPath = path;
 
-		this->CachedParts.push_back(_CachedMesh);
+		this->CachedModels.push_back(model);
+		this->Importer.FreeScene();
+		return true;
 	}
 
 	this->Importer.FreeScene();
+	return false;
 }
 
-void SMBC::CacheManager::ClearCachedMeshList() {
-	for (uint32_t a = 0u; a < this->CachedParts.size(); a++) {
-		SMBC::CachedMesh& _CMesh = this->CachedParts[a];
+void SMBC::CacheManager::LoadPart(
+	SMBC::SM_Part& part,
+	SMBC::CachedPart& cached_part,
+	const bool& load_uvs,
+	const bool& load_normal,
+	const bool& mat_by_color
+) {
+	std::wstring _UuidTest = part.uuid;
+	if (mat_by_color) {
+		_UuidTest.append(L" ");
+		_UuidTest.append(part.color);
+	}
 
-		for (uint32_t b = 0u; b < _CMesh.SubMeshCache.size(); b++) {
-			SMBC::SubMeshCache& _SMeshCache = _CMesh.SubMeshCache[b];
-
-			for (uint32_t c = 0u; c < _SMeshCache._DataIdx.size(); c++)
-				_SMeshCache._DataIdx[c].clear();
-
-			_SMeshCache._DataIdx.clear();
+	for (SMBC::CachedPart& p : this->CachedParts)
+		if (p.uuid == _UuidTest) {
+			cached_part = p;
+			return;
 		}
 
-		_CMesh.SubMeshCache.clear();
-		_CMesh.MeshName.clear();
-		_CMesh.MeshPath.clear();
-		_CMesh.MeshUuid.clear();
-		_CMesh.TexturePoints.clear();
-		_CMesh.Normals.clear();
-		_CMesh.Vertices.clear();
-	}
-	this->CachedParts.clear();
+	cached_part.meshPath = part.object_path;
+	cached_part.name = part.name;
+	cached_part.texPaths = part.tex;
+	cached_part.uuid = _UuidTest;
 
-	for (uint32_t a = 0u; a < this->CachedBlocks.size(); a++) {
-		SMBC::CachedBlock& _CBlock = this->CachedBlocks[a];
-
-		_CBlock.name.clear();
-		_CBlock.uuid.clear();
-	}
-	this->CachedBlocks.clear();
+	this->CachedParts.push_back(cached_part);
 }
 
-bool SMBC::CacheManager::GetCachedMesh(const std::wstring& uuid, SMBC::CachedMesh& c_mesh) {
-	for (SMBC::CachedMesh& cMesh : this->CachedParts)
-		if (cMesh.MeshUuid == uuid) {
-			c_mesh = cMesh;
+void SMBC::CacheManager::LoadBlock(SMBC::SM_Block& block, const bool& mat_by_color) {
+	std::wstring _UuidTest = block.uuid;
+	if (mat_by_color) {
+		_UuidTest.append(L" ");
+		_UuidTest.append(block.color);
+	}
+
+	for (SMBC::CachedBlock& blk : this->CachedBlocks)
+		if (blk.uuid == _UuidTest) return;
+
+	SMBC::CachedBlock NewBlock;
+	NewBlock.name = block.name;
+	NewBlock.uuid = _UuidTest;
+	NewBlock.texList = block.tex_list;
+
+	this->CachedBlocks.push_back(NewBlock);
+}
+
+bool SMBC::CacheManager::GetModel(const std::wstring& path, SMBC::Model& model) {
+	for (SMBC::Model& m : this->CachedModels)
+		if (m.meshPath == path) {
+			model = m;
 			return true;
 		}
-
+	
 	return false;
+}
+
+void SMBC::CacheManager::ClearCache() {
+	this->CachedModels.clear();
+	this->CachedBlocks.clear();
+	this->CachedParts.clear();
 }
 
 void SMBC::CacheManager::WriteMtlFile(const std::wstring& path) {
@@ -188,16 +180,33 @@ void SMBC::CacheManager::WriteMtlFile(const std::wstring& path) {
 
 	std::string _main_text = "Ns 323.999994\nKa 1.000000 1.000000 1.000000\nKd 0.800000 0.800000 0.800000\nKs 0.500000 0.500000 0.500000\nKe 0.000000 0.000000 0.000000\nNi 1.450000\nd 1.000000\nillum 2\n";
 
-	for (unsigned int a = 0; a < this->CachedParts.size(); a++) {
-		SMBC::CachedMesh& _CMesh = this->CachedParts[a];
+	for (uint32_t a = 0u; a < this->CachedParts.size(); a++) {
+		SMBC::CachedPart& _CPart = this->CachedParts[a];
 
-		for (unsigned int b = 0; b < _CMesh.SubMeshCache.size(); b++) {
-			SMBC::SubMeshCache& SMCache = _CMesh.SubMeshCache[b];
+		SMBC::Model _CModel;
+		if (!this->GetModel(_CPart.meshPath, _CModel)) continue;
 
-			std::string _mtl_mat = "newmtl " + SMBC::Other::WideToUtf8(SMCache._MeshName) + '\n' + _main_text;
+		for (uint32_t b = 0u; b < _CModel.subMeshData.size(); b++) {
+			SMBC::SubMeshData& SMData = _CModel.subMeshData[b];
 
-			if (!SMCache._TexPath.empty())
-				_mtl_mat += "map_Kd " + SMBC::Other::WideToUtf8(SMCache._TexPath) + '\n';
+			std::wstring _MtlName = _CPart.uuid + L' ' + std::to_wstring(SMData.SubMeshIndex);
+
+			std::string _mtl_mat = "newmtl " + SMBC::Other::WideToUtf8(_MtlName) + '\n' + _main_text;
+
+			bool _Success = false;
+			SMBC::Texture::TextureList _TList;
+
+			switch (_CPart.texPaths.TexType) {
+			case SMBC::Texture::TextureType::SubMeshList:
+				_Success = _CPart.texPaths.GetTextureByName(std::to_wstring(SMData.SubMeshIndex), _TList);
+				break;
+			case SMBC::Texture::TextureType::SubMeshMap:
+				_Success = _CPart.texPaths.GetTextureByName(SMData.MaterialName, _TList);
+				break;
+			}
+
+			if (_Success && !_TList.dif.empty())
+				_mtl_mat += "map_Kd " + SMBC::Other::WideToUtf8(_TList.dif) + '\n';
 
 			_mtl_mat += '\n';
 
@@ -205,13 +214,13 @@ void SMBC::CacheManager::WriteMtlFile(const std::wstring& path) {
 		}
 	}
 
-	for (uint32_t a = 0; a < this->CachedBlocks.size(); a++) {
+	for (uint32_t a = 0u; a < this->CachedBlocks.size(); a++) {
 		SMBC::CachedBlock& _CBlock = this->CachedBlocks[a];
 
 		std::string _mtl_mat = "newmtl " + SMBC::Other::WideToUtf8(_CBlock.uuid) + '\n' + _main_text;
 
-		if (!_CBlock.TexList.dif.empty())
-			_mtl_mat += "map_Kd " + SMBC::Other::WideToUtf8(_CBlock.TexList.dif) + '\n';
+		if (!_CBlock.texList.dif.empty())
+			_mtl_mat += "map_Kd " + SMBC::Other::WideToUtf8(_CBlock.texList.dif) + '\n';
 
 		_mtl_mat += '\n';
 
@@ -227,57 +236,57 @@ void SMBC::CacheManager::WriteMtlFile(const std::wstring& path) {
 void SMBC::CacheManager::WriteTexturePaths(const std::wstring& path) {
 	std::ofstream _TextureOutput(path);
 
-	if (_TextureOutput.is_open()) {
-		nlohmann::json _TextureList;
+	if (!_TextureOutput.is_open()) return;
 
-		for (SMBC::CachedMesh& _CMesh : this->CachedParts) {
-			SMBC::Texture::Texture& _CurTex = _CMesh.TexPaths;
-			if (_CurTex.TexList.size() == 0) continue;
+	nlohmann::json _TextureList;
 
-			std::string _MeshNameStr = SMBC::Other::WideToUtf8(_CMesh.MeshName);
-			_TextureList[_MeshNameStr] = {};
+	for (SMBC::CachedPart& _CMesh : this->CachedParts) {
+		SMBC::Texture::Texture& _CurTex = _CMesh.texPaths;
+		if (_CurTex.TexList.size() == 0) continue;
 
-			switch (_CMesh.TexPaths.TexType) {
-			case SMBC::Texture::TextureType::SubMeshList:
-				for (SMBC::Texture::TextureList& _TexList : _CurTex.TexList) {
-					nlohmann::json _TextureObject;
-					if (!_TexList.dif.empty()) _TextureObject["Dif"] = SMBC::Other::WideToUtf8(_TexList.dif);
-					if (!_TexList.asg.empty()) _TextureObject["Asg"] = SMBC::Other::WideToUtf8(_TexList.asg);
-					if (!_TexList.nor.empty()) _TextureObject["Nor"] = SMBC::Other::WideToUtf8(_TexList.nor);
+		std::string _MeshNameStr = SMBC::Other::WideToUtf8(_CMesh.name);
+		_TextureList[_MeshNameStr] = {};
 
-					_TextureList[_MeshNameStr].push_back(_TextureObject);
-				}
+		switch (_CMesh.texPaths.TexType) {
+		case SMBC::Texture::TextureType::SubMeshList:
+			for (SMBC::Texture::TextureList& _TexList : _CurTex.TexList) {
+				nlohmann::json _TextureObject;
+				if (!_TexList.dif.empty()) _TextureObject["Dif"] = SMBC::Other::WideToUtf8(_TexList.dif);
+				if (!_TexList.asg.empty()) _TextureObject["Asg"] = SMBC::Other::WideToUtf8(_TexList.asg);
+				if (!_TexList.nor.empty()) _TextureObject["Nor"] = SMBC::Other::WideToUtf8(_TexList.nor);
 
-				break;
-			case SMBC::Texture::TextureType::SubMeshMap:
-				for (SMBC::Texture::TextureList& _TList : _CurTex.TexList) {
-					std::string _TexListStr = SMBC::Other::WideToUtf8(_TList.name);
-
-					nlohmann::json _TexObj;
-					if (!_TList.dif.empty()) _TexObj["Dif"] = SMBC::Other::WideToUtf8(_TList.dif);
-					if (!_TList.asg.empty()) _TexObj["Asg"] = SMBC::Other::WideToUtf8(_TList.asg);
-					if (!_TList.nor.empty()) _TexObj["Nor"] = SMBC::Other::WideToUtf8(_TList.nor);
-
-					_TextureList[_MeshNameStr][_TexListStr] = _TexObj;
-				}
-
-				break;
+				_TextureList[_MeshNameStr].push_back(_TextureObject);
 			}
+
+			break;
+		case SMBC::Texture::TextureType::SubMeshMap:
+			for (SMBC::Texture::TextureList& _TList : _CurTex.TexList) {
+				std::string _TexListStr = SMBC::Other::WideToUtf8(_TList.name);
+
+				nlohmann::json _TexObj;
+				if (!_TList.dif.empty()) _TexObj["Dif"] = SMBC::Other::WideToUtf8(_TList.dif);
+				if (!_TList.asg.empty()) _TexObj["Asg"] = SMBC::Other::WideToUtf8(_TList.asg);
+				if (!_TList.nor.empty()) _TexObj["Nor"] = SMBC::Other::WideToUtf8(_TList.nor);
+
+				_TextureList[_MeshNameStr][_TexListStr] = _TexObj;
+			}
+
+			break;
 		}
-
-		for (SMBC::CachedBlock& _CBlock : this->CachedBlocks) {
-			std::string _MeshNameStr = SMBC::Other::WideToUtf8(_CBlock.name);
-			_TextureList[_MeshNameStr] = {};
-
-			nlohmann::json _TexObj;
-			if (!_CBlock.TexList.dif.empty()) _TexObj["Dif"] = SMBC::Other::WideToUtf8(_CBlock.TexList.dif);
-			if (!_CBlock.TexList.asg.empty()) _TexObj["Asg"] = SMBC::Other::WideToUtf8(_CBlock.TexList.asg);
-			if (!_CBlock.TexList.nor.empty()) _TexObj["Nor"] = SMBC::Other::WideToUtf8(_CBlock.TexList.nor);
-
-			_TextureList[_MeshNameStr].push_back(_TexObj);
-		}
-
-		_TextureOutput << std::setw(4) << _TextureList;
-		_TextureOutput.close();
 	}
+
+	for (SMBC::CachedBlock& _CBlock : this->CachedBlocks) {
+		std::string _MeshNameStr = SMBC::Other::WideToUtf8(_CBlock.name);
+		_TextureList[_MeshNameStr] = {};
+
+		nlohmann::json _TexObj;
+		if (!_CBlock.texList.dif.empty()) _TexObj["Dif"] = SMBC::Other::WideToUtf8(_CBlock.texList.dif);
+		if (!_CBlock.texList.asg.empty()) _TexObj["Asg"] = SMBC::Other::WideToUtf8(_CBlock.texList.asg);
+		if (!_CBlock.texList.nor.empty()) _TexObj["Nor"] = SMBC::Other::WideToUtf8(_CBlock.texList.nor);
+
+		_TextureList[_MeshNameStr].push_back(_TexObj);
+	}
+
+	_TextureOutput << std::setw(4) << _TextureList;
+	_TextureOutput.close();
 }

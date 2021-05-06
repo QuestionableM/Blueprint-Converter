@@ -3,7 +3,9 @@
 #include "Lib/Functions/Functions.h"
 #include "Lib/OtherFunc/OtherFunc.h"
 #include "Lib/Json/JsonFunc.h"
+#include "Lib/File/FileFunc.h"
 
+//written by Brent Batch in C# and translated by Questionable Mark into C++
 void SMBC::BPFunction::GetPartPosAndBounds(
 	glm::vec3& pos,
 	glm::vec3& bounds,
@@ -142,10 +144,21 @@ int SMBC::BPFunction::ConvertBlueprintToObj(
 	const bool& texture_list,
 	const bool& apply_textures,
 	const bool& export_uvs,
-	const bool& export_normals
+	const bool& export_normals,
+	const bool& mat_by_color
 ) {
 	int EscapeCode = 0;
-	nlohmann::json* _BlueprintJson = SMBC::JSON::OpenParseJson(blueprint_path);
+
+	if (SMBC::FILE::IsBadPath(L"./Converted Models/" + blueprint_name))
+		return 2;
+
+	nlohmann::json _BlueprintJson;
+
+	if (!SMBC::JSON::OpenParseJson(blueprint_path, _BlueprintJson))
+		return 1;
+
+	if (!(_BlueprintJson.contains("bodies") || _BlueprintJson.contains("joints")))
+		return 4;
 
 	SMBC::ConvertedModel::ConvertedModelData conv_data;
 	conv_data.apply_texture = apply_textures;
@@ -153,20 +166,14 @@ int SMBC::BPFunction::ConvertBlueprintToObj(
 	conv_data.export_uvs = export_uvs;
 	conv_data.separate_parts = separate_blocks;
 	conv_data.tex_list = texture_list;
+	conv_data.mat_by_color = mat_by_color;
 
 	SMBC::ConvertedModel _ConvModel(conv_data);
 	_ConvModel.ModelName = blueprint_name;
 
-	if (!_BlueprintJson) { EscapeCode = 1; goto skip_generation; }
-
-	if (!(_BlueprintJson->contains("bodies") || _BlueprintJson->contains("joints"))) {
-		EscapeCode = 4;
-		goto skip_generation;
-	}
-
 	SMBC::BlueprintConversionData::SetNewStage(1, 0);
-	if (_BlueprintJson->contains("bodies") && _BlueprintJson->at("bodies").is_array()) {
-		auto& _BodiesArray = _BlueprintJson->at("bodies");
+	if (_BlueprintJson.contains("bodies") && _BlueprintJson.at("bodies").is_array()) {
+		auto& _BodiesArray = _BlueprintJson.at("bodies");
 
 		for (auto& _Body : _BodiesArray) {
 			auto& _Childs = _Body["childs"];
@@ -179,6 +186,7 @@ int SMBC::BPFunction::ConvertBlueprintToObj(
 				auto& _XAxis = _Child["xaxis"];
 				auto& _ZAxis = _Child["zaxis"];
 				auto& _Bounds = _Child["bounds"];
+				auto& _Color = _Child["color"];
 
 				if (!(_ShapeId.is_string() && _Pos.is_object() && _XAxis.is_number() && _ZAxis.is_number())) continue;
 				auto& _PosX = _Pos["x"];
@@ -189,6 +197,8 @@ int SMBC::BPFunction::ConvertBlueprintToObj(
 				glm::vec3 _PosVec(_PosX.get<float>(), _PosY.get<float>(), _PosZ.get<float>());
 
 				std::wstring _UuidWstr = SMBC::Other::Utf8ToWide(_ShapeId.get<std::string>());
+
+				std::wstring _ColorWstr = (_Color.is_string() ? SMBC::Other::Utf8ToWide(_Color.get<std::string>()) : L"000000");
 
 				if (_Bounds.is_object()) {
 					auto& _BoundX = _Bounds["x"];
@@ -210,7 +220,8 @@ int SMBC::BPFunction::ConvertBlueprintToObj(
 						_BlockD._obj_name,
 						_BlockD._block_tex,
 						_UuidWstr,
-						_BlockD._tiling
+						_BlockD._tiling,
+						_ColorWstr
 					);
 					_ConvModel.BlockList.push_back(_Block);
 				}
@@ -227,7 +238,8 @@ int SMBC::BPFunction::ConvertBlueprintToObj(
 						_ObjData._obj_bounds,
 						_XAxis.get<int>(),
 						_ZAxis.get<int>(),
-						_ObjData._obj_uuid
+						_ObjData._obj_uuid,
+						_ColorWstr
 					);
 					SMBC::BPFunction::GetPartPosAndBounds(_Part.position, _Part.bounds, _Part.xAxis, _Part.zAxis, false);
 					_ConvModel.PartList.push_back(_Part);
@@ -238,8 +250,8 @@ int SMBC::BPFunction::ConvertBlueprintToObj(
 	}
 
 	SMBC::BlueprintConversionData::SetNewStage(2, 0);
-	if (_BlueprintJson->contains("joints") && _BlueprintJson->at("joints").is_array()) {
-		auto& _JointsArray = _BlueprintJson->at("joints");
+	if (_BlueprintJson.contains("joints") && _BlueprintJson.at("joints").is_array()) {
+		auto& _JointsArray = _BlueprintJson.at("joints");
 
 		SMBC::BlueprintConversionData::ProgressBarMax = (uint32_t)_JointsArray.size();
 		for (auto& _Joint : _JointsArray) {
@@ -247,6 +259,7 @@ int SMBC::BPFunction::ConvertBlueprintToObj(
 			auto& _XAxis = _Joint["xaxisA"];
 			auto& _ZAxis = _Joint["zaxisA"];
 			auto& _ShapeId = _Joint["shapeId"];
+			auto& _Color = _Joint["color"];
 
 			if (!(_ShapeId.is_string() && _Position.is_object() && _XAxis.is_number() && _ZAxis.is_number())) continue;
 			auto& _PosX = _Position["x"];
@@ -261,6 +274,8 @@ int SMBC::BPFunction::ConvertBlueprintToObj(
 			SMBC::ObjectData _jnt_data;
 			if (!SMBC::ObjectDatabase::GetPartByUuid(_UuidWstr, _jnt_data) || _jnt_data._obj_path.empty()) continue;
 
+			std::wstring _WstrColor = (_Color.is_string() ? SMBC::Other::Utf8ToWide(_Color.get<std::string>()) : L"000000");
+
 			SMBC::SM_Part _jnt(
 				_jnt_data._obj_path,
 				_jnt_data._obj_name,
@@ -269,7 +284,8 @@ int SMBC::BPFunction::ConvertBlueprintToObj(
 				_jnt_data._obj_bounds,
 				_XAxis.get<int>(),
 				_ZAxis.get<int>(),
-				_UuidWstr
+				_UuidWstr,
+				_WstrColor
 			);
 			SMBC::BPFunction::GetPartPosAndBounds(_jnt.position, _jnt.bounds, _jnt.xAxis, _jnt.zAxis, true);
 			_ConvModel.PartList.push_back(_jnt);
@@ -278,9 +294,6 @@ int SMBC::BPFunction::ConvertBlueprintToObj(
 	}
 
 	EscapeCode = _ConvModel.ConvertAndWrite();
-	//EscapeCode = _ConvModel.WriteToFileNewVersion(texture_list, apply_textures, export_uvs, export_normals, separate_blocks);
 
-skip_generation:
-	delete _BlueprintJson;
 	return EscapeCode;
 }

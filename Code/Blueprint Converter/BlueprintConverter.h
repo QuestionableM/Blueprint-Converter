@@ -16,7 +16,8 @@ namespace SMBC {
 			const bool& texture_list,
 			const bool& apply_textures,
 			const bool& export_uvs,
-			const bool& export_normals
+			const bool& export_normals,
+			const bool& mat_by_color
 		);
 
 		void GetPartPosAndBounds(

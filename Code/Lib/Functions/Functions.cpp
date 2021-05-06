@@ -29,15 +29,18 @@ bool SMBC::Blueprint::IsSupportedExtension(const std::wstring& _ext) {
 	return false;
 }
 
+#include "Lib/OtherFunc/OtherFunc.h"
+
 std::wstring SMBC::Blueprint::FixBlueprintName(const std::wstring& name) {
 	std::wstring _Output = L"";
 
 	for (unsigned int a = 0; a < name.size(); a++) {
 		const wchar_t& _Letter = name[a];
 
-		if (_Letter == ' ' || System::Char::IsLetterOrDigit(_Letter))
+		if (SMBC::Other::IsLetterAllowed(_Letter))
 			_Output += _Letter;
 	}
+
 	return _Output;
 }
 

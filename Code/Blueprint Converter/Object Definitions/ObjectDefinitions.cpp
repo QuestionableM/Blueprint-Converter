@@ -8,7 +8,8 @@ SMBC::SM_Part::SM_Part(
 	const glm::vec3& bounds,
 	const int& _XAxis,
 	const int& _ZAxis,
-	const std::wstring& uuid
+	const std::wstring& uuid,
+	const std::wstring& color
 ) {
 	this->object_path = path;
 	this->name = name;
@@ -18,6 +19,7 @@ SMBC::SM_Part::SM_Part(
 	this->zAxis = _ZAxis;
 	this->bounds = bounds;
 	this->uuid = uuid;
+	this->color = color;
 }
 
 SMBC::SM_Block::SM_Block(
@@ -28,16 +30,18 @@ SMBC::SM_Block::SM_Block(
 	const std::wstring& name,
 	const SMBC::Texture::TextureList& tex_list,
 	const std::wstring& uuid,
-	const int& tiling
+	const int& tiling,
+	const std::wstring& color
 ) {
 	this->position = pos;
 	this->bounds = bounds;
-	this->xAxis = xAxis;
-	this->zAxis = zAxis;
+	this->xAxis = _XAxis;
+	this->zAxis = _ZAxis;
 	this->name = name;
 	this->tex_list = tex_list;
 	this->uuid = uuid;
 	this->tiling = tiling;
+	this->color = color;
 }
 
 SMBC::CubeMesh::CubeMesh(

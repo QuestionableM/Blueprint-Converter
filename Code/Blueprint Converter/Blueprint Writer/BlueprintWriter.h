@@ -12,6 +12,7 @@ namespace SMBC {
 			bool export_uvs;
 			bool export_normals;
 			bool separate_parts;
+			bool mat_by_color;
 		};
 
 		std::wstring ModelName;
@@ -32,20 +33,20 @@ namespace SMBC {
 		};
 
 		void LoadBlueprintBlocks(
-			std::vector<SMBC::ModelDataChunk>& ModelDataChunks,
-			SMBC::ModelDataChunk& NewDataChunk,
-			SMBC::SubMeshCache& NewSubMeshCache,
+			std::vector<SMBC::Model>& Models,
+			SMBC::Model& NewModel,
+			SMBC::SubMeshData& NewSubMeshData,
 			OffsetData& o_data
 		);
 		void LoadBlueprintParts(
-			std::vector<SMBC::ModelDataChunk>& ModelDataChunks,
-			SMBC::ModelDataChunk& NewDataChunk,
-			SMBC::SubMeshCache& NewSubMeshCache,
+			std::vector<SMBC::Model>& Models,
+			SMBC::Model& NewModel,
+			SMBC::SubMeshData& NewSubMeshData,
 			OffsetData& o_data
 		);
 
 	public:
-		bool WriteChunksToFile(std::vector<SMBC::ModelDataChunk>& chunks);
+		bool WriteChunksToFile(std::vector<SMBC::Model>& models);
 		int ConvertAndWrite();
 	};
 }
