@@ -5,19 +5,29 @@
 #include "Blueprint Converter/Cache Manager/CacheManager.h"
 
 namespace SMBC {
+	struct ObjectCollection {
+		std::vector<SMBC::SM_Part> PartList;
+		std::vector<SMBC::SM_Block> BlockList;
+
+		bool is_empty();
+	};
+
 	struct ConvertedModel {
 		struct ConvertedModelData {
 			bool tex_list;
 			bool apply_texture;
 			bool export_uvs;
 			bool export_normals;
-			bool separate_parts;
 			bool mat_by_color;
+
+			int separation_method;
 		};
 
 		std::wstring ModelName;
-		std::vector<SMBC::SM_Part> PartList;
-		std::vector<SMBC::SM_Block> BlockList;
+		std::vector<SMBC::ObjectCollection> ObjCollection;
+
+		bool AddJointToChildShape(SMBC::SM_Part& joint);
+		bool HasStuffToConvert();
 
 		ConvertedModel(SMBC::ConvertedModel::ConvertedModelData& cm_data);
 
@@ -36,13 +46,15 @@ namespace SMBC {
 			std::vector<SMBC::Model>& Models,
 			SMBC::Model& NewModel,
 			SMBC::SubMeshData& NewSubMeshData,
-			OffsetData& o_data
+			OffsetData& o_data,
+			uint32_t& collection_idx
 		);
 		void LoadBlueprintParts(
 			std::vector<SMBC::Model>& Models,
 			SMBC::Model& NewModel,
 			SMBC::SubMeshData& NewSubMeshData,
-			OffsetData& o_data
+			OffsetData& o_data,
+			uint32_t& collection_idx
 		);
 
 	public:

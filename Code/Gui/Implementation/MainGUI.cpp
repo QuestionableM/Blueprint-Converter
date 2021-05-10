@@ -106,12 +106,12 @@ System::Void SMBC::MainGUI::Start_BTN_Click(System::Object^ sender, System::Even
 
 			_ThreadData->SetValue(gcnew System::String(_BlueprintFile.c_str()), (int)0);
 			_ThreadData->SetValue(_GenSettings->BlueprintName_TB->Text, (int)1);
-			_ThreadData->SetValue(_GenSettings->SeparateParts_CB->Checked, (int)2);
-			_ThreadData->SetValue(_GenSettings->ExportTexPaths_CB->Checked, (int)3);
-			_ThreadData->SetValue(_GenSettings->ApplyTextures_CB->Checked, (int)4);
-			_ThreadData->SetValue(_GenSettings->ExportUVs_CB->Checked, (int)5);
+			_ThreadData->SetValue(_GenSettings->SeparationType_CB->SelectedIndex, (int)2);
+			_ThreadData->SetValue(_GenSettings->ApplyTextures_CB->Checked, (int)3);
+			_ThreadData->SetValue(_GenSettings->ExportTexPaths_CB->Checked, (int)4);
+			_ThreadData->SetValue(_GenSettings->MaterialsByColor_CB->Checked, (int)5);
 			_ThreadData->SetValue(_GenSettings->ExportNormals_CB->Checked, (int)6);
-			_ThreadData->SetValue(_GenSettings->MaterialsByColor_CB->Checked, (int)7);
+			_ThreadData->SetValue(_GenSettings->ExportUVs_CB->Checked, (int)7);
 
 			this->ObjectGenerator->RunWorkerAsync(_ThreadData);
 			this->GuiUpdater->Start();
@@ -133,21 +133,23 @@ System::Void SMBC::MainGUI::ObjectGenerator_DoWork(System::Object^ sender, Syste
 
 	System::String^ _BlueprintPathS = safe_cast<System::String^>(_Data->GetValue((int)0));
 	System::String^ _BlueprintNameS = safe_cast<System::String^>(_Data->GetValue((int)1));
-	bool _SeparateParts = safe_cast<bool>(_Data->GetValue((int)2));
-	bool _ExportTexPaths = safe_cast<bool>(_Data->GetValue((int)3));
-	bool _ApplyTextures = safe_cast<bool>(_Data->GetValue((int)4));
-	bool _ExportUvs = safe_cast<bool>(_Data->GetValue((int)5));
+
+	int _SeparationMethod = safe_cast<int>(_Data->GetValue((int)2));
+
+	bool _ApplyTextures = safe_cast<bool>(_Data->GetValue((int)3));
+	bool _ExportTexPaths = safe_cast<bool>(_Data->GetValue((int)4));
+	bool _MaterialsByColor = safe_cast<bool>(_Data->GetValue((int)5));
 	bool _ExportNormals = safe_cast<bool>(_Data->GetValue((int)6));
-	bool _MaterialsByColor = safe_cast<bool>(_Data->GetValue((int)7));
+	bool _ExportUvs = safe_cast<bool>(_Data->GetValue((int)7));
 
 	std::wstring _BlueprintPath = msclr::interop::marshal_as<std::wstring>(_BlueprintPathS);
 	std::wstring _BlueprintName = msclr::interop::marshal_as<std::wstring>(_BlueprintNameS);
 
-	SMBC::BlueprintConversionData::SetNewStage(0, 0);
+	SMBC::BlueprintConversionData::SetNewStage(SMBC_CONV_READING_JSON, 0);
 	SMBC::LastGenerationOutput = SMBC::BPFunction::ConvertBlueprintToObj(
 		_BlueprintPath,
 		_BlueprintName,
-		_SeparateParts,
+		_SeparationMethod,
 		_ExportTexPaths,
 		_ApplyTextures && _ExportUvs,
 		_ExportUvs,
@@ -190,21 +192,21 @@ System::Void SMBC::MainGUI::ObjectGenerator_RunWorkerCompleted(System::Object^ s
 		System::Windows::Forms::MessageBoxButtons::OK,
 		System::Windows::Forms::MessageBoxIcon::Information
 	);
-	SMBC::BlueprintConversionData::SetNewStage(-1, 0);
+	SMBC::BlueprintConversionData::SetNewStage(SMBC_CONV_NONE, 0);
 	this->ChangeGUIState(true, true, true);
 	this->ActionProgress->Value = 0;
 	this->ActionLabel->Text = "No Action";
 }
 
 System::Void SMBC::MainGUI::DatabaseLoader_DoWork(System::Object^ sender, System::ComponentModel::DoWorkEventArgs^ e) {
-	SMBC::BlueprintConversionData::SetNewStage(7, 0);
+	SMBC::BlueprintConversionData::SetNewStage(SMBC_CONV_READING_DATABASE, 0);
 	SMBC::ObjectDatabase::ClearDatabase();
 	SMBC::ObjectDatabase::LoadGameDatabase();
 	SMBC::ObjectDatabase::LoadModDatabase();
 }
 
 System::Void SMBC::MainGUI::DatabaseLoader_RunWorkerCompleted(System::Object^ sender, System::ComponentModel::RunWorkerCompletedEventArgs^ e) {
-	SMBC::BlueprintConversionData::SetNewStage(-1, 0);
+	SMBC::BlueprintConversionData::SetNewStage(SMBC_CONV_NONE, 0);
 	this->GuiUpdater->Stop();
 	this->ActionProgress->Value = 0;
 	this->ActionLabel->Text = gcnew System::String((L"Successfully loaded " + std::to_wstring(SMBC::ObjectDatabase::ObjectDB.size()) + L" objects into the database").c_str());

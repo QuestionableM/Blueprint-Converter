@@ -16,12 +16,13 @@ namespace BlueprintConverter {
 		GeneratorSettings(const std::wstring& blueprint_name);
 		bool Success = false;
 		System::Windows::Forms::CheckBox^ ExportTexPaths_CB;
-		System::Windows::Forms::CheckBox^ SeparateParts_CB;
+
 		System::Windows::Forms::CheckBox^ ExportNormals_CB;
 		System::Windows::Forms::CheckBox^ ExportUVs_CB;
 		System::Windows::Forms::TextBox^ BlueprintName_TB;
 		System::Windows::Forms::CheckBox^ ApplyTextures_CB;
 		System::Windows::Forms::CheckBox^ MaterialsByColor_CB;
+		System::Windows::Forms::ComboBox^ SeparationType_CB;
 	protected:
 		~GeneratorSettings();
 
@@ -30,6 +31,7 @@ namespace BlueprintConverter {
 		System::Windows::Forms::GroupBox^ ModelSettings_GB;
 		System::Windows::Forms::GroupBox^ DataSettings_GB;
 		System::Windows::Forms::GroupBox^ BlueprintName_GB;
+		System::Windows::Forms::Label^ label1;
 		System::ComponentModel::Container^ components;
 
 #pragma region Windows Form Designer generated code
@@ -37,9 +39,10 @@ namespace BlueprintConverter {
 		{
 			this->Convert_BTN = (gcnew System::Windows::Forms::Button());
 			this->ExportTexPaths_CB = (gcnew System::Windows::Forms::CheckBox());
-			this->SeparateParts_CB = (gcnew System::Windows::Forms::CheckBox());
 			this->ApplyTextures_CB = (gcnew System::Windows::Forms::CheckBox());
 			this->ModelSettings_GB = (gcnew System::Windows::Forms::GroupBox());
+			this->label1 = (gcnew System::Windows::Forms::Label());
+			this->SeparationType_CB = (gcnew System::Windows::Forms::ComboBox());
 			this->MaterialsByColor_CB = (gcnew System::Windows::Forms::CheckBox());
 			this->DataSettings_GB = (gcnew System::Windows::Forms::GroupBox());
 			this->ExportNormals_CB = (gcnew System::Windows::Forms::CheckBox());
@@ -57,7 +60,7 @@ namespace BlueprintConverter {
 				| System::Windows::Forms::AnchorStyles::Right));
 			this->Convert_BTN->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 9.75F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(0)));
-			this->Convert_BTN->Location = System::Drawing::Point(12, 273);
+			this->Convert_BTN->Location = System::Drawing::Point(12, 300);
 			this->Convert_BTN->Name = L"Convert_BTN";
 			this->Convert_BTN->Size = System::Drawing::Size(238, 31);
 			this->Convert_BTN->TabIndex = 0;
@@ -70,31 +73,19 @@ namespace BlueprintConverter {
 			this->ExportTexPaths_CB->AutoSize = true;
 			this->ExportTexPaths_CB->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 9.75F, System::Drawing::FontStyle::Regular,
 				System::Drawing::GraphicsUnit::Point, static_cast<System::Byte>(0)));
-			this->ExportTexPaths_CB->Location = System::Drawing::Point(6, 19);
+			this->ExportTexPaths_CB->Location = System::Drawing::Point(6, 65);
 			this->ExportTexPaths_CB->Name = L"ExportTexPaths_CB";
 			this->ExportTexPaths_CB->Size = System::Drawing::Size(191, 20);
 			this->ExportTexPaths_CB->TabIndex = 1;
 			this->ExportTexPaths_CB->Text = L"Export Model Texture Paths";
 			this->ExportTexPaths_CB->UseVisualStyleBackColor = true;
 			// 
-			// SeparateParts_CB
-			// 
-			this->SeparateParts_CB->AutoSize = true;
-			this->SeparateParts_CB->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 9.75F, System::Drawing::FontStyle::Regular,
-				System::Drawing::GraphicsUnit::Point, static_cast<System::Byte>(0)));
-			this->SeparateParts_CB->Location = System::Drawing::Point(6, 45);
-			this->SeparateParts_CB->Name = L"SeparateParts_CB";
-			this->SeparateParts_CB->Size = System::Drawing::Size(169, 20);
-			this->SeparateParts_CB->TabIndex = 2;
-			this->SeparateParts_CB->Text = L"Separate Different Parts";
-			this->SeparateParts_CB->UseVisualStyleBackColor = true;
-			// 
 			// ApplyTextures_CB
 			// 
 			this->ApplyTextures_CB->AutoSize = true;
 			this->ApplyTextures_CB->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 9.75F, System::Drawing::FontStyle::Regular,
 				System::Drawing::GraphicsUnit::Point, static_cast<System::Byte>(0)));
-			this->ApplyTextures_CB->Location = System::Drawing::Point(6, 71);
+			this->ApplyTextures_CB->Location = System::Drawing::Point(6, 91);
 			this->ApplyTextures_CB->Name = L"ApplyTextures_CB";
 			this->ApplyTextures_CB->Size = System::Drawing::Size(117, 20);
 			this->ApplyTextures_CB->TabIndex = 3;
@@ -107,16 +98,45 @@ namespace BlueprintConverter {
 			this->ModelSettings_GB->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Bottom)
 				| System::Windows::Forms::AnchorStyles::Left)
 				| System::Windows::Forms::AnchorStyles::Right));
+			this->ModelSettings_GB->Controls->Add(this->label1);
+			this->ModelSettings_GB->Controls->Add(this->SeparationType_CB);
 			this->ModelSettings_GB->Controls->Add(this->MaterialsByColor_CB);
 			this->ModelSettings_GB->Controls->Add(this->ExportTexPaths_CB);
 			this->ModelSettings_GB->Controls->Add(this->ApplyTextures_CB);
-			this->ModelSettings_GB->Controls->Add(this->SeparateParts_CB);
 			this->ModelSettings_GB->Location = System::Drawing::Point(12, 69);
 			this->ModelSettings_GB->Name = L"ModelSettings_GB";
-			this->ModelSettings_GB->Size = System::Drawing::Size(238, 123);
+			this->ModelSettings_GB->Size = System::Drawing::Size(238, 145);
 			this->ModelSettings_GB->TabIndex = 4;
 			this->ModelSettings_GB->TabStop = false;
 			this->ModelSettings_GB->Text = L"Model Settings";
+			// 
+			// label1
+			// 
+			this->label1->AutoSize = true;
+			this->label1->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 9.75F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
+				static_cast<System::Byte>(0)));
+			this->label1->Location = System::Drawing::Point(3, 16);
+			this->label1->Name = L"label1";
+			this->label1->Size = System::Drawing::Size(112, 16);
+			this->label1->TabIndex = 6;
+			this->label1->Text = L"Separation Type:";
+			// 
+			// SeparationType_CB
+			// 
+			this->SeparationType_CB->Anchor = static_cast<System::Windows::Forms::AnchorStyles>(((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Left)
+				| System::Windows::Forms::AnchorStyles::Right));
+			this->SeparationType_CB->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
+			this->SeparationType_CB->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 9.75F, System::Drawing::FontStyle::Regular,
+				System::Drawing::GraphicsUnit::Point, static_cast<System::Byte>(0)));
+			this->SeparationType_CB->FormattingEnabled = true;
+			this->SeparationType_CB->Items->AddRange(gcnew cli::array< System::Object^  >(3) {
+				L"None", L"Separate Different Objects",
+					L"Separate By Joints"
+			});
+			this->SeparationType_CB->Location = System::Drawing::Point(6, 35);
+			this->SeparationType_CB->Name = L"SeparationType_CB";
+			this->SeparationType_CB->Size = System::Drawing::Size(226, 24);
+			this->SeparationType_CB->TabIndex = 5;
 			// 
 			// MaterialsByColor_CB
 			// 
@@ -124,7 +144,7 @@ namespace BlueprintConverter {
 			this->MaterialsByColor_CB->Enabled = false;
 			this->MaterialsByColor_CB->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 9.75F, System::Drawing::FontStyle::Regular,
 				System::Drawing::GraphicsUnit::Point, static_cast<System::Byte>(0)));
-			this->MaterialsByColor_CB->Location = System::Drawing::Point(6, 97);
+			this->MaterialsByColor_CB->Location = System::Drawing::Point(6, 117);
 			this->MaterialsByColor_CB->Name = L"MaterialsByColor_CB";
 			this->MaterialsByColor_CB->Size = System::Drawing::Size(176, 20);
 			this->MaterialsByColor_CB->TabIndex = 4;
@@ -138,9 +158,9 @@ namespace BlueprintConverter {
 				| System::Windows::Forms::AnchorStyles::Right));
 			this->DataSettings_GB->Controls->Add(this->ExportNormals_CB);
 			this->DataSettings_GB->Controls->Add(this->ExportUVs_CB);
-			this->DataSettings_GB->Location = System::Drawing::Point(12, 198);
+			this->DataSettings_GB->Location = System::Drawing::Point(12, 220);
 			this->DataSettings_GB->Name = L"DataSettings_GB";
-			this->DataSettings_GB->Size = System::Drawing::Size(238, 69);
+			this->DataSettings_GB->Size = System::Drawing::Size(238, 74);
 			this->DataSettings_GB->TabIndex = 5;
 			this->DataSettings_GB->TabStop = false;
 			this->DataSettings_GB->Text = L"Data Settings";
@@ -196,7 +216,7 @@ namespace BlueprintConverter {
 			this->BlueprintName_GB->Controls->Add(this->BlueprintName_TB);
 			this->BlueprintName_GB->Location = System::Drawing::Point(12, 12);
 			this->BlueprintName_GB->Name = L"BlueprintName_GB";
-			this->BlueprintName_GB->Size = System::Drawing::Size(238, 56);
+			this->BlueprintName_GB->Size = System::Drawing::Size(238, 51);
 			this->BlueprintName_GB->TabIndex = 7;
 			this->BlueprintName_GB->TabStop = false;
 			this->BlueprintName_GB->Text = L"Output File Name";
@@ -205,7 +225,7 @@ namespace BlueprintConverter {
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
-			this->ClientSize = System::Drawing::Size(262, 316);
+			this->ClientSize = System::Drawing::Size(262, 343);
 			this->Controls->Add(this->BlueprintName_GB);
 			this->Controls->Add(this->DataSettings_GB);
 			this->Controls->Add(this->ModelSettings_GB);

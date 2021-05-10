@@ -14,6 +14,7 @@ namespace SMBC {
 		glm::vec3 bounds;
 		int xAxis;
 		int zAxis;
+		int _index;
 
 		SM_Part(
 			const std::wstring& path,
@@ -38,6 +39,7 @@ namespace SMBC {
 		std::wstring uuid;
 		int tiling;
 		std::wstring color;
+		long _index;
 
 		SM_Block(
 			const glm::vec3& pos,

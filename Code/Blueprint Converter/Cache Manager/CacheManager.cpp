@@ -4,6 +4,14 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
+bool SMBC::SubMeshData::is_empty() {
+	return (this->DataIdx.size() <= 0);
+}
+
+bool SMBC::Model::is_empty() {
+	return (this->subMeshData.size() <= 0 || (this->vertices.size() <= 0 && this->uvs.size() <= 0 && this->normals.size() <= 0));
+}
+
 bool SMBC::CacheManager::LoadModel(
 	std::wstring& path,
 	SMBC::Model& model,
@@ -205,8 +213,11 @@ void SMBC::CacheManager::WriteMtlFile(const std::wstring& path) {
 				break;
 			}
 
-			if (_Success && !_TList.dif.empty())
-				_mtl_mat += "map_Kd " + SMBC::Other::WideToUtf8(_TList.dif) + '\n';
+			if (_Success) {
+				if (!_TList.nor.empty()) _mtl_mat += "map_Bump " + SMBC::Other::WideToUtf8(_TList.nor) + '\n';
+				if (!_TList.dif.empty()) _mtl_mat += "map_Kd " + SMBC::Other::WideToUtf8(_TList.dif) + '\n';
+				if (!_TList.asg.empty()) _mtl_mat += "map_Ks " + SMBC::Other::WideToUtf8(_TList.asg) + '\n';
+			}
 
 			_mtl_mat += '\n';
 
@@ -219,8 +230,14 @@ void SMBC::CacheManager::WriteMtlFile(const std::wstring& path) {
 
 		std::string _mtl_mat = "newmtl " + SMBC::Other::WideToUtf8(_CBlock.uuid) + '\n' + _main_text;
 
+		if (!_CBlock.texList.nor.empty())
+			_mtl_mat += "map_Bump " + SMBC::Other::WideToUtf8(_CBlock.texList.nor) + '\n';
+
 		if (!_CBlock.texList.dif.empty())
 			_mtl_mat += "map_Kd " + SMBC::Other::WideToUtf8(_CBlock.texList.dif) + '\n';
+
+		if (!_CBlock.texList.asg.empty())
+			_mtl_mat += "map_Ks " + SMBC::Other::WideToUtf8(_CBlock.texList.asg) + '\n';
 
 		_mtl_mat += '\n';
 

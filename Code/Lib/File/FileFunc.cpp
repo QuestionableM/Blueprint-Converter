@@ -41,14 +41,3 @@ bool _File::IsEquivalent(const std::wstring& p1, const std::wstring& p2) {
 
 	return false;
 }
-
-bool _File::CreateDirectory(const std::wstring& path) {
-	if (_File::FileExists(path)) return true;
-
-	try {
-		fs::create_directory(path);
-	}
-	catch (...) {}
-
-	return _File::FileExists(path);
-}

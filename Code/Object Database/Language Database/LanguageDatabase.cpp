@@ -43,18 +43,11 @@ bool SMBC::LangDB::UuidExists(const std::wstring& uuid) {
 
 	return false;
 }
+
 void SMBC::LangDB::AddTranslation(const SMBC::LangTrans& translation) {
 	if (this->UuidExists(translation.uuid)) return;
 
 	this->_translations.push_back(translation);
-}
-SMBC::LangTrans* SMBC::LangDB::GetTranslation(const std::wstring& uuid) {
-	for (unsigned int a = 0; a < this->_translations.size(); a++) {
-		SMBC::LangTrans& _translation = this->_translations[a];
-		if (_translation.uuid == uuid) return &_translation;
-	}
-
-	return nullptr;
 }
 
 std::wstring SMBC::LangDB::GetTranslationString(const std::wstring& uuid) {

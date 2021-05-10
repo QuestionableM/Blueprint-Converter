@@ -4,6 +4,25 @@
 #include <string>
 #include <Windows.h>
 
+#define SMBC_CONV_NONE -1
+#define SMBC_CONV_READING_JSON 0
+#define SMBC_CONV_GETTING_OBJECTS 1
+#define SMBC_CONV_GETTING_JOINTS 2
+#define SMBC_CONV_READING_BLOCKS 3
+#define SMBC_CONV_READING_PARTS 4
+#define SMBC_CONV_WRITING_VERTICES 5
+#define SMBC_CONV_WRITING_FACES 6
+#define SMBC_CONV_READING_DATABASE 7
+#define SMBC_CONV_WRITING_UVS 8
+#define SMBC_CONV_WRITING_NORMALS 9
+#define SMBC_CONV_WRITING_OBJECTS 10
+
+#define SMBC_ERROR_NONE 0
+#define SMBC_ERROR_FILE 1
+#define SMBC_ERROR_WRITE 2
+#define SMBC_ERROR_NO_BLOCKS 3
+#define SMBC_ERROR_NO_BP_DATA 4
+
 namespace SMBC {
 	class BlueprintConversionData {
 	public:

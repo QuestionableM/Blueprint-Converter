@@ -11,6 +11,8 @@ namespace SMBC {
 		int SubMeshIndex;
 
 		std::vector<std::vector<std::vector<long long>>> DataIdx;
+
+		bool is_empty();
 	};
 
 	struct Model {
@@ -20,6 +22,8 @@ namespace SMBC {
 		std::vector<SMBC::SubMeshData> subMeshData;
 
 		std::wstring meshPath;
+
+		bool is_empty();
 	};
 
 	struct CachedBlock {

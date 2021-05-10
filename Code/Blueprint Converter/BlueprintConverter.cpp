@@ -140,40 +140,43 @@ glm::vec3 SMBC::BPFunction::GetPartRotation(
 int SMBC::BPFunction::ConvertBlueprintToObj(
 	const std::wstring& blueprint_path,
 	const std::wstring blueprint_name,
-	const bool& separate_blocks,
+	const int& separation_method,
 	const bool& texture_list,
 	const bool& apply_textures,
 	const bool& export_uvs,
 	const bool& export_normals,
 	const bool& mat_by_color
 ) {
-	int EscapeCode = 0;
-
-	if (SMBC::FILE::IsBadPath(L"./Converted Models/" + blueprint_name))
-		return 2;
+	int EscapeCode = SMBC_ERROR_NONE;
 
 	nlohmann::json _BlueprintJson;
 
 	if (!SMBC::JSON::OpenParseJson(blueprint_path, _BlueprintJson))
-		return 1;
+		return SMBC_ERROR_FILE;
 
-	if (!(_BlueprintJson.contains("bodies") || _BlueprintJson.contains("joints")))
-		return 4;
+	if (!_BlueprintJson.contains("bodies") && !_BlueprintJson.contains("joints"))
+		return SMBC_ERROR_NO_BP_DATA;
 
 	SMBC::ConvertedModel::ConvertedModelData conv_data;
 	conv_data.apply_texture = apply_textures;
 	conv_data.export_normals = export_normals;
 	conv_data.export_uvs = export_uvs;
-	conv_data.separate_parts = separate_blocks;
+	conv_data.separation_method = separation_method;
 	conv_data.tex_list = texture_list;
 	conv_data.mat_by_color = mat_by_color;
 
 	SMBC::ConvertedModel _ConvModel(conv_data);
 	_ConvModel.ModelName = blueprint_name;
 
-	SMBC::BlueprintConversionData::SetNewStage(1, 0);
+	SMBC::ObjectCollection _NewCollection;
+
+	bool _separate_joints = (conv_data.separation_method == SMBC_SEPARATION_JOINTS);
+
+	SMBC::BlueprintConversionData::SetNewStage(SMBC_CONV_GETTING_OBJECTS, 0);
 	if (_BlueprintJson.contains("bodies") && _BlueprintJson.at("bodies").is_array()) {
 		auto& _BodiesArray = _BlueprintJson.at("bodies");
+
+		long _ObjectIndexValue = 0;
 
 		for (auto& _Body : _BodiesArray) {
 			auto& _Childs = _Body["childs"];
@@ -223,7 +226,11 @@ int SMBC::BPFunction::ConvertBlueprintToObj(
 						_BlockD._tiling,
 						_ColorWstr
 					);
-					_ConvModel.BlockList.push_back(_Block);
+					_Block._index = _ObjectIndexValue;
+					_NewCollection.BlockList.push_back(_Block);
+
+					_ObjectIndexValue++;
+					SMBC::BlueprintConversionData::ProgressBarValue++;
 				}
 				else {
 					SMBC::ObjectData _ObjData;
@@ -241,17 +248,27 @@ int SMBC::BPFunction::ConvertBlueprintToObj(
 						_ObjData._obj_uuid,
 						_ColorWstr
 					);
+					_Part._index = _ObjectIndexValue;
 					SMBC::BPFunction::GetPartPosAndBounds(_Part.position, _Part.bounds, _Part.xAxis, _Part.zAxis, false);
-					_ConvModel.PartList.push_back(_Part);
+					_NewCollection.PartList.push_back(_Part);
+
+					_ObjectIndexValue++;
 					SMBC::BlueprintConversionData::ProgressBarValue++;
 				}
+			}
+
+			if (_separate_joints && !_NewCollection.is_empty()) {
+				_ConvModel.ObjCollection.push_back(_NewCollection);
+				_NewCollection = SMBC::ObjectCollection();
 			}
 		}
 	}
 
-	SMBC::BlueprintConversionData::SetNewStage(2, 0);
+	SMBC::BlueprintConversionData::SetNewStage(SMBC_CONV_GETTING_JOINTS, 0);
 	if (_BlueprintJson.contains("joints") && _BlueprintJson.at("joints").is_array()) {
 		auto& _JointsArray = _BlueprintJson.at("joints");
+
+
 
 		SMBC::BlueprintConversionData::ProgressBarMax = (uint32_t)_JointsArray.size();
 		for (auto& _Joint : _JointsArray) {
@@ -260,6 +277,7 @@ int SMBC::BPFunction::ConvertBlueprintToObj(
 			auto& _ZAxis = _Joint["zaxisA"];
 			auto& _ShapeId = _Joint["shapeId"];
 			auto& _Color = _Joint["color"];
+			auto& _ChildA = _Joint["childA"];
 
 			if (!(_ShapeId.is_string() && _Position.is_object() && _XAxis.is_number() && _ZAxis.is_number())) continue;
 			auto& _PosX = _Position["x"];
@@ -288,10 +306,17 @@ int SMBC::BPFunction::ConvertBlueprintToObj(
 				_WstrColor
 			);
 			SMBC::BPFunction::GetPartPosAndBounds(_jnt.position, _jnt.bounds, _jnt.xAxis, _jnt.zAxis, true);
-			_ConvModel.PartList.push_back(_jnt);
+			_jnt._index = (_ChildA.is_number() ? _ChildA.get<int>() : -1);
+
+			if (!_separate_joints || !_ConvModel.AddJointToChildShape(_jnt))
+				_NewCollection.PartList.push_back(_jnt);
+
 			SMBC::BlueprintConversionData::ProgressBarValue++;
 		}
 	}
+
+	if (!_NewCollection.is_empty())
+		_ConvModel.ObjCollection.push_back(_NewCollection);
 
 	EscapeCode = _ConvModel.ConvertAndWrite();
 

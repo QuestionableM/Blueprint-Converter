@@ -73,6 +73,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Code\Gui\About.resx">
+      <DependentUpon>Code\Gui\About.h</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Code\Gui\GeneratorSettings.resx">
       <DependentUpon>Code\Gui\GeneratorSettings.h</DependentUpon>
     </EmbeddedResource>

@@ -9,11 +9,53 @@
 
 namespace fs = std::filesystem;
 
+bool SMBC::ObjectCollection::is_empty() {
+	return (this->BlockList.size() <= 0 && this->PartList.size() <= 0);
+}
+
+bool SMBC::ConvertedModel::AddJointToChildShape(SMBC::SM_Part& joint) {
+	for (uint32_t col_idx = 0u; col_idx < this->ObjCollection.size(); col_idx++) {
+		SMBC::ObjectCollection& _cur_col = this->ObjCollection[col_idx];
+
+		for (uint32_t block_itr = 0u; block_itr < _cur_col.BlockList.size(); block_itr++) {
+			SMBC::SM_Block& cur_block = _cur_col.BlockList[block_itr];
+
+			if (cur_block._index == joint._index) {
+				this->ObjCollection[col_idx].PartList.push_back(joint);
+				return true;
+			}
+		}
+
+		for (uint32_t part_itr = 0u; part_itr < _cur_col.PartList.size(); part_itr++) {
+			SMBC::SM_Part& cur_part = _cur_col.PartList[part_itr];
+
+			if (cur_part._index == joint._index) {
+				this->ObjCollection[col_idx].PartList.push_back(joint);
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
+bool SMBC::ConvertedModel::HasStuffToConvert() {
+	long long _StuffCounter = 0;
+	for (uint32_t a = 0u; a < this->ObjCollection.size(); a++) {
+		SMBC::ObjectCollection& _CurCol = this->ObjCollection[a];
+
+		_StuffCounter += (long long)_CurCol.PartList.size();
+		_StuffCounter += (long long)_CurCol.BlockList.size();
+	}
+
+	return (_StuffCounter > 0);
+}
+
 SMBC::ConvertedModel::ConvertedModel(SMBC::ConvertedModel::ConvertedModelData& cm_data) {
 	this->conv_data.apply_texture = cm_data.apply_texture;
 	this->conv_data.export_normals = cm_data.export_normals;
 	this->conv_data.export_uvs = cm_data.export_uvs;
-	this->conv_data.separate_parts = cm_data.separate_parts;
+	this->conv_data.separation_method = cm_data.separation_method;
 	this->conv_data.tex_list = cm_data.tex_list;
 	this->conv_data.mat_by_color = cm_data.mat_by_color;
 }
@@ -22,19 +64,24 @@ void SMBC::ConvertedModel::LoadBlueprintBlocks(
 	std::vector<SMBC::Model>& Models,
 	SMBC::Model& NewModel,
 	SMBC::SubMeshData& NewSubMeshData,
-	SMBC::ConvertedModel::OffsetData& o_data
+	SMBC::ConvertedModel::OffsetData& o_data,
+	uint32_t& collection_idx
 ) {
 	long long ModelFaceIdxOffset = 0ll;
 	long long ModelTextureOffset = 0ll;
 	long long ModelNormalOffset = 0ll;
 
-	SMBC::BlueprintConversionData::SetNewStage(3, (uint32_t)this->BlockList.size());
-	for (uint32_t block_idx = 0u; block_idx < this->BlockList.size(); block_idx++) {
+	SMBC::ObjectCollection& _collection = this->ObjCollection[collection_idx];
+
+	bool _separate_parts = (conv_data.separation_method == SMBC_SEPARATION_BLOCKS);
+
+	SMBC::BlueprintConversionData::SetNewStage(SMBC_CONV_READING_BLOCKS, (uint32_t)_collection.BlockList.size());
+	for (uint32_t block_idx = 0u; block_idx < _collection.BlockList.size(); block_idx++) {
 		ModelFaceIdxOffset = o_data.Vertex;
 		ModelTextureOffset = o_data.Texture;
 		ModelNormalOffset = o_data.Normal;
 
-		SMBC::SM_Block& Block = this->BlockList[block_idx];
+		SMBC::SM_Block& Block = _collection.BlockList[block_idx];
 		this->CacheManager.LoadBlock(Block, conv_data.mat_by_color);
 
 		SMBC::CubeMesh _Cube(Block.bounds / 2.0f, Block.position, Block.tiling);
@@ -75,7 +122,7 @@ void SMBC::ConvertedModel::LoadBlueprintBlocks(
 					(long long)D_Idx[0] + ModelFaceIdxOffset,
 					(conv_data.export_uvs ? (long long)D_Idx[1] + ModelTextureOffset : -1ll),
 					(conv_data.export_normals ? (long long)D_Idx[2] + ModelNormalOffset : -1ll)
-				});
+					});
 			}
 
 			NewSubMeshData.DataIdx.push_back(FaceData);
@@ -93,9 +140,14 @@ void SMBC::ConvertedModel::LoadBlueprintBlocks(
 			NewSubMeshData = SMBC::SubMeshData();
 		}
 
-		if (conv_data.separate_parts) {
+		if (_separate_parts) {
 			NewModel.meshPath.append(L"Block_");
 			NewModel.meshPath.append(std::to_wstring(block_idx + 1));
+
+			if (!conv_data.apply_texture) {
+				NewModel.subMeshData.push_back(NewSubMeshData);
+				NewSubMeshData = SMBC::SubMeshData();
+			}
 
 			Models.push_back(NewModel);
 			NewModel = SMBC::Model();
@@ -109,19 +161,24 @@ void SMBC::ConvertedModel::LoadBlueprintParts(
 	std::vector<SMBC::Model>& Models,
 	SMBC::Model& NewModel,
 	SMBC::SubMeshData& NewSubMeshData,
-	SMBC::ConvertedModel::OffsetData& o_data
+	SMBC::ConvertedModel::OffsetData& o_data,
+	uint32_t& collection_idx
 ) {
 	long long ModelFaceIdxOffset = 0ll;
 	long long ModelTextureOffset = 0ll;
 	long long ModelNormalOffset = 0ll;
 
-	SMBC::BlueprintConversionData::SetNewStage(4, (uint32_t)this->PartList.size());
-	for (uint32_t part_idx = 0u; part_idx < this->PartList.size(); part_idx++) {
+	SMBC::ObjectCollection& _collection = this->ObjCollection[collection_idx];
+
+	bool _separate_parts = (conv_data.separation_method == SMBC_SEPARATION_BLOCKS);
+
+	SMBC::BlueprintConversionData::SetNewStage(SMBC_CONV_READING_PARTS, (uint32_t)_collection.PartList.size());
+	for (uint32_t part_idx = 0u; part_idx < _collection.PartList.size(); part_idx++) {
 		ModelFaceIdxOffset = o_data.Vertex;
 		ModelTextureOffset = o_data.Texture;
 		ModelNormalOffset = o_data.Normal;
 
-		SMBC::SM_Part& Part = this->PartList[part_idx];
+		SMBC::SM_Part& Part = _collection.PartList[part_idx];
 
 		SMBC::CachedPart _CachedPart;
 		this->CacheManager.LoadPart(Part, _CachedPart, conv_data.export_uvs, conv_data.export_normals, conv_data.mat_by_color);
@@ -154,7 +211,7 @@ void SMBC::ConvertedModel::LoadBlueprintParts(
 			}
 		}
 
-		NewModel.subMeshData.reserve(CachedModel.subMeshData.size());
+		if (conv_data.apply_texture) NewModel.subMeshData.reserve(CachedModel.subMeshData.size());
 		for (uint32_t a = 0u; a < CachedModel.subMeshData.size(); a++) {
 			SMBC::SubMeshData& _SMData = CachedModel.subMeshData[a];
 
@@ -173,7 +230,7 @@ void SMBC::ConvertedModel::LoadBlueprintParts(
 						F_Idx[0] + ModelFaceIdxOffset,
 						(_HasTextures) ? (F_Idx[1] + ModelTextureOffset) : -1ll,
 						(_HasNormals) ? (F_Idx[2] + ModelNormalOffset) : -1ll
-					});
+						});
 				}
 
 				NewSubMeshData.DataIdx.push_back(FaceIdx);
@@ -194,9 +251,14 @@ void SMBC::ConvertedModel::LoadBlueprintParts(
 			}
 		}
 
-		if (conv_data.separate_parts) {
+		if (_separate_parts) {
 			NewModel.meshPath.append(L"Part_");
 			NewModel.meshPath.append(std::to_wstring(part_idx + 1));
+
+			if (!conv_data.apply_texture) {
+				NewModel.subMeshData.push_back(NewSubMeshData);
+				NewSubMeshData = SMBC::SubMeshData();
+			}
 
 			Models.push_back(NewModel);
 			NewModel = SMBC::Model();
@@ -237,10 +299,12 @@ bool SMBC::ConvertedModel::WriteChunksToFile(
 		_writer.write(_mtl_lib.c_str(), _mtl_lib.length());
 	}
 
+	bool _any_separation = (conv_data.separation_method != 0);
+
 	for (uint32_t a = 0u; a < models.size(); a++) {
 		SMBC::Model& DChunk = models[a];
 
-		if (conv_data.separate_parts) {
+		if (_any_separation) {
 			std::string _c_name = "o ";
 			_c_name.append(SMBC::Other::WideToUtf8(DChunk.meshPath));
 			_c_name.append("\n");
@@ -248,7 +312,7 @@ bool SMBC::ConvertedModel::WriteChunksToFile(
 			_writer.write(_c_name.c_str(), _c_name.length());
 		}
 
-		SMBC::BlueprintConversionData::SetNewStage(5, (uint32_t)DChunk.vertices.size());
+		SMBC::BlueprintConversionData::SetNewStage(SMBC_CONV_WRITING_VERTICES, (uint32_t)DChunk.vertices.size());
 		for (uint32_t b = 0u; b < DChunk.vertices.size(); b++) {
 			std::string _v_str = "v ";
 			_v_str.append(SMBC::Other::VecToString(DChunk.vertices[b]));
@@ -259,7 +323,7 @@ bool SMBC::ConvertedModel::WriteChunksToFile(
 		}
 
 		if (conv_data.export_uvs) {
-			SMBC::BlueprintConversionData::SetNewStage(8, (uint32_t)DChunk.uvs.size());
+			SMBC::BlueprintConversionData::SetNewStage(SMBC_CONV_WRITING_UVS, (uint32_t)DChunk.uvs.size());
 			for (uint32_t b = 0u; b < DChunk.uvs.size(); b++) {
 				glm::vec2& _uv = DChunk.uvs[b];
 
@@ -275,7 +339,7 @@ bool SMBC::ConvertedModel::WriteChunksToFile(
 		}
 
 		if (conv_data.export_normals) {
-			SMBC::BlueprintConversionData::SetNewStage(9, (uint32_t)DChunk.normals.size());
+			SMBC::BlueprintConversionData::SetNewStage(SMBC_CONV_WRITING_NORMALS, (uint32_t)DChunk.normals.size());
 			for (uint32_t b = 0u; b < DChunk.normals.size(); b++) {
 				std::string _n_str = "vn ";
 				_n_str.append(SMBC::Other::VecToString(DChunk.normals[b]));
@@ -286,7 +350,7 @@ bool SMBC::ConvertedModel::WriteChunksToFile(
 			}
 		}
 
-		SMBC::BlueprintConversionData::SetNewStage(6, (uint32_t)DChunk.subMeshData.size());
+		SMBC::BlueprintConversionData::SetNewStage(SMBC_CONV_WRITING_FACES, (uint32_t)DChunk.subMeshData.size());
 		for (uint32_t b = 0u; b < DChunk.subMeshData.size(); b++) {
 			SMBC::SubMeshData& _SubData = DChunk.subMeshData[b];
 
@@ -337,26 +401,37 @@ bool SMBC::ConvertedModel::WriteChunksToFile(
 #include <assimp/scene.h>
 
 int SMBC::ConvertedModel::ConvertAndWrite() {
-	if (this->PartList.size() <= 0 && this->BlockList.size() <= 0) return 3;
+	if (!this->HasStuffToConvert()) return SMBC_ERROR_NO_BLOCKS;
 
 	SMBC::ConvertedModel::OffsetData offset_data;
 	std::vector<SMBC::Model> Models = {};
 	SMBC::Model NewModel;
 	SMBC::SubMeshData NewSubMeshData;
 
-	this->LoadBlueprintBlocks(Models, NewModel, NewSubMeshData, offset_data);
-	this->BlockList.clear();
+	bool _joint_separation = (conv_data.separation_method == SMBC_SEPARATION_JOINTS);
 
-	this->LoadBlueprintParts(Models, NewModel, NewSubMeshData, offset_data);
-	this->PartList.clear();
+	for (uint32_t collection_idx = 0u; collection_idx < this->ObjCollection.size(); collection_idx++) {
+		this->LoadBlueprintBlocks(Models, NewModel, NewSubMeshData, offset_data, collection_idx);
 
-	if (!conv_data.separate_parts) {
+		this->LoadBlueprintParts(Models, NewModel, NewSubMeshData, offset_data, collection_idx);
+
+		if (_joint_separation) {
+			NewModel.meshPath = this->ModelName + L' ' + std::to_wstring(collection_idx);
+
+			NewModel.subMeshData.push_back(NewSubMeshData);
+			NewSubMeshData = SMBC::SubMeshData();
+			Models.push_back(NewModel);
+			NewModel = SMBC::Model();
+		}
+	}
+
+	if (conv_data.separation_method == 0) {
 		NewModel.subMeshData.push_back(NewSubMeshData);
 		Models.push_back(NewModel);
 	}
 
 	if (!this->WriteChunksToFile(Models))
-		return 2;
+		return SMBC_ERROR_WRITE;
 
-	return 0;
+	return SMBC_ERROR_NONE;
 }

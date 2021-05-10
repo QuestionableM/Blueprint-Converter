@@ -39,13 +39,6 @@ std::wstring _Other::ReadRegistryKey(const std::wstring& main_key, const std::ws
 	return L"";
 }
 
-bool _Other::FindEQInTable(std::vector<std::wstring>& vec, const std::wstring& key) {
-	for (std::wstring& v : vec)
-		if (v == key || SMBC::FILE::IsEquivalent(v, key)) return true;
-
-	return false;
-}
-
 std::string _Other::VecToString(glm::vec3& vec3) {
 	std::string _Output;
 	_Output.append(std::to_string(vec3.x));
