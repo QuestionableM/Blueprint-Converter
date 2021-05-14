@@ -32,11 +32,14 @@ namespace BlueprintConverter {
 		System::Windows::Forms::GroupBox^ DataSettings_GB;
 		System::Windows::Forms::GroupBox^ BlueprintName_GB;
 		System::Windows::Forms::Label^ label1;
-		System::ComponentModel::Container^ components;
+		System::Windows::Forms::ToolTip^ ToolTip_TT;
+		System::ComponentModel::IContainer^ components;
+
 
 #pragma region Windows Form Designer generated code
 		void InitializeComponent(void)
 		{
+			this->components = (gcnew System::ComponentModel::Container());
 			this->Convert_BTN = (gcnew System::Windows::Forms::Button());
 			this->ExportTexPaths_CB = (gcnew System::Windows::Forms::CheckBox());
 			this->ApplyTextures_CB = (gcnew System::Windows::Forms::CheckBox());
@@ -49,6 +52,7 @@ namespace BlueprintConverter {
 			this->ExportUVs_CB = (gcnew System::Windows::Forms::CheckBox());
 			this->BlueprintName_TB = (gcnew System::Windows::Forms::TextBox());
 			this->BlueprintName_GB = (gcnew System::Windows::Forms::GroupBox());
+			this->ToolTip_TT = (gcnew System::Windows::Forms::ToolTip(this->components));
 			this->ModelSettings_GB->SuspendLayout();
 			this->DataSettings_GB->SuspendLayout();
 			this->BlueprintName_GB->SuspendLayout();
@@ -58,6 +62,7 @@ namespace BlueprintConverter {
 			// 
 			this->Convert_BTN->Anchor = static_cast<System::Windows::Forms::AnchorStyles>(((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left)
 				| System::Windows::Forms::AnchorStyles::Right));
+			this->Convert_BTN->Cursor = System::Windows::Forms::Cursors::Hand;
 			this->Convert_BTN->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 9.75F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(0)));
 			this->Convert_BTN->Location = System::Drawing::Point(12, 300);
@@ -65,12 +70,14 @@ namespace BlueprintConverter {
 			this->Convert_BTN->Size = System::Drawing::Size(238, 31);
 			this->Convert_BTN->TabIndex = 0;
 			this->Convert_BTN->Text = L"Convert";
+			this->ToolTip_TT->SetToolTip(this->Convert_BTN, L"Converts a blueprint with the specified settings");
 			this->Convert_BTN->UseVisualStyleBackColor = true;
 			this->Convert_BTN->Click += gcnew System::EventHandler(this, &GeneratorSettings::Convert_BTN_Click);
 			// 
 			// ExportTexPaths_CB
 			// 
 			this->ExportTexPaths_CB->AutoSize = true;
+			this->ExportTexPaths_CB->Cursor = System::Windows::Forms::Cursors::Hand;
 			this->ExportTexPaths_CB->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 9.75F, System::Drawing::FontStyle::Regular,
 				System::Drawing::GraphicsUnit::Point, static_cast<System::Byte>(0)));
 			this->ExportTexPaths_CB->Location = System::Drawing::Point(6, 65);
@@ -83,6 +90,7 @@ namespace BlueprintConverter {
 			// ApplyTextures_CB
 			// 
 			this->ApplyTextures_CB->AutoSize = true;
+			this->ApplyTextures_CB->Cursor = System::Windows::Forms::Cursors::Hand;
 			this->ApplyTextures_CB->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 9.75F, System::Drawing::FontStyle::Regular,
 				System::Drawing::GraphicsUnit::Point, static_cast<System::Byte>(0)));
 			this->ApplyTextures_CB->Location = System::Drawing::Point(6, 91);
@@ -125,6 +133,7 @@ namespace BlueprintConverter {
 			// 
 			this->SeparationType_CB->Anchor = static_cast<System::Windows::Forms::AnchorStyles>(((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Left)
 				| System::Windows::Forms::AnchorStyles::Right));
+			this->SeparationType_CB->Cursor = System::Windows::Forms::Cursors::Hand;
 			this->SeparationType_CB->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
 			this->SeparationType_CB->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 9.75F, System::Drawing::FontStyle::Regular,
 				System::Drawing::GraphicsUnit::Point, static_cast<System::Byte>(0)));
@@ -141,6 +150,7 @@ namespace BlueprintConverter {
 			// MaterialsByColor_CB
 			// 
 			this->MaterialsByColor_CB->AutoSize = true;
+			this->MaterialsByColor_CB->Cursor = System::Windows::Forms::Cursors::Hand;
 			this->MaterialsByColor_CB->Enabled = false;
 			this->MaterialsByColor_CB->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 9.75F, System::Drawing::FontStyle::Regular,
 				System::Drawing::GraphicsUnit::Point, static_cast<System::Byte>(0)));
@@ -170,6 +180,7 @@ namespace BlueprintConverter {
 			this->ExportNormals_CB->AutoSize = true;
 			this->ExportNormals_CB->Checked = true;
 			this->ExportNormals_CB->CheckState = System::Windows::Forms::CheckState::Checked;
+			this->ExportNormals_CB->Cursor = System::Windows::Forms::Cursors::Hand;
 			this->ExportNormals_CB->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 9.75F, System::Drawing::FontStyle::Regular,
 				System::Drawing::GraphicsUnit::Point, static_cast<System::Byte>(0)));
 			this->ExportNormals_CB->Location = System::Drawing::Point(6, 45);
@@ -184,6 +195,7 @@ namespace BlueprintConverter {
 			this->ExportUVs_CB->AutoSize = true;
 			this->ExportUVs_CB->Checked = true;
 			this->ExportUVs_CB->CheckState = System::Windows::Forms::CheckState::Checked;
+			this->ExportUVs_CB->Cursor = System::Windows::Forms::Cursors::Hand;
 			this->ExportUVs_CB->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 9.75F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(0)));
 			this->ExportUVs_CB->Location = System::Drawing::Point(6, 19);

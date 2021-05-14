@@ -3,22 +3,32 @@
 #include <filesystem>
 
 #include "Gui/SettingsGUI.h"
-#include "Object Database/ObjectDatabase.h"
+#include "Lib/ProgramSettings.h"
 #include "Lib/Functions/Functions.h"
+#include "Lib/GuiLib/GuiLib.h"
+#include "Lib/Bit/Bit.h"
+#include "Lib/File/FileFunc.h"
 
 namespace SMBC {
 	using namespace BlueprintConverter;
 };
 
+#define SETTING_BLUEPRINT	0x1000
+#define SETTING_MOD_LIST	0x0100
+#define SETTING_SM_PATH		0x0010
+#define SETTING_STEAM_OPEN	0x0001
+
 SMBC::SettingsGUI::SettingsGUI() {
 	this->InitializeComponent();
 
-	this->SMPath->Text = gcnew System::String(SMBC::ObjectDatabase::_sm_path.c_str());
+	this->OpenInWorkshop_CB->Checked = SMBC::Settings::OpenLinksInSteam;
+	this->SMPath->Text = gcnew System::String(SMBC::Settings::PathToSM.c_str());
 
-	this->AddItemsToListBox(this->ModList, SMBC::ObjectDatabase::_mods_path);
-	this->AddItemsToListBox(this->BlueprintList, SMBC::Blueprint::BlueprintPaths);
+	this->AddItemsToListBox(this->ModList, SMBC::Settings::ModFolders);
+	this->AddItemsToListBox(this->BlueprintList, SMBC::Settings::BlueprintFolders);
 
 	this->SMPath->TextChanged += gcnew System::EventHandler(this, &SettingsGUI::SMPath_TextChanged);
+	this->OpenInWorkshop_CB->CheckedChanged += gcnew System::EventHandler(this, &SettingsGUI::OpenInWorkshop_CB_CheckedChanged);
 }
 
 SMBC::SettingsGUI::~SettingsGUI() {
@@ -27,23 +37,37 @@ SMBC::SettingsGUI::~SettingsGUI() {
 
 System::Void SMBC::SettingsGUI::SettingsGUI_FormClosing(System::Object^ sender, System::Windows::Forms::FormClosingEventArgs^ e) {
 	if (this->Save_BTN->Enabled) {
-		System::Windows::Forms::DialogResult dr = System::Windows::Forms::MessageBox::Show(
-			"Are you sure that you want to close the settings window without saving any changes?\n\nAll unsaved changes will be lost!",
+		WForms::DialogResult dr = SMBC::GUI::Question(
 			"Unsaved Changes",
-			System::Windows::Forms::MessageBoxButtons::YesNo,
-			System::Windows::Forms::MessageBoxIcon::Question
+			"Are you sure that you want to close the settings window without saving any changes?\n\nAll unsaved changes will be lost!"
 		);
-		if (dr == System::Windows::Forms::DialogResult::No)
+
+		if (dr == WForms::DialogResult::No)
 			e->Cancel = true;
 	}
 }
 
 System::Void SMBC::SettingsGUI::Save_BTN_Click(System::Object^ sender, System::EventArgs^ e) {
+	std::wstring _NewPathWstr = msclr::interop::marshal_as<std::wstring>(this->SMPath->Text);
+	if (!SMBC::FILE::FileExists(_NewPathWstr)) {
+		SMBC::GUI::Warning("Save Error", "The specified path to Scrap Mechanic is invalid!");
+		return;
+	}
+
 	this->Save_BTN->Enabled = false;
 
-	SMBC::ObjectDatabase::_sm_path = msclr::interop::marshal_as<std::wstring>(this->SMPath->Text);
+	bool _SSMP = SMBC::Bit::GetBit<int>(this->BinChanges, SETTING_SM_PATH);
+	bool _SSteam = SMBC::Bit::GetBit<int>(this->BinChanges, SETTING_STEAM_OPEN);
+	bool _SBlueprint = SMBC::Bit::GetBit<int>(this->BinChanges, SETTING_BLUEPRINT);
+	bool _SMods = SMBC::Bit::GetBit<int>(this->BinChanges, SETTING_MOD_LIST);
 
-	SMBC::ObjectDatabase::SaveConfigFile(true, true, true);
+	if (_SSMP) SMBC::Settings::PathToSM = _NewPathWstr;
+	if (_SSteam) SMBC::Settings::OpenLinksInSteam = this->OpenInWorkshop_CB->Checked;
+	if (_SBlueprint) this->AddPathsToWstrArray(SMBC::Settings::BlueprintFolders, this->BlueprintList);
+	if (_SMods) this->AddPathsToWstrArray(SMBC::Settings::ModFolders, this->ModList);
+
+	SMBC::Settings::SaveSettingsFile(_SSMP, _SBlueprint, _SMods, _SSteam);
+	this->BinChanges = 0x0000;
 }
 
 System::Void SMBC::SettingsGUI::ModText_TB_TextChanged(System::Object^ sender, System::EventArgs^ e) {
@@ -51,22 +75,10 @@ System::Void SMBC::SettingsGUI::ModText_TB_TextChanged(System::Object^ sender, S
 }
 
 System::Void SMBC::SettingsGUI::ModAdd_BTN_Click(System::Object^ sender, System::EventArgs^ e) {
-	if (this->ModText_TB->TextLength <= 0) return;
+	if (!this->AddStringToListBox(this->ModText_TB, this->ModList)) return;
 
-	if (this->ModList->Items->Contains(this->ModText_TB->Text)) {
-		System::Windows::Forms::MessageBox::Show(
-			gcnew System::String("The specified string \"" + this->ModText_TB->Text + "\" already exists!"),
-			"Value Exists",
-			System::Windows::Forms::MessageBoxButtons::OK,
-			System::Windows::Forms::MessageBoxIcon::Warning
-		);
-		return;
-	}
-
-	this->ModList->Items->Add(this->ModText_TB->Text);
-	SMBC::ObjectDatabase::_mods_path.push_back(msclr::interop::marshal_as<std::wstring>(this->ModText_TB->Text));
-	this->ModText_TB->Clear();
-	this->ChangeGUIState(this->BlueprintListChanged, true, this->SMPathChanged, this->SMDataListChanged);
+	bool _TablesEqual = !this->AreTablesEqual(SMBC::Settings::ModFolders, this->ModList);
+	this->ChangeSetting(SETTING_MOD_LIST, _TablesEqual);
 }
 
 System::Void SMBC::SettingsGUI::ModList_SelectedIndexChanged(System::Object^ sender, System::EventArgs^ e) {
@@ -74,11 +86,13 @@ System::Void SMBC::SettingsGUI::ModList_SelectedIndexChanged(System::Object^ sen
 }
 
 System::Void SMBC::SettingsGUI::ModRemSelected_Click(System::Object^ sender, System::EventArgs^ e) {
-	if (this->ModList->SelectedIndex <= -1) return;
+	int _CurIdx = this->ModList->SelectedIndex;
+	if (_CurIdx <= -1) return;
 
-	SMBC::ObjectDatabase::_mods_path.erase(SMBC::ObjectDatabase::_mods_path.begin() + this->ModList->SelectedIndex);
-	this->ModList->Items->RemoveAt(this->ModList->SelectedIndex);
-	this->ChangeGUIState(this->BlueprintListChanged, true, this->SMPathChanged, this->SMDataListChanged);
+	this->ModList->Items->RemoveAt(_CurIdx);
+
+	bool _TablesEqual = !this->AreTablesEqual(SMBC::Settings::ModFolders, this->ModList);
+	this->ChangeSetting(SETTING_MOD_LIST, _TablesEqual);
 }
 
 System::Void SMBC::SettingsGUI::BlueprintText_TB_TextChanged(System::Object^ sender, System::EventArgs^ e) {
@@ -86,22 +100,10 @@ System::Void SMBC::SettingsGUI::BlueprintText_TB_TextChanged(System::Object^ sen
 }
 
 System::Void SMBC::SettingsGUI::BlueprintAdd_BTN_Click(System::Object^ sender, System::EventArgs^ e) {
-	if (this->BlueprintText_TB->TextLength <= -1) return;
+	if (!this->AddStringToListBox(this->BlueprintText_TB, this->BlueprintList)) return;
 
-	if (this->BlueprintList->Items->Contains(this->BlueprintText_TB->Text)) {
-		System::Windows::Forms::MessageBox::Show(
-			gcnew System::String("The specified string \"" + this->BlueprintText_TB->Text + "\" already exists!"),
-			"Value Exists",
-			System::Windows::Forms::MessageBoxButtons::OK,
-			System::Windows::Forms::MessageBoxIcon::Warning
-		);
-		return;
-	}
-
-	this->BlueprintList->Items->Add(this->BlueprintText_TB->Text);
-	SMBC::Blueprint::BlueprintPaths.push_back(msclr::interop::marshal_as<std::wstring>(this->BlueprintText_TB->Text));
-	this->BlueprintText_TB->Clear();
-	this->ChangeGUIState(true, this->ModListChanged, this->SMPathChanged, this->SMDataListChanged);
+	bool _TablesEqual = !this->AreTablesEqual(SMBC::Settings::BlueprintFolders, this->BlueprintList);
+	this->ChangeSetting(SETTING_BLUEPRINT, _TablesEqual);
 }
 
 System::Void SMBC::SettingsGUI::BlueprintList_SelectedIndexChanged(System::Object^ sender, System::EventArgs^ e) {
@@ -109,35 +111,121 @@ System::Void SMBC::SettingsGUI::BlueprintList_SelectedIndexChanged(System::Objec
 }
 
 System::Void SMBC::SettingsGUI::BlueprintRemSelected_Click(System::Object^ sender, System::EventArgs^ e) {
-	if (this->BlueprintList->SelectedIndex <= -1) return;
+	int _CurIdx = this->BlueprintList->SelectedIndex;
+	if (_CurIdx <= -1) return;
 
-	SMBC::Blueprint::BlueprintPaths.erase(SMBC::Blueprint::BlueprintPaths.begin() + this->BlueprintList->SelectedIndex);
-	this->BlueprintList->Items->RemoveAt(this->BlueprintList->SelectedIndex);
-	this->ChangeGUIState(true, this->ModListChanged, this->SMPathChanged, this->SMDataListChanged);
+	this->BlueprintList->Items->RemoveAt(_CurIdx);
+
+	bool _TablesEqual = !this->AreTablesEqual(SMBC::Settings::BlueprintFolders, this->BlueprintList);
+	this->ChangeSetting(SETTING_BLUEPRINT, _TablesEqual);
 }
 
 System::Void SMBC::SettingsGUI::SMPath_TextChanged(System::Object^ sender, System::EventArgs^ e) {
 	std::wstring& _WstrPath = msclr::interop::marshal_as<std::wstring>(this->SMPath->Text);
-	bool IsChanged = (_WstrPath != SMBC::ObjectDatabase::_sm_path);
-	this->ChangeGUIState(this->BlueprintListChanged, this->ModListChanged, IsChanged, this->SMDataListChanged);
+	bool IsChanged = (_WstrPath != SMBC::Settings::PathToSM);
+	this->ChangeSetting(SETTING_SM_PATH, IsChanged);
 }
 
-System::Void SMBC::SettingsGUI::ChangeGUIState(bool bpList, bool modList, bool SMPath, bool SMData) {
-	this->BlueprintListChanged = bpList;
-	this->ModListChanged = modList;
-	this->SMPathChanged = SMPath;
-	this->SMDataListChanged = SMData;
-
-	bool AnyTrue = (bpList || modList || SMPath || SMData);
-
-	this->Save_BTN->Enabled = AnyTrue;
-}
-
-System::Void SMBC::SettingsGUI::AddItemsToListBox(System::Windows::Forms::ListBox^ list, std::vector<std::wstring>& vec) {
+System::Void SMBC::SettingsGUI::AddItemsToListBox(
+	System::Windows::Forms::ListBox^ list,
+	std::vector<std::wstring>& vec
+) {
 	list->BeginUpdate();
 
 	for (std::wstring& wstr : vec)
 		list->Items->Add(gcnew System::String(wstr.c_str()));
 
 	list->EndUpdate();
+}
+
+System::Void SMBC::SettingsGUI::OpenInWorkshop_CB_CheckedChanged(System::Object^ sender, System::EventArgs^ e) {
+	bool _IsChanged = (this->OpenInWorkshop_CB->Checked != SMBC::Settings::OpenLinksInSteam);
+	this->ChangeSetting(SETTING_STEAM_OPEN, _IsChanged);
+}
+
+#include "Lib/File/FileFunc.h"
+
+bool SMBC::SettingsGUI::AddStringToListBox(
+	System::Windows::Forms::TextBox^ tb,
+	System::Windows::Forms::ListBox^ lb
+) {
+	if (tb->TextLength <= -1) return false;
+
+	std::wstring _Path = msclr::interop::marshal_as<std::wstring>(tb->Text);
+	if (!SMBC::FILE::FileExists(_Path)) {
+		SMBC::GUI::Warning("Invalid Path", "The specified path is invalid!");
+		return false;
+	}
+
+	for (int a = 0; a < lb->Items->Count; a++) {
+		std::wstring _Ws = msclr::interop::marshal_as<std::wstring>(lb->Items[a]->ToString());
+
+		if (SMBC::FILE::IsEquivalent(_Path, _Ws)) {
+			SMBC::GUI::Warning(
+				"Equivalent Path",
+				"The specified path is equivalent to one of the items in the list!"
+			);
+			return false;
+		}
+
+		if (_Path == _Ws) {
+			SMBC::GUI::Warning(
+				"Value Exists",
+				"The specified string already exists!"
+			);
+			return false;
+		}
+	}
+
+	lb->Items->Add(tb->Text);
+	tb->Clear();
+	return true;
+}
+
+bool SMBC::SettingsGUI::AreTablesEqual(
+	std::vector<std::wstring>& vec,
+	System::Windows::Forms::ListBox^ lb
+) {
+	if (vec.size() != lb->Items->Count) return false;
+
+	for (uint32_t a = 0u; a < vec.size(); a++) {
+		std::wstring _WstrLb = msclr::interop::marshal_as<std::wstring>(lb->Items[a]->ToString());
+		if (vec[a] != _WstrLb)
+			return false;
+	}
+
+	return true;
+}
+
+void SMBC::SettingsGUI::AddPathsToWstrArray(std::vector<std::wstring>& vec, System::Windows::Forms::ListBox^ lb) {
+	vec.clear();
+
+	vec.reserve(lb->Items->Count);
+	for (int a = 0u; a < lb->Items->Count; a++) {
+		std::wstring _Wstr = msclr::interop::marshal_as<std::wstring>(lb->Items[a]->ToString());
+
+		vec.push_back(_Wstr);
+	}
+}
+
+void SMBC::SettingsGUI::ChangeSetting(int mask, bool value) {
+	int _NewSetting = this->BinChanges;
+	SMBC::Bit::SetBit<int>(_NewSetting, mask, value);
+
+	this->BinChanges = _NewSetting;
+
+	this->Save_BTN->Enabled = (this->BinChanges > 0);
+}
+
+System::Void SMBC::SettingsGUI::BrowseSMFolder_BTN_Click(System::Object^ sender, System::EventArgs^ e) {
+	std::wstring _SM_Path = SMBC::GUI::OpenFileName(
+		L"Select a Scrap Mechanic Folder",
+		FOS_PICKFOLDERS,
+		L"All Files (*.*)\0*.*\0",
+		static_cast<HWND>(this->Handle.ToPointer())
+	);
+
+	if (_SM_Path.empty()) return;
+
+	this->SMPath->Text = gcnew System::String(_SM_Path.c_str());
 }

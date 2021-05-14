@@ -14,10 +14,8 @@ namespace BlueprintConverter {
 	public ref class SettingsGUI : public System::Windows::Forms::Form
 	{
 	public:
-		bool BlueprintListChanged = false;
-		bool ModListChanged = false;
-		bool SMPathChanged = false;
-		bool SMDataListChanged = false;
+		int BinChanges = 0x0000;
+
 		SettingsGUI(void);
 	protected:
 		~SettingsGUI();
@@ -39,13 +37,18 @@ namespace BlueprintConverter {
 		System::Windows::Forms::Label^ label4;
 		System::Windows::Forms::Button^ BlueprintRemSelected;
 		System::Windows::Forms::Button^ BlueprintAdd_BTN;
-		System::ComponentModel::Container^ components;
+		System::Windows::Forms::CheckBox^ OpenInWorkshop_CB;
+		System::Windows::Forms::ToolTip^ ToolTip_TT;
+	private: System::Windows::Forms::Button^ BrowseSMFolder_BTN;
+		   System::ComponentModel::IContainer^ components;
 
 #pragma region Windows Form Designer generated code
 		void InitializeComponent(void)
 		{
+			this->components = (gcnew System::ComponentModel::Container());
 			this->Save_BTN = (gcnew System::Windows::Forms::Button());
 			this->SMTab = (gcnew System::Windows::Forms::TabPage());
+			this->OpenInWorkshop_CB = (gcnew System::Windows::Forms::CheckBox());
 			this->label1 = (gcnew System::Windows::Forms::Label());
 			this->SMPath = (gcnew System::Windows::Forms::TextBox());
 			this->ModTab = (gcnew System::Windows::Forms::TabPage());
@@ -61,6 +64,8 @@ namespace BlueprintConverter {
 			this->label4 = (gcnew System::Windows::Forms::Label());
 			this->BlueprintRemSelected = (gcnew System::Windows::Forms::Button());
 			this->BlueprintAdd_BTN = (gcnew System::Windows::Forms::Button());
+			this->ToolTip_TT = (gcnew System::Windows::Forms::ToolTip(this->components));
+			this->BrowseSMFolder_BTN = (gcnew System::Windows::Forms::Button());
 			this->SMTab->SuspendLayout();
 			this->ModTab->SuspendLayout();
 			this->SettingTabs->SuspendLayout();
@@ -70,6 +75,7 @@ namespace BlueprintConverter {
 			// Save_BTN
 			// 
 			this->Save_BTN->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Right));
+			this->Save_BTN->Cursor = System::Windows::Forms::Cursors::Hand;
 			this->Save_BTN->Enabled = false;
 			this->Save_BTN->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 9.75F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(0)));
@@ -83,14 +89,31 @@ namespace BlueprintConverter {
 			// 
 			// SMTab
 			// 
+			this->SMTab->Controls->Add(this->BrowseSMFolder_BTN);
+			this->SMTab->Controls->Add(this->OpenInWorkshop_CB);
 			this->SMTab->Controls->Add(this->label1);
 			this->SMTab->Controls->Add(this->SMPath);
 			this->SMTab->Location = System::Drawing::Point(4, 22);
 			this->SMTab->Name = L"SMTab";
 			this->SMTab->Size = System::Drawing::Size(447, 246);
 			this->SMTab->TabIndex = 2;
-			this->SMTab->Text = L"SM Settings";
+			this->SMTab->Text = L"General";
 			this->SMTab->UseVisualStyleBackColor = true;
+			// 
+			// OpenInWorkshop_CB
+			// 
+			this->OpenInWorkshop_CB->AutoSize = true;
+			this->OpenInWorkshop_CB->Cursor = System::Windows::Forms::Cursors::Hand;
+			this->OpenInWorkshop_CB->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 9.75F, System::Drawing::FontStyle::Regular,
+				System::Drawing::GraphicsUnit::Point, static_cast<System::Byte>(0)));
+			this->OpenInWorkshop_CB->Location = System::Drawing::Point(7, 57);
+			this->OpenInWorkshop_CB->Name = L"OpenInWorkshop_CB";
+			this->OpenInWorkshop_CB->Size = System::Drawing::Size(334, 20);
+			this->OpenInWorkshop_CB->TabIndex = 3;
+			this->OpenInWorkshop_CB->Text = L"Open workshop items in Steam instead of a browser";
+			this->ToolTip_TT->SetToolTip(this->OpenInWorkshop_CB, L"When \"Open in Steam Workshop\" button is pressed with this\r\noption enabled, the to"
+				L"ol will show the specified blueprint in \r\nSteam instead of a browser");
+			this->OpenInWorkshop_CB->UseVisualStyleBackColor = true;
 			// 
 			// label1
 			// 
@@ -113,7 +136,7 @@ namespace BlueprintConverter {
 			this->SMPath->Location = System::Drawing::Point(7, 29);
 			this->SMPath->Margin = System::Windows::Forms::Padding(7, 3, 7, 3);
 			this->SMPath->Name = L"SMPath";
-			this->SMPath->Size = System::Drawing::Size(433, 22);
+			this->SMPath->Size = System::Drawing::Size(359, 22);
 			this->SMPath->TabIndex = 0;
 			// 
 			// ModTab
@@ -159,6 +182,7 @@ namespace BlueprintConverter {
 			// ModAdd_BTN
 			// 
 			this->ModAdd_BTN->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Right));
+			this->ModAdd_BTN->Cursor = System::Windows::Forms::Cursors::Hand;
 			this->ModAdd_BTN->Enabled = false;
 			this->ModAdd_BTN->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 9.75F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(0)));
@@ -192,6 +216,7 @@ namespace BlueprintConverter {
 			// ModRemSelected
 			// 
 			this->ModRemSelected->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Right));
+			this->ModRemSelected->Cursor = System::Windows::Forms::Cursors::Hand;
 			this->ModRemSelected->Enabled = false;
 			this->ModRemSelected->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 9.75F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(0)));
@@ -279,6 +304,7 @@ namespace BlueprintConverter {
 			// BlueprintRemSelected
 			// 
 			this->BlueprintRemSelected->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Right));
+			this->BlueprintRemSelected->Cursor = System::Windows::Forms::Cursors::Hand;
 			this->BlueprintRemSelected->Enabled = false;
 			this->BlueprintRemSelected->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 9.75F, System::Drawing::FontStyle::Regular,
 				System::Drawing::GraphicsUnit::Point, static_cast<System::Byte>(0)));
@@ -293,6 +319,7 @@ namespace BlueprintConverter {
 			// BlueprintAdd_BTN
 			// 
 			this->BlueprintAdd_BTN->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Right));
+			this->BlueprintAdd_BTN->Cursor = System::Windows::Forms::Cursors::Hand;
 			this->BlueprintAdd_BTN->Enabled = false;
 			this->BlueprintAdd_BTN->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 9.75F, System::Drawing::FontStyle::Regular,
 				System::Drawing::GraphicsUnit::Point, static_cast<System::Byte>(0)));
@@ -304,6 +331,18 @@ namespace BlueprintConverter {
 			this->BlueprintAdd_BTN->Text = L"Add";
 			this->BlueprintAdd_BTN->UseVisualStyleBackColor = true;
 			this->BlueprintAdd_BTN->Click += gcnew System::EventHandler(this, &SettingsGUI::BlueprintAdd_BTN_Click);
+			// 
+			// BrowseSMFolder_BTN
+			// 
+			this->BrowseSMFolder_BTN->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Right));
+			this->BrowseSMFolder_BTN->Location = System::Drawing::Point(376, 29);
+			this->BrowseSMFolder_BTN->Margin = System::Windows::Forms::Padding(3, 3, 7, 3);
+			this->BrowseSMFolder_BTN->Name = L"BrowseSMFolder_BTN";
+			this->BrowseSMFolder_BTN->Size = System::Drawing::Size(64, 22);
+			this->BrowseSMFolder_BTN->TabIndex = 4;
+			this->BrowseSMFolder_BTN->Text = L"Browse";
+			this->BrowseSMFolder_BTN->UseVisualStyleBackColor = true;
+			this->BrowseSMFolder_BTN->Click += gcnew System::EventHandler(this, &SettingsGUI::BrowseSMFolder_BTN_Click);
 			// 
 			// SettingsGUI
 			// 
@@ -339,7 +378,16 @@ namespace BlueprintConverter {
 		System::Void BlueprintList_SelectedIndexChanged(System::Object^ sender, System::EventArgs^ e);
 		System::Void BlueprintRemSelected_Click(System::Object^ sender, System::EventArgs^ e);
 		System::Void SMPath_TextChanged(System::Object^ sender, System::EventArgs^ e);
-		System::Void ChangeGUIState(bool bpList, bool modList, bool SMPath, bool SMData);
 		System::Void AddItemsToListBox(System::Windows::Forms::ListBox^ list, std::vector<std::wstring>& vec);
+		System::Void OpenInWorkshop_CB_CheckedChanged(System::Object^ sender, System::EventArgs^ e);
+		bool AreTablesEqual(std::vector<std::wstring>& vec, System::Windows::Forms::ListBox^ lb);
+		bool AddStringToListBox(
+			System::Windows::Forms::TextBox^ tb,
+			System::Windows::Forms::ListBox^ lb
+		);
+
+		void AddPathsToWstrArray(std::vector<std::wstring>& vec, System::Windows::Forms::ListBox^ lb);
+		void ChangeSetting(int mask, bool value);
+		System::Void BrowseSMFolder_BTN_Click(System::Object^ sender, System::EventArgs^ e);
 	};
 }

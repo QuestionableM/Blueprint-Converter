@@ -1,7 +1,7 @@
 #include <Windows.h>
 
 #include "Gui/MainGUI.h"
-#include "Object Database/ObjectDatabase.h"
+#include "Lib/ProgramSettings.h"
 #include "Lib/Functions/Functions.h"
 
 #include "Object Database/Texture Database/TextureDatabase.h"
@@ -16,7 +16,7 @@ namespace SMBC {
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	CoUninitialize();
 
-	SMBC::ObjectDatabase::LoadConfig(L"./Resources/Config.json");
+	SMBC::Settings::LoadSettingsFile();
 
 	SMBC::Application::EnableVisualStyles();
 	SMBC::Application::SetCompatibleTextRenderingDefault(false);

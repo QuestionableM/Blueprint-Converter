@@ -1,5 +1,6 @@
 #include "Gui/GeneratorSettings.h"
 #include "Lib/File/FileFunc.h"
+#include "Lib/GuiLib/GuiLib.h"
 #include <msclr/marshal_cppstd.h>
 
 namespace SMBC {
@@ -22,11 +23,9 @@ System::Void _GenSet::Convert_BTN_Click(System::Object^ sender, System::EventArg
 	std::wstring _bp_name = msclr::interop::marshal_as<std::wstring>(this->BlueprintName_TB->Text);
 
 	if (SMBC::FILE::IsBadPath(L"./Converted Models/" + _bp_name)) {
-		System::Windows::Forms::MessageBox::Show(
-			L"The specified blueprint name is invalid.\n\nPlease, pick the other name",
-			L"Invalid name",
-			System::Windows::Forms::MessageBoxButtons::OK,
-			System::Windows::Forms::MessageBoxIcon::Warning
+		SMBC::GUI::Warning(
+			"Invalid name",
+			"The specified blueprint name is invalid.\n\nPlease, pick the other name"
 		);
 		return;
 	}

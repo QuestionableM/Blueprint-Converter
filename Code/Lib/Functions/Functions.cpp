@@ -20,7 +20,6 @@ void SMBC::BlueprintConversionData::SetNewStage(const long& Stage, const long& M
 }
 
 std::vector<std::wstring> SMBC::Blueprint::ImageExtensions = { L".jpg", L".png", L".bmp" };
-std::vector<std::wstring> SMBC::Blueprint::BlueprintPaths = {};
 
 bool SMBC::Blueprint::IsSupportedExtension(const std::wstring& _ext) {
 	for (std::wstring& _Ext : SMBC::Blueprint::ImageExtensions)
@@ -45,21 +44,36 @@ std::wstring SMBC::Blueprint::FixBlueprintName(const std::wstring& name) {
 }
 
 std::wstring SMBC::Blueprint::FindBlueprintImage() {
-	std::wstring _Output = L"";
-	if (!SMBC::FILE::FileExists(this->BlueprintFolder)) goto skip_function;
+	if (!SMBC::FILE::FileExists(this->BlueprintFolder)) return L"";
 
-	for (auto& Image : fs::directory_iterator(this->BlueprintFolder, fs::directory_options::skip_permission_denied)) {
-		if (Image.is_regular_file() && Image.path().has_extension() && this->IsSupportedExtension(Image.path().extension().wstring())) {
-			_Output = Image.path().wstring();
-			break;
-		}
+	fs::directory_iterator _Iter(this->BlueprintFolder, fs::directory_options::skip_permission_denied);
+	for (auto& Image : _Iter) {
+		const fs::path& _img_p = Image.path();
+
+		if (
+			Image.is_regular_file() && _img_p.has_extension() &&
+			this->IsSupportedExtension(_img_p.extension().wstring())
+		) return _img_p.wstring();
 	}
-
-skip_function:
-	return _Output;
+	
+	return L"";
 }
-SMBC::Blueprint::Blueprint(const std::wstring& name, const std::wstring& path, const std::wstring& folder) {
+
+bool SMBC::Blueprint::BlueprintExists() {
+	bool _FolderExists = SMBC::FILE::FileExists(this->BlueprintFolder);
+	bool _PathExists = SMBC::FILE::FileExists(this->BlueprintPath);
+
+	return (_FolderExists && _PathExists);
+}
+
+SMBC::Blueprint::Blueprint(
+	const std::wstring& name,
+	const std::wstring& path,
+	const std::wstring& folder,
+	const std::wstring& workshop_id
+) {
 	this->BlueprintName = name;
 	this->BlueprintPath = path;
 	this->BlueprintFolder = folder;
+	this->WorkshopId = workshop_id;
 }

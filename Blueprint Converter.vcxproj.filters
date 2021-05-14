@@ -19,6 +19,8 @@
     <ClCompile Include="Code\Lib\GuiLib\GuiLib.cpp" />
     <ClCompile Include="Code\Lib\Json\JsonFunc.cpp" />
     <ClCompile Include="Code\Lib\OtherFunc\OtherFunc.cpp" />
+    <ClCompile Include="Code\Lib\ProgramSettings.cpp" />
+    <ClCompile Include="Code\Lib\Bit\Bit.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Code\Blueprint Converter\BlueprintConverter.h" />
@@ -38,5 +40,7 @@
     <ClInclude Include="Code\Lib\GuiLib\GuiLib.h" />
     <ClInclude Include="Code\Lib\Json\JsonFunc.h" />
     <ClInclude Include="Code\Lib\OtherFunc\OtherFunc.h" />
+    <ClInclude Include="Code\Lib\ProgramSettings.h" />
+    <ClInclude Include="Code\Lib\Bit\Bit.h" />
   </ItemGroup>
 </Project>

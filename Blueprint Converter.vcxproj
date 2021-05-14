@@ -27,11 +27,13 @@
     <ClCompile Include="Code\Gui\Implementation\About.cpp" />
     <ClCompile Include="Code\Gui\Implementation\MainGUI.cpp" />
     <ClCompile Include="Code\Gui\Implementation\SettingsGUI.cpp" />
+    <ClCompile Include="Code\Lib\Bit\Bit.cpp" />
     <ClCompile Include="Code\Lib\File\FileFunc.cpp" />
     <ClCompile Include="Code\Lib\Functions\Functions.cpp" />
     <ClCompile Include="Code\Lib\GuiLib\GuiLib.cpp" />
     <ClCompile Include="Code\Lib\Json\JsonFunc.cpp" />
     <ClCompile Include="Code\Lib\OtherFunc\OtherFunc.cpp" />
+    <ClCompile Include="Code\Lib\ProgramSettings.cpp" />
     <ClCompile Include="Code\Main.cpp" />
     <ClCompile Include="Code\Object Database\Keyword Replacer\KeywordReplacer.cpp" />
     <ClCompile Include="Code\Object Database\Language Database\LanguageDatabase.cpp" />
@@ -55,11 +57,13 @@
     <ClInclude Include="Code\Gui\SettingsGUI.h">
       <FileType>CppForm</FileType>
     </ClInclude>
+    <ClInclude Include="Code\Lib\Bit\Bit.h" />
     <ClInclude Include="Code\Lib\File\FileFunc.h" />
     <ClInclude Include="Code\Lib\Functions\Functions.h" />
     <ClInclude Include="Code\Lib\GuiLib\GuiLib.h" />
     <ClInclude Include="Code\Lib\Json\JsonFunc.h" />
     <ClInclude Include="Code\Lib\OtherFunc\OtherFunc.h" />
+    <ClInclude Include="Code\Lib\ProgramSettings.h" />
     <ClInclude Include="Code\Object Database\Keyword Replacer\KeywordReplacer.h" />
     <ClInclude Include="Code\Object Database\Language Database\LanguageDatabase.h" />
     <ClInclude Include="Code\Object Database\ObjectDatabase.h" />
@@ -81,6 +85,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Code\Gui\MainGUI.resx">
       <DependentUpon>Code\Gui\MainGUI.h</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Code\Gui\SettingsGUI.resx">
+      <DependentUpon>Code\Gui\SettingsGUI.h</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup Label="Globals">
@@ -162,7 +169,7 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>assimp-vc142-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>assimp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)\Dependencies\Assimp\Lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -174,7 +181,7 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>assimp-vc142-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>assimp64.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)\Dependencies\Assimp\Lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
     </Link>
@@ -187,7 +194,7 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>assimp-vc142-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>assimp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)\Dependencies\Assimp\Lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -199,7 +206,7 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>assimp-vc142-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>assimp64.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)\Dependencies\Assimp\Lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
     </Link>

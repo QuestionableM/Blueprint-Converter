@@ -44,9 +44,6 @@ namespace SMBC {
 
 	class ObjectDatabase {
 	public:
-		static std::wstring _sm_path;
-		static std::vector<std::wstring> _mods_path;
-		static std::vector<std::wstring> _sm_dir_database;
 		static std::vector<ObjectData> ObjectDB;
 		static std::vector<BlockData> BlockDB;
 		static SMBC::LangDB GameTranslations;
@@ -70,10 +67,5 @@ namespace SMBC {
 		static void LoadObjectFile(const std::wstring& path, SMBC::LangDB& translations);
 		static void LoadGameDatabase();
 		static void LoadModDatabase();
-		static void LoadConfig(const std::wstring& path);
-		static void LoadJsonWstrArray(const nlohmann::json& file, const std::string& keyword, std::vector<std::wstring>& _array);
-		static void SaveConfigFile(const bool sm_path = false, const bool bp_list = false, const bool mod_list = false);
-		static void AddArrayPath(const std::wstring& element, std::vector<std::wstring>& _array);
-		static void AddRegistryPathAndSave();
 	};
 };

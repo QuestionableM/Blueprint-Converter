@@ -29,12 +29,14 @@ namespace SMBC {
 	struct CachedBlock {
 		std::wstring uuid;
 		std::wstring name;
+		std::wstring color;
 		SMBC::Texture::TextureList texList;
 	};
 
 	struct CachedPart {
 		std::wstring uuid;
 		std::wstring name;
+		std::wstring color;
 		std::wstring meshPath;
 
 		SMBC::Texture::Texture texPaths;

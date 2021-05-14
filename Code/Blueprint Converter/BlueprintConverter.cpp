@@ -268,8 +268,6 @@ int SMBC::BPFunction::ConvertBlueprintToObj(
 	if (_BlueprintJson.contains("joints") && _BlueprintJson.at("joints").is_array()) {
 		auto& _JointsArray = _BlueprintJson.at("joints");
 
-
-
 		SMBC::BlueprintConversionData::ProgressBarMax = (uint32_t)_JointsArray.size();
 		for (auto& _Joint : _JointsArray) {
 			auto& _Position = _Joint["posA"];

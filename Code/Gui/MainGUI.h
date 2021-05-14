@@ -43,9 +43,11 @@ namespace BlueprintConverter {
 		System::Windows::Forms::ListBox^ BlueprintList;
 		System::Windows::Forms::PictureBox^ BlueprintImage;
 		System::ComponentModel::BackgroundWorker^ BlueprintLoader;
-		System::ComponentModel::IContainer^ components;
 		System::Windows::Forms::Button^ OpenBlueprint;
 		System::Windows::Forms::Button^ OpenOutputFolder_BTN;
+		System::Windows::Forms::Button^ OpenInWorkshop_BTN;
+		System::Windows::Forms::ToolTip^ ToolTip_TT;
+		System::ComponentModel::IContainer^ components;
 
 #pragma region Windows Form Designer generated code
 		void InitializeComponent(void)
@@ -73,6 +75,8 @@ namespace BlueprintConverter {
 			this->Result_LBL = (gcnew System::Windows::Forms::Label());
 			this->OpenBlueprint = (gcnew System::Windows::Forms::Button());
 			this->OpenOutputFolder_BTN = (gcnew System::Windows::Forms::Button());
+			this->OpenInWorkshop_BTN = (gcnew System::Windows::Forms::Button());
+			this->ToolTip_TT = (gcnew System::Windows::Forms::ToolTip(this->components));
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->BlueprintImage))->BeginInit();
 			this->menuStrip1->SuspendLayout();
 			this->SuspendLayout();
@@ -93,14 +97,17 @@ namespace BlueprintConverter {
 			// Start_BTN
 			// 
 			this->Start_BTN->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Right));
+			this->Start_BTN->Cursor = System::Windows::Forms::Cursors::Hand;
 			this->Start_BTN->Enabled = false;
 			this->Start_BTN->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 9.75F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(0)));
-			this->Start_BTN->Location = System::Drawing::Point(347, 305);
+			this->Start_BTN->Location = System::Drawing::Point(527, 305);
 			this->Start_BTN->Name = L"Start_BTN";
-			this->Start_BTN->Size = System::Drawing::Size(350, 34);
+			this->Start_BTN->Size = System::Drawing::Size(170, 34);
 			this->Start_BTN->TabIndex = 1;
 			this->Start_BTN->Text = L"Convert";
+			this->ToolTip_TT->SetToolTip(this->Start_BTN, L"Opens a window in which you can configure\r\nthe behaviour of the blueprint convert"
+				L"er");
 			this->Start_BTN->UseVisualStyleBackColor = true;
 			this->Start_BTN->Click += gcnew System::EventHandler(this, &MainGUI::Start_BTN_Click);
 			// 
@@ -275,20 +282,23 @@ namespace BlueprintConverter {
 			// OpenBlueprint
 			// 
 			this->OpenBlueprint->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Right));
+			this->OpenBlueprint->Cursor = System::Windows::Forms::Cursors::Hand;
 			this->OpenBlueprint->Enabled = false;
-			this->OpenBlueprint->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 9.75F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
+			this->OpenBlueprint->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(0)));
 			this->OpenBlueprint->Location = System::Drawing::Point(277, 47);
 			this->OpenBlueprint->Name = L"OpenBlueprint";
 			this->OpenBlueprint->Size = System::Drawing::Size(64, 22);
 			this->OpenBlueprint->TabIndex = 12;
 			this->OpenBlueprint->Text = L"Open";
+			this->ToolTip_TT->SetToolTip(this->OpenBlueprint, L"Opens a dialog in which you can select the\r\nblueprint that you want to convert");
 			this->OpenBlueprint->UseVisualStyleBackColor = true;
 			this->OpenBlueprint->Click += gcnew System::EventHandler(this, &MainGUI::OpenBlueprint_Click);
 			// 
 			// OpenOutputFolder_BTN
 			// 
 			this->OpenOutputFolder_BTN->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Right));
+			this->OpenOutputFolder_BTN->Cursor = System::Windows::Forms::Cursors::Hand;
 			this->OpenOutputFolder_BTN->Enabled = false;
 			this->OpenOutputFolder_BTN->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 9.75F, System::Drawing::FontStyle::Regular,
 				System::Drawing::GraphicsUnit::Point, static_cast<System::Byte>(0)));
@@ -297,14 +307,32 @@ namespace BlueprintConverter {
 			this->OpenOutputFolder_BTN->Size = System::Drawing::Size(350, 34);
 			this->OpenOutputFolder_BTN->TabIndex = 13;
 			this->OpenOutputFolder_BTN->Text = L"Open Model Output Directory";
+			this->ToolTip_TT->SetToolTip(this->OpenOutputFolder_BTN, L"Opens Windows Explorer in the\r\nmodel output directory");
 			this->OpenOutputFolder_BTN->UseVisualStyleBackColor = true;
 			this->OpenOutputFolder_BTN->Click += gcnew System::EventHandler(this, &MainGUI::OpenOutputFolder_BTN_Click);
+			// 
+			// OpenInWorkshop_BTN
+			// 
+			this->OpenInWorkshop_BTN->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Right));
+			this->OpenInWorkshop_BTN->Cursor = System::Windows::Forms::Cursors::Hand;
+			this->OpenInWorkshop_BTN->Enabled = false;
+			this->OpenInWorkshop_BTN->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 9.75F, System::Drawing::FontStyle::Regular,
+				System::Drawing::GraphicsUnit::Point, static_cast<System::Byte>(0)));
+			this->OpenInWorkshop_BTN->Location = System::Drawing::Point(347, 305);
+			this->OpenInWorkshop_BTN->Name = L"OpenInWorkshop_BTN";
+			this->OpenInWorkshop_BTN->Size = System::Drawing::Size(170, 34);
+			this->OpenInWorkshop_BTN->TabIndex = 14;
+			this->OpenInWorkshop_BTN->Text = L"Open in Steam Workshop";
+			this->ToolTip_TT->SetToolTip(this->OpenInWorkshop_BTN, L"Open the selected blueprint in\r\nSteam Workshop");
+			this->OpenInWorkshop_BTN->UseVisualStyleBackColor = true;
+			this->OpenInWorkshop_BTN->Click += gcnew System::EventHandler(this, &MainGUI::OpenInWorkshop_BTN_Click);
 			// 
 			// MainGUI
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->ClientSize = System::Drawing::Size(709, 351);
+			this->Controls->Add(this->OpenInWorkshop_BTN);
 			this->Controls->Add(this->OpenOutputFolder_BTN);
 			this->Controls->Add(this->OpenBlueprint);
 			this->Controls->Add(this->Result_LBL);
@@ -357,5 +385,8 @@ namespace BlueprintConverter {
 		System::Void OpenBlueprint_Click(System::Object^ sender, System::EventArgs^ e);
 		System::Void OpenOutputFolder_BTN_Click(System::Object^ sender, System::EventArgs^ e);
 		System::Void MainGUI_FormClosing(System::Object^ sender, System::Windows::Forms::FormClosingEventArgs^ e);
+		System::Void OpenInWorkshop_BTN_Click(System::Object^ sender, System::EventArgs^ e);
+		
+		bool GetCurrentBlueprint(SMBC::Blueprint& bp);
 	};
 }

@@ -8,6 +8,7 @@
 #include "Lib/File/FileFunc.h"
 #include "Lib/OtherFunc/OtherFunc.h"
 #include "Lib/Json/JsonFunc.h"
+#include "Lib/ProgramSettings.h"
 
 namespace fs = std::filesystem;
 
@@ -37,9 +38,6 @@ SMBC::BlockData::BlockData(
 	this->_tiling = tiling;
 }
 
-std::wstring SMBC::ObjectDatabase::_sm_path = L"";
-std::vector<std::wstring> SMBC::ObjectDatabase::_mods_path = {};
-std::vector<std::wstring> SMBC::ObjectDatabase::_sm_dir_database = {};
 std::vector<SMBC::ObjectData> SMBC::ObjectDatabase::ObjectDB = {};
 std::vector<SMBC::BlockData> SMBC::ObjectDatabase::BlockDB = {};
 SMBC::LangDB SMBC::ObjectDatabase::GameTranslations = SMBC::LangDB(L"GAME DATA");
@@ -297,7 +295,7 @@ void SMBC::ObjectDatabase::LoadObjectFile(const std::wstring& path, SMBC::LangDB
 }
 
 void SMBC::ObjectDatabase::LoadGameDatabase() {
-	for (std::wstring& data_path : SMBC::ObjectDatabase::_sm_dir_database) {
+	for (std::wstring& data_path : SMBC::Settings::SMDirDatabase) {
 		if (!SMBC::FILE::FileExists(data_path)) continue;
 
 		fs::directory_entry CurPath(data_path);
@@ -315,9 +313,9 @@ void SMBC::ObjectDatabase::LoadGameDatabase() {
 }
 
 void SMBC::ObjectDatabase::LoadModDatabase() {
-	if (SMBC::ObjectDatabase::_mods_path.size() <= 0) return;
+	if (SMBC::Settings::ModFolders.empty()) return;
 
-	for (std::wstring& _ModDirectory : SMBC::ObjectDatabase::_mods_path) {
+	for (std::wstring& _ModDirectory : SMBC::Settings::ModFolders) {
 		if (!SMBC::FILE::FileExists(_ModDirectory)) continue;
 
 		fs::directory_iterator _DirIter(_ModDirectory, fs::directory_options::skip_permission_denied);
@@ -355,137 +353,6 @@ void SMBC::ObjectDatabase::LoadModDatabase() {
 
 				SMBC::ObjectDatabase::LoadObjectFile(m_dir.path().wstring(), _LangDB);
 			}
-		}
-	}
-}
-
-void SMBC::ObjectDatabase::LoadConfig(const std::wstring& path) {
-	nlohmann::json _ConfigFile;
-
-	if (SMBC::JSON::OpenParseJson(path, _ConfigFile)) {
-		auto& _ConfigData = _ConfigFile;
-
-		auto& _UserSettings = _ConfigData["UserSettings"];
-		if (_UserSettings.is_object()) {
-			auto& _SMPath = _UserSettings["ScrapPath"];
-
-			SMBC::ObjectDatabase::LoadJsonWstrArray(_UserSettings, "BlueprintPaths", SMBC::Blueprint::BlueprintPaths);
-			SMBC::ObjectDatabase::LoadJsonWstrArray(_UserSettings, "ScrapModsPath", SMBC::ObjectDatabase::_mods_path);
-
-			if (_SMPath.is_string())
-				SMBC::ObjectDatabase::_sm_path = SMBC::Other::Utf8ToWide(_SMPath.get<std::string>());
-		}
-
-		SMBC::ObjectDatabase::AddRegistryPathAndSave();
-		if (!SMBC::ObjectDatabase::_sm_path.empty())
-			SMBC::PathReplacer::AddKeyReplacement(SMBC::KeyReplacement(L"$GAME_FOLDER", SMBC::ObjectDatabase::_sm_path));
-
-		auto& _ProgramSettings = _ConfigData["ProgramSettings"];
-		if (_ProgramSettings.is_object()) {
-			auto& _KeyWords = _ProgramSettings["Keywords"];
-
-			if (_KeyWords.is_object()) {
-				for (auto& keyword : _KeyWords.items()) {
-					if (!keyword.value().is_string()) continue;
-
-					std::wstring _WstrKey = SMBC::Other::Utf8ToWide(keyword.key());
-					std::wstring _WstrRepl = SMBC::Other::Utf8ToWide(keyword.value().get<std::string>());
-					_WstrRepl = SMBC::PathReplacer::ReplaceKey(_WstrRepl);
-
-					SMBC::PathReplacer::AddKeyReplacement(SMBC::KeyReplacement(_WstrKey, _WstrRepl));
-				}
-			}
-
-			SMBC::ObjectDatabase::LoadJsonWstrArray(_ProgramSettings, "ScrapObjectDatabase", SMBC::ObjectDatabase::_sm_dir_database);
-
-			std::vector<std::wstring> _LanguageArray = {};
-			SMBC::ObjectDatabase::LoadJsonWstrArray(_ProgramSettings, "LanguageDirectories", _LanguageArray);
-
-			for (std::wstring& _str : _LanguageArray)
-				SMBC::ObjectDatabase::LoadLanguageFile(_str);
-		}
-	}
-}
-
-void SMBC::ObjectDatabase::LoadJsonWstrArray(const nlohmann::json& file, const std::string& keyword, std::vector<std::wstring>& _array) {
-	if (!file.contains(keyword)) return;
-
-	auto& _JsonArray = file.at(keyword);
-	if (!_JsonArray.is_array()) return;
-
-	for (auto& _wstr : _JsonArray) {
-		if (!_wstr.is_string()) continue;
-
-		std::wstring _WstrPath = SMBC::Other::Utf8ToWide(_wstr.get<std::string>());
-		_WstrPath = SMBC::PathReplacer::ReplaceKey(_WstrPath);
-
-		_array.push_back(_WstrPath);
-	}
-}
-
-void SMBC::ObjectDatabase::SaveConfigFile(const bool sm_path, const bool bp_list, const bool mod_list) {
-	nlohmann::json _JsonOutput;
-	SMBC::JSON::OpenParseJson(L"./Resources/Config.json", _JsonOutput);
-
-	std::filesystem::create_directory(L"./Resources");
-	std::ofstream _ConfigJson("./Resources/Config.json");
-
-	if (!_ConfigJson.is_open()) return;
-
-	if (_JsonOutput.contains("UserSettings") && !_JsonOutput.at("UserSettings").is_object())
-		_JsonOutput["UserSettings"] = {};
-
-	if (sm_path) {
-		_JsonOutput["UserSettings"]["ScrapPath"] = SMBC::Other::WideToUtf8(SMBC::ObjectDatabase::_sm_path);
-	}
-
-	if (bp_list) {
-		nlohmann::json _BlueprintList = {};
-
-		for (std::wstring& _bp_obj : SMBC::Blueprint::BlueprintPaths)
-			_BlueprintList.push_back(SMBC::Other::WideToUtf8(_bp_obj));
-
-		_JsonOutput["UserSettings"]["BlueprintPaths"] = _BlueprintList;
-	}
-
-	if (mod_list) {
-		nlohmann::json _ModList = {};
-
-		for (std::wstring& _mod_obj : SMBC::ObjectDatabase::_mods_path)
-			_ModList.push_back(SMBC::Other::WideToUtf8(_mod_obj));
-
-		_JsonOutput["UserSettings"]["ScrapModsPath"] = _ModList;
-	}
-
-	_ConfigJson << std::setw(4) << _JsonOutput;
-
-	_ConfigJson.close();
-}
-
-void SMBC::ObjectDatabase::AddArrayPath(const std::wstring& element, std::vector<std::wstring>& _array) {
-	for (std::wstring& _wstr_e : _array) {
-		if (_wstr_e == element || SMBC::FILE::IsEquivalent(_wstr_e, element))
-			return;
-	}
-
-	_array.push_back(element);
-}
-
-void SMBC::ObjectDatabase::AddRegistryPathAndSave() {
-	if (SMBC::ObjectDatabase::_sm_path.empty()) {
-		std::wstring _Path = SMBC::Other::ReadRegistryKey(L"SOFTWARE\\Valve\\Steam", L"SteamPath");
-
-		if (!_Path.empty() && SMBC::FILE::FileExists(_Path)) {
-			std::wstring _ScrapPath = _Path + L"/steamapps/common/scrap mechanic";
-			std::wstring _ScrapWorkshop = _Path + L"/steamapps/workshop/content/387990";
-
-			if (SMBC::FILE::FileExists(_ScrapPath)) SMBC::ObjectDatabase::_sm_path = _ScrapPath;
-			if (SMBC::FILE::FileExists(_ScrapWorkshop)) {
-				SMBC::ObjectDatabase::AddArrayPath(_ScrapWorkshop, SMBC::ObjectDatabase::_mods_path);
-				SMBC::ObjectDatabase::AddArrayPath(_ScrapWorkshop, SMBC::Blueprint::BlueprintPaths);
-			}
-
-			SMBC::ObjectDatabase::SaveConfigFile(true, true, true);
 		}
 	}
 }
