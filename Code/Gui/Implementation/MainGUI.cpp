@@ -31,7 +31,7 @@ _MainGUI::MainGUI() {
 	this->LoadDatabase();
 	this->LoadBlueprints();
 
-#if DEBUG
+#if _DEBUG
 	this->Text += " DEBUG";
 #endif
 }

@@ -15,7 +15,7 @@ _About::About() {
 	this->Version_LBL->Text += " (x86)";
 #endif
 
-#ifdef DEBUG
+#if _DEBUG
 	this->Version_LBL->Text += " DEBUG";
 #endif
 }
