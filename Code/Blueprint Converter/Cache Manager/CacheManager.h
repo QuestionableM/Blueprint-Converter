@@ -68,7 +68,7 @@ namespace SMBC {
 
 		void ClearCache();
 
-		void WriteMtlFile(const std::wstring& path);
+		void WriteMtlFile(const std::wstring& path, const bool& add_colors);
 		void WriteTexturePaths(const std::wstring& path);
 	};
 }

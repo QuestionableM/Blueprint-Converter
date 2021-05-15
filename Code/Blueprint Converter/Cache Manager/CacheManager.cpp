@@ -202,7 +202,10 @@ std::string HexToFloat(std::wstring& f) {
 	return _output;
 }
 
-void SMBC::CacheManager::WriteMtlFile(const std::wstring& path) {
+void SMBC::CacheManager::WriteMtlFile(
+	const std::wstring& path,
+	const bool& add_colors
+) {
 	std::ofstream _MtlFile(path);
 
 	if (!_MtlFile.is_open()) return;
@@ -221,7 +224,16 @@ void SMBC::CacheManager::WriteMtlFile(const std::wstring& path) {
 
 			std::wstring _MtlName = _CPart.uuid + L' ' + std::to_wstring(SMData.SubMeshIndex);
 
-			std::string _mtl_mat = "newmtl " + SMBC::Other::WideToUtf8(_MtlName) + '\n' + _fp_t + HexToFloat(_CPart.color) + '\n' + _sp_t;
+			std::string _mtl_mat;
+			_mtl_mat.append("newmtl " + SMBC::Other::WideToUtf8(_MtlName) + '\n');
+			_mtl_mat.append(_fp_t);
+
+			if (add_colors)
+				_mtl_mat.append(HexToFloat(_CPart.color) + '\n');
+			else
+				_mtl_mat.append("0.8 0.8 0.8\n");
+
+			_mtl_mat.append(_sp_t);
 
 			bool _Success = false;
 			SMBC::Texture::TextureList _TList;
@@ -250,7 +262,16 @@ void SMBC::CacheManager::WriteMtlFile(const std::wstring& path) {
 	for (uint32_t a = 0u; a < this->CachedBlocks.size(); a++) {
 		SMBC::CachedBlock& _CBlock = this->CachedBlocks[a];
 
-		std::string _mtl_mat = "newmtl " + SMBC::Other::WideToUtf8(_CBlock.uuid) + '\n' + _fp_t + HexToFloat(_CBlock.color) + '\n' + _sp_t;
+		std::string _mtl_mat;
+		_mtl_mat.append("newmtl " + SMBC::Other::WideToUtf8(_CBlock.uuid) + '\n');
+		_mtl_mat.append(_fp_t);
+
+		if (add_colors)
+			_mtl_mat.append(HexToFloat(_CBlock.color) + '\n');
+		else
+			_mtl_mat.append("0.8 0.8 0.8\n");
+
+		_mtl_mat.append(_sp_t);
 
 		if (!_CBlock.texList.nor.empty())
 			_mtl_mat += "map_Bump " + SMBC::Other::WideToUtf8(_CBlock.texList.nor) + '\n';

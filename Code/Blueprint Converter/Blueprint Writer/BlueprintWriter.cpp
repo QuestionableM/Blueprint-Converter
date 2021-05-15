@@ -283,7 +283,7 @@ bool SMBC::ConvertedModel::WriteChunksToFile(
 		_writer.open(_path + L".obj");
 
 		if (conv_data.tex_list) this->CacheManager.WriteTexturePaths(_ModelPath + L"/Used Textures.json");
-		if (conv_data.apply_texture) this->CacheManager.WriteMtlFile(_path + L".mtl");
+		if (conv_data.apply_texture) this->CacheManager.WriteMtlFile(_path + L".mtl", conv_data.mat_by_color);
 	}
 	else _writer.open(_ModelPath + L".obj");
 
