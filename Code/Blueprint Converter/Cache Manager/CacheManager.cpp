@@ -34,13 +34,13 @@ bool SMBC::CacheManager::LoadModel(
 		aiProcess_OptimizeMeshes
 	);
 
-	bool _HasMaterials = ModelScene->HasMaterials();
-
-	long long FaceOffset = 0ll;
-	long long TexturePointOffset = 0ll;
-	long long NormalOffset = 0ll;
-
 	if (ModelScene && ModelScene->HasMeshes()) {
+		long long FaceOffset = 0ll;
+		long long TexturePointOffset = 0ll;
+		long long NormalOffset = 0ll;
+
+		bool _HasMaterials = ModelScene->HasMaterials();
+
 		model.subMeshData.reserve(ModelScene->mNumMeshes);
 		for (uint32_t a = 0u; a < ModelScene->mNumMeshes; a++) {
 			FaceOffset = (long long)model.vertices.size();

@@ -399,9 +399,16 @@ bool SMBC::ConvertedModel::WriteChunksToFile(
 
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
+#if _DEBUG
+#include <assimp/DefaultLogger.hpp>
+#endif
 
 int SMBC::ConvertedModel::ConvertAndWrite() {
 	if (!this->HasStuffToConvert()) return SMBC_ERROR_NO_BLOCKS;
+
+#if _DEBUG
+	Assimp::Logger* logger = Assimp::DefaultLogger::create("AssimpDebugLog.txt", Assimp::Logger::LogSeverity::DEBUGGING);
+#endif
 
 	SMBC::ConvertedModel::OffsetData offset_data;
 	std::vector<SMBC::Model> Models = {};
@@ -424,6 +431,10 @@ int SMBC::ConvertedModel::ConvertAndWrite() {
 			NewModel = SMBC::Model();
 		}
 	}
+
+#if _DEBUG
+	delete logger;
+#endif
 
 	if (conv_data.separation_method == 0) {
 		NewModel.subMeshData.push_back(NewSubMeshData);
