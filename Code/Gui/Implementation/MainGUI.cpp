@@ -6,8 +6,10 @@
 #include "Gui/About.h"
 #include "Gui/SettingsGUI.h"
 #include "Gui/GeneratorSettings.h"
+#include "Gui/ModList.h"
 
 #include "Blueprint Converter/BlueprintConverter.h"
+#include "Object Database/Keyword Replacer/KeywordReplacer.h"
 
 #include "Lib/Functions/Functions.h"
 #include "Lib/GuiLib/GuiLib.h"
@@ -198,7 +200,7 @@ System::Void _MainGUI::ObjectGenerator_RunWorkerCompleted(System::Object^ sender
 
 System::Void _MainGUI::DatabaseLoader_DoWork(System::Object^ sender, System::ComponentModel::DoWorkEventArgs^ e) {
 	SMBC::BlueprintConversionData::SetNewStage(SMBC_CONV_READING_DATABASE, 0);
-	SMBC::ObjectDatabase::ClearDatabase();
+	SMBC::ObjectDatabase::ModDB.clear();
 	SMBC::ObjectDatabase::LoadGameDatabase();
 	SMBC::ObjectDatabase::LoadModDatabase();
 }
@@ -207,7 +209,7 @@ System::Void _MainGUI::DatabaseLoader_RunWorkerCompleted(System::Object^ sender,
 	SMBC::BlueprintConversionData::SetNewStage(SMBC_CONV_NONE, 0);
 	this->GuiUpdater->Stop();
 	this->ActionProgress->Value = 0;
-	this->ActionLabel->Text = gcnew System::String((L"Successfully loaded " + std::to_wstring(SMBC::ObjectDatabase::ObjectDB.size()) + L" objects into the database").c_str());
+	this->ActionLabel->Text = gcnew System::String((L"Successfully loaded " + std::to_wstring(SMBC::ObjectDatabase::CountLoadedObjects()) + L" objects into the database").c_str());
 	this->ChangeGUIState(this->LoadedBP, true, true);
 }
 
@@ -275,9 +277,12 @@ System::Void _MainGUI::BlueprintList_SelectedIndexChanged(System::Object^ sender
 		);
 
 		this->LoadBlueprints();
-
 		return;
 	}
+
+	this->BP_OpenOutputDir_BTN->Enabled = !_CurBlueprint.BlueprintFolder.empty();
+	this->BP_ShowModList_BTN->Enabled = !_CurBlueprint.BlueprintPath.empty();
+	this->BlueprintOptions_CMS->Enabled = (!_CurBlueprint.BlueprintFolder.empty() || !_CurBlueprint.BlueprintPath.empty());
 
 	std::wstring _BPImage = _CurBlueprint.FindBlueprintImage();
 	this->OpenInWorkshop_BTN->Enabled = !_CurBlueprint.WorkshopId.empty();
@@ -336,6 +341,10 @@ System::Void _MainGUI::LoadDatabase() {
 	this->DatabaseLoader->RunWorkerAsync();
 }
 System::Void _MainGUI::LoadBlueprints() {
+	if (this->BlueprintImage->Image) delete this->BlueprintImage->Image;
+	this->BlueprintImage->Image = nullptr;
+	this->BlueprintImage->Invalidate();
+
 	this->SelItemIndex = -1;
 	this->ChangeGUIState(false, this->LoadedDatabase, true);
 	this->SearchTB->Clear();
@@ -363,13 +372,28 @@ System::Void _MainGUI::ChangeGUIState(bool bploaded, bool databaseloaded, bool b
 	this->Start_BTN->Enabled = (dpandbp && this->BPPath_TB->TextLength > 0);
 
 	if (dpandbp) {
+		bool _HasWorkshopId = false;
+		bool _HasBPFolder = false;
+		bool _HasBPPath = false;
+
 		SMBC::Blueprint _CurBlueprint;
 		if (this->GetCurrentBlueprint(_CurBlueprint)) {
-			if (!_CurBlueprint.WorkshopId.empty())
-				this->OpenInWorkshop_BTN->Enabled = true;
+			_HasWorkshopId = !_CurBlueprint.WorkshopId.empty();
+			_HasBPFolder = !_CurBlueprint.BlueprintFolder.empty();
+			_HasBPPath = !_CurBlueprint.BlueprintPath.empty();
 		}
+
+		this->BlueprintOptions_CMS->Enabled = (_HasBPFolder || _HasBPPath);
+		this->BP_OpenOutputDir_BTN->Enabled = _HasBPFolder;
+		this->BP_ShowModList_BTN->Enabled = _HasBPPath;
+		this->OpenInWorkshop_BTN->Enabled = _HasWorkshopId;
 	}
-	else this->OpenInWorkshop_BTN->Enabled = false;
+	else {
+		this->OpenInWorkshop_BTN->Enabled = false;
+		this->BlueprintOptions_CMS->Enabled = false;
+		this->BP_OpenOutputDir_BTN->Enabled = false;
+		this->BP_ShowModList_BTN->Enabled = false;
+	}
 
 	this->OpenBlueprint->Enabled = dpandbp;
 	this->OpenOutputFolder_BTN->Enabled = dpandbp;
@@ -389,6 +413,19 @@ System::Void _MainGUI::settingsToolStripMenuItem1_Click(System::Object^ sender, 
 System::Void _MainGUI::OpenOptionsGUI() {
 	SMBC::SettingsGUI^ _Settings = gcnew SMBC::SettingsGUI();
 	_Settings->ShowDialog();
+
+	if (_Settings->scrap_path_changed) {
+		this->BlueprintList->Items->Clear();
+		this->TempBPTable->clear();
+		this->Blueprints->clear();
+
+		SMBC::Settings::LoadSettingsFile();
+
+		this->GuiUpdater->Start();
+		this->LoadDatabase();
+		this->LoadBlueprints();
+	}
+
 	delete _Settings;
 }
 
@@ -455,6 +492,21 @@ System::Void _MainGUI::OpenInWorkshop_BTN_Click(System::Object^ sender, System::
 	System::Diagnostics::Process::Start(gcnew System::String(_WorkshopLink.c_str()));
 }
 
+System::Void _MainGUI::BP_OpenOutputDir_BTN_Click(System::Object^ sender, System::EventArgs^ e) {
+	SMBC::Blueprint _CurBlueprint;
+	if (!this->GetCurrentBlueprint(_CurBlueprint)) return;
+
+	if (!SMBC::FILE::FileExists(_CurBlueprint.BlueprintFolder)) {
+		SMBC::GUI::Error("Internal Error", "The path to the selected blueprint doesn't exist!");
+		return;
+	}
+
+	std::wstring path_cpy = _CurBlueprint.BlueprintFolder;
+	SMBC::PathReplacer::ReplaceAll(path_cpy, L'/', L'\\');
+	
+	SMBC::GUI::OpenFolderInExplorer(path_cpy);
+}
+
 bool _MainGUI::GetCurrentBlueprint(SMBC::Blueprint& bp) {
 	int _CurIdx = this->BlueprintList->SelectedIndex;
 
@@ -464,4 +516,15 @@ bool _MainGUI::GetCurrentBlueprint(SMBC::Blueprint& bp) {
 	bp = _CurrentList.at(_CurIdx);
 	
 	return true;
+}
+
+System::Void _MainGUI::BP_ShowModList_BTN_Click(System::Object^ sender, System::EventArgs^ e) {
+	SMBC::Blueprint sel_blueprint;
+
+	if (!this->GetCurrentBlueprint(sel_blueprint)) return;
+
+	SMBC::ModList^ ModListGUI = gcnew SMBC::ModList(sel_blueprint);
+	ModListGUI->ShowDialog();
+
+	delete ModListGUI;
 }

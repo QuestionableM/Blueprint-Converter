@@ -4,21 +4,17 @@
 namespace fs = std::filesystem;
 namespace _File = SMBC::FILE;
 
-_File::ExistsType _File::FileExistsA(const std::wstring& path) {
-	try {
-		if (fs::exists(path))
-			return _File::ExistsType::Exists;
-	}
-	catch (...) {
-		return _File::ExistsType::BadFile;
-	}
+bool _File::IsDirectory(const std::wstring& path) {
+	fs::directory_entry _path(path);
 
-	return _File::ExistsType::NExists;
+	return _path.is_directory();
 }
 
 bool _File::IsBadPath(const std::wstring& path) {
-	if (_File::FileExistsA(path) == _File::ExistsType::BadFile)
-		return true;
+	try {
+		bool exists = fs::exists(path);
+	}
+	catch (...) { return true; }
 
 	return false;
 }

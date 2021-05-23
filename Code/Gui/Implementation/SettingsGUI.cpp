@@ -53,6 +53,10 @@ System::Void SMBC::SettingsGUI::Save_BTN_Click(System::Object^ sender, System::E
 		SMBC::GUI::Warning("Save Error", "The specified path to Scrap Mechanic is invalid!");
 		return;
 	}
+	if (!SMBC::FILE::IsDirectory(_NewPathWstr)) {
+		SMBC::GUI::Warning("Save Error", "The specified path to Scrap Mechanic does not lead to a directory!");
+		return;
+	}
 
 	this->Save_BTN->Enabled = false;
 
@@ -61,7 +65,10 @@ System::Void SMBC::SettingsGUI::Save_BTN_Click(System::Object^ sender, System::E
 	bool _SBlueprint = SMBC::Bit::GetBit<int>(this->BinChanges, SETTING_BLUEPRINT);
 	bool _SMods = SMBC::Bit::GetBit<int>(this->BinChanges, SETTING_MOD_LIST);
 
-	if (_SSMP) SMBC::Settings::PathToSM = _NewPathWstr;
+	if (_SSMP) {
+		SMBC::Settings::PathToSM = _NewPathWstr;
+		this->scrap_path_changed = true;
+	}
 	if (_SSteam) SMBC::Settings::OpenLinksInSteam = this->OpenInWorkshop_CB->Checked;
 	if (_SBlueprint) this->AddPathsToWstrArray(SMBC::Settings::BlueprintFolders, this->BlueprintList);
 	if (_SMods) this->AddPathsToWstrArray(SMBC::Settings::ModFolders, this->ModList);
@@ -157,6 +164,11 @@ bool SMBC::SettingsGUI::AddStringToListBox(
 		return false;
 	}
 
+	if (!SMBC::FILE::IsDirectory(_Path)) {
+		SMBC::GUI::Warning("Invalid Path", "The specified path does not lead to a directory!");
+		return false;
+	}
+
 	for (int a = 0; a < lb->Items->Count; a++) {
 		std::wstring _Ws = msclr::interop::marshal_as<std::wstring>(lb->Items[a]->ToString());
 
@@ -228,4 +240,30 @@ System::Void SMBC::SettingsGUI::BrowseSMFolder_BTN_Click(System::Object^ sender,
 	if (_SM_Path.empty()) return;
 
 	this->SMPath->Text = gcnew System::String(_SM_Path.c_str());
+}
+
+System::Void SMBC::SettingsGUI::ModListDirSearch_BTN_Click(System::Object^ sender, System::EventArgs^ e) {
+	std::wstring _ModDirPath = SMBC::GUI::OpenFileName(
+		L"Select a Directory Containing Mods",
+		FOS_PICKFOLDERS,
+		L"All Files (*.*)\0*.*\0",
+		static_cast<HWND>(this->Handle.ToPointer())
+	);
+
+	if (_ModDirPath.empty()) return;
+
+	this->ModText_TB->Text = gcnew System::String(_ModDirPath.c_str());
+}
+
+System::Void SMBC::SettingsGUI::BPDirSearch_BTN_Click(System::Object^ sender, System::EventArgs^ e) {
+	std::wstring _BPDirPath = SMBC::GUI::OpenFileName(
+		L"Select a Directory Containing Blueprints",
+		FOS_PICKFOLDERS,
+		L"All Files (*.*)\0*.*\0",
+		static_cast<HWND>(this->Handle.ToPointer())
+	);
+
+	if (_BPDirPath.empty()) return;
+
+	this->BlueprintText_TB->Text = gcnew System::String(_BPDirPath.c_str());
 }

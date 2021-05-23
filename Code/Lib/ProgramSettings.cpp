@@ -52,6 +52,15 @@ void SMBC::Settings::LoadSettingsFile() {
 	nlohmann::json _ConfigFile;
 	if (!SMBC::JSON::OpenParseJson(SMBC::Settings::ConfigPath, _ConfigFile)) return;
 
+	SMBC::Settings::BlueprintFolders.clear();
+	SMBC::Settings::ModFolders.clear();
+	SMBC::Settings::PathToSM.clear();
+	SMBC::Settings::OpenLinksInSteam = false;
+	SMBC::PathReplacer::ClearAllData();
+	SMBC::Settings::SMDirDatabase.clear();
+	SMBC::ObjectDatabase::ModDB.clear();
+	SMBC::ObjectDatabase::GameTranslations.clear_database();
+
 	auto& _ConfigData = _ConfigFile;
 
 	auto& _UserSettings = _ConfigData["UserSettings"];
@@ -71,7 +80,7 @@ void SMBC::Settings::LoadSettingsFile() {
 
 	SMBC::Settings::AddRegistryPathAndSave();
 	if (!SMBC::Settings::PathToSM.empty())
-		SMBC::PathReplacer::AddKeyReplacement(SMBC::KeyReplacement(L"$GAME_FOLDER", SMBC::Settings::PathToSM));
+		SMBC::PathReplacer::Add(SMBC::KeyReplacement(L"$GAME_FOLDER", SMBC::Settings::PathToSM));
 
 	auto& _ProgramSettings = _ConfigData["ProgramSettings"];
 	if (_ProgramSettings.is_object()) {
@@ -85,10 +94,16 @@ void SMBC::Settings::LoadSettingsFile() {
 				std::wstring _WstrRepl = SMBC::Other::Utf8ToWide(keyword.value().get<std::string>());
 				_WstrRepl = SMBC::PathReplacer::ReplaceKey(_WstrRepl);
 
-				SMBC::PathReplacer::AddKeyReplacement(SMBC::KeyReplacement(_WstrKey, _WstrRepl));
+				SMBC::PathReplacer::Add(SMBC::KeyReplacement(_WstrKey, _WstrRepl));
 			}
 		}
 
+		std::vector<std::wstring> _UpgradeFiles = {};
+		SMBC::Settings::LoadJsonWstrArray(_ProgramSettings, "ResourceUpgradeFiles", _UpgradeFiles);
+
+		for (std::wstring& _str : _UpgradeFiles)
+			SMBC::PathReplacer::ReadResourceUpgrades(_str);
+		
 		SMBC::Settings::LoadJsonWstrArray(_ProgramSettings, "ScrapObjectDatabase", SMBC::Settings::SMDirDatabase);
 
 		std::vector<std::wstring> _LanguageArray = {};
@@ -149,6 +164,8 @@ void SMBC::Settings::AddRegistryPathAndSave() {
 	if (!SMBC::Settings::PathToSM.empty()) return;
 
 	std::wstring _Path = SMBC::Other::ReadRegistryKey(L"SOFTWARE\\Valve\\Steam", L"SteamPath");
+	if (_Path.empty())
+		_Path = SMBC::Other::ReadRegistryKey(L"SOFTWARE\\WOW6432Node\\Valve\\Steam", L"SteamPath");
 
 	if (_Path.empty() || !SMBC::FILE::FileExists(_Path)) return;
 

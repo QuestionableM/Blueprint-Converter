@@ -22,7 +22,5 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	SMBC::Application::SetCompatibleTextRenderingDefault(false);
 	SMBC::Application::Run(gcnew SMBC::MainGUI);
 
-	SMBC::ObjectDatabase::ClearDatabase();
-
 	return 0;
 }

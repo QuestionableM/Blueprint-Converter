@@ -212,7 +212,7 @@ int SMBC::BPFunction::ConvertBlueprintToObj(
 					glm::vec3 _BoundsVec(_BoundX.get<float>(), _BoundY.get<float>(), _BoundZ.get<float>());
 
 					SMBC::BlockData _BlockD;
-					if (!SMBC::ObjectDatabase::GetBlockByUuid(_UuidWstr, _BlockD))
+					if (!SMBC::ObjectDatabase::GetBlock(_UuidWstr, _BlockD))
 						_BlockD._obj_name = (L"Block (" + _UuidWstr + L")");
 
 					SMBC::SM_Block _Block(
@@ -235,7 +235,7 @@ int SMBC::BPFunction::ConvertBlueprintToObj(
 				else {
 					SMBC::ObjectData _ObjData;
 
-					if (!SMBC::ObjectDatabase::GetPartByUuid(_UuidWstr, _ObjData) || _ObjData._obj_path.empty()) continue;
+					if (!SMBC::ObjectDatabase::GetPart(_UuidWstr, _ObjData) || _ObjData._obj_path.empty()) continue;
 
 					SMBC::SM_Part _Part(
 						_ObjData._obj_path,
@@ -288,7 +288,7 @@ int SMBC::BPFunction::ConvertBlueprintToObj(
 			std::wstring _UuidWstr = SMBC::Other::Utf8ToWide(_ShapeId.get<std::string>());
 
 			SMBC::ObjectData _jnt_data;
-			if (!SMBC::ObjectDatabase::GetPartByUuid(_UuidWstr, _jnt_data) || _jnt_data._obj_path.empty()) continue;
+			if (!SMBC::ObjectDatabase::GetPart(_UuidWstr, _jnt_data) || _jnt_data._obj_path.empty()) continue;
 
 			std::wstring _WstrColor = (_Color.is_string() ? SMBC::Other::Utf8ToWide(_Color.get<std::string>()) : L"000000");
 

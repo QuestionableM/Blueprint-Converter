@@ -27,6 +27,7 @@
     <ClCompile Include="Code\Gui\Implementation\About.cpp" />
     <ClCompile Include="Code\Gui\Implementation\MainGUI.cpp" />
     <ClCompile Include="Code\Gui\Implementation\SettingsGUI.cpp" />
+    <ClCompile Include="Code\Gui\Implementation\ModList.cpp" />
     <ClCompile Include="Code\Lib\Bit\Bit.cpp" />
     <ClCompile Include="Code\Lib\File\FileFunc.cpp" />
     <ClCompile Include="Code\Lib\Functions\Functions.cpp" />
@@ -52,6 +53,9 @@
       <FileType>CppForm</FileType>
     </ClInclude>
     <ClInclude Include="Code\Gui\MainGUI.h">
+      <FileType>CppForm</FileType>
+    </ClInclude>
+    <ClInclude Include="Code\Gui\ModList.h">
       <FileType>CppForm</FileType>
     </ClInclude>
     <ClInclude Include="Code\Gui\SettingsGUI.h">
@@ -85,6 +89,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Code\Gui\MainGUI.resx">
       <DependentUpon>Code\Gui\MainGUI.h</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Code\Gui\ModList.resx">
+      <DependentUpon>Code\Gui\ModList.h</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Code\Gui\SettingsGUI.resx">
       <DependentUpon>Code\Gui\SettingsGUI.h</DependentUpon>

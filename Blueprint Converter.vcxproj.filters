@@ -21,6 +21,7 @@
     <ClCompile Include="Code\Lib\OtherFunc\OtherFunc.cpp" />
     <ClCompile Include="Code\Lib\ProgramSettings.cpp" />
     <ClCompile Include="Code\Lib\Bit\Bit.cpp" />
+    <ClCompile Include="Code\Gui\Implementation\ModList.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Code\Blueprint Converter\BlueprintConverter.h" />
@@ -42,5 +43,6 @@
     <ClInclude Include="Code\Lib\OtherFunc\OtherFunc.h" />
     <ClInclude Include="Code\Lib\ProgramSettings.h" />
     <ClInclude Include="Code\Lib\Bit\Bit.h" />
+    <ClInclude Include="Code\Gui\ModList.h" />
   </ItemGroup>
 </Project>

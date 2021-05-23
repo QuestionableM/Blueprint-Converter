@@ -15,6 +15,7 @@ namespace BlueprintConverter {
 	{
 	public:
 		int BinChanges = 0x0000;
+		bool scrap_path_changed = false;
 
 		SettingsGUI(void);
 	protected:
@@ -39,8 +40,10 @@ namespace BlueprintConverter {
 		System::Windows::Forms::Button^ BlueprintAdd_BTN;
 		System::Windows::Forms::CheckBox^ OpenInWorkshop_CB;
 		System::Windows::Forms::ToolTip^ ToolTip_TT;
-	private: System::Windows::Forms::Button^ BrowseSMFolder_BTN;
-		   System::ComponentModel::IContainer^ components;
+		System::Windows::Forms::Button^ BrowseSMFolder_BTN;
+		System::Windows::Forms::Button^ ModListDirSearch_BTN;
+		System::Windows::Forms::Button^ BPDirSearch_BTN;
+		System::ComponentModel::IContainer^ components;
 
 #pragma region Windows Form Designer generated code
 		void InitializeComponent(void)
@@ -48,10 +51,12 @@ namespace BlueprintConverter {
 			this->components = (gcnew System::ComponentModel::Container());
 			this->Save_BTN = (gcnew System::Windows::Forms::Button());
 			this->SMTab = (gcnew System::Windows::Forms::TabPage());
+			this->BrowseSMFolder_BTN = (gcnew System::Windows::Forms::Button());
 			this->OpenInWorkshop_CB = (gcnew System::Windows::Forms::CheckBox());
 			this->label1 = (gcnew System::Windows::Forms::Label());
 			this->SMPath = (gcnew System::Windows::Forms::TextBox());
 			this->ModTab = (gcnew System::Windows::Forms::TabPage());
+			this->ModListDirSearch_BTN = (gcnew System::Windows::Forms::Button());
 			this->ModText_TB = (gcnew System::Windows::Forms::TextBox());
 			this->label3 = (gcnew System::Windows::Forms::Label());
 			this->ModAdd_BTN = (gcnew System::Windows::Forms::Button());
@@ -59,13 +64,13 @@ namespace BlueprintConverter {
 			this->ModRemSelected = (gcnew System::Windows::Forms::Button());
 			this->SettingTabs = (gcnew System::Windows::Forms::TabControl());
 			this->BlueprintTab = (gcnew System::Windows::Forms::TabPage());
+			this->BPDirSearch_BTN = (gcnew System::Windows::Forms::Button());
 			this->BlueprintText_TB = (gcnew System::Windows::Forms::TextBox());
 			this->BlueprintList = (gcnew System::Windows::Forms::ListBox());
 			this->label4 = (gcnew System::Windows::Forms::Label());
 			this->BlueprintRemSelected = (gcnew System::Windows::Forms::Button());
 			this->BlueprintAdd_BTN = (gcnew System::Windows::Forms::Button());
 			this->ToolTip_TT = (gcnew System::Windows::Forms::ToolTip(this->components));
-			this->BrowseSMFolder_BTN = (gcnew System::Windows::Forms::Button());
 			this->SMTab->SuspendLayout();
 			this->ModTab->SuspendLayout();
 			this->SettingTabs->SuspendLayout();
@@ -99,6 +104,18 @@ namespace BlueprintConverter {
 			this->SMTab->TabIndex = 2;
 			this->SMTab->Text = L"General";
 			this->SMTab->UseVisualStyleBackColor = true;
+			// 
+			// BrowseSMFolder_BTN
+			// 
+			this->BrowseSMFolder_BTN->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Right));
+			this->BrowseSMFolder_BTN->Location = System::Drawing::Point(376, 29);
+			this->BrowseSMFolder_BTN->Margin = System::Windows::Forms::Padding(3, 3, 7, 3);
+			this->BrowseSMFolder_BTN->Name = L"BrowseSMFolder_BTN";
+			this->BrowseSMFolder_BTN->Size = System::Drawing::Size(64, 22);
+			this->BrowseSMFolder_BTN->TabIndex = 4;
+			this->BrowseSMFolder_BTN->Text = L"Browse";
+			this->BrowseSMFolder_BTN->UseVisualStyleBackColor = true;
+			this->BrowseSMFolder_BTN->Click += gcnew System::EventHandler(this, &SettingsGUI::BrowseSMFolder_BTN_Click);
 			// 
 			// OpenInWorkshop_CB
 			// 
@@ -141,6 +158,7 @@ namespace BlueprintConverter {
 			// 
 			// ModTab
 			// 
+			this->ModTab->Controls->Add(this->ModListDirSearch_BTN);
 			this->ModTab->Controls->Add(this->ModText_TB);
 			this->ModTab->Controls->Add(this->label3);
 			this->ModTab->Controls->Add(this->ModAdd_BTN);
@@ -154,6 +172,19 @@ namespace BlueprintConverter {
 			this->ModTab->Text = L"Mod Directories";
 			this->ModTab->UseVisualStyleBackColor = true;
 			// 
+			// ModListDirSearch_BTN
+			// 
+			this->ModListDirSearch_BTN->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Right));
+			this->ModListDirSearch_BTN->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 9.75F, System::Drawing::FontStyle::Regular,
+				System::Drawing::GraphicsUnit::Point, static_cast<System::Byte>(0)));
+			this->ModListDirSearch_BTN->Location = System::Drawing::Point(328, 217);
+			this->ModListDirSearch_BTN->Name = L"ModListDirSearch_BTN";
+			this->ModListDirSearch_BTN->Size = System::Drawing::Size(35, 22);
+			this->ModListDirSearch_BTN->TabIndex = 12;
+			this->ModListDirSearch_BTN->Text = L"...";
+			this->ModListDirSearch_BTN->UseVisualStyleBackColor = true;
+			this->ModListDirSearch_BTN->Click += gcnew System::EventHandler(this, &SettingsGUI::ModListDirSearch_BTN_Click);
+			// 
 			// ModText_TB
 			// 
 			this->ModText_TB->Anchor = static_cast<System::Windows::Forms::AnchorStyles>(((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left)
@@ -163,7 +194,7 @@ namespace BlueprintConverter {
 			this->ModText_TB->Location = System::Drawing::Point(7, 217);
 			this->ModText_TB->Margin = System::Windows::Forms::Padding(3, 3, 3, 4);
 			this->ModText_TB->Name = L"ModText_TB";
-			this->ModText_TB->Size = System::Drawing::Size(356, 22);
+			this->ModText_TB->Size = System::Drawing::Size(315, 22);
 			this->ModText_TB->TabIndex = 11;
 			this->ModText_TB->TextChanged += gcnew System::EventHandler(this, &SettingsGUI::ModText_TB_TextChanged);
 			// 
@@ -246,6 +277,7 @@ namespace BlueprintConverter {
 			// 
 			// BlueprintTab
 			// 
+			this->BlueprintTab->Controls->Add(this->BPDirSearch_BTN);
 			this->BlueprintTab->Controls->Add(this->BlueprintText_TB);
 			this->BlueprintTab->Controls->Add(this->BlueprintList);
 			this->BlueprintTab->Controls->Add(this->label4);
@@ -258,6 +290,19 @@ namespace BlueprintConverter {
 			this->BlueprintTab->Text = L"Blueprint Directories";
 			this->BlueprintTab->UseVisualStyleBackColor = true;
 			// 
+			// BPDirSearch_BTN
+			// 
+			this->BPDirSearch_BTN->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Right));
+			this->BPDirSearch_BTN->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 9.75F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
+				static_cast<System::Byte>(0)));
+			this->BPDirSearch_BTN->Location = System::Drawing::Point(328, 217);
+			this->BPDirSearch_BTN->Name = L"BPDirSearch_BTN";
+			this->BPDirSearch_BTN->Size = System::Drawing::Size(35, 22);
+			this->BPDirSearch_BTN->TabIndex = 17;
+			this->BPDirSearch_BTN->Text = L"...";
+			this->BPDirSearch_BTN->UseVisualStyleBackColor = true;
+			this->BPDirSearch_BTN->Click += gcnew System::EventHandler(this, &SettingsGUI::BPDirSearch_BTN_Click);
+			// 
 			// BlueprintText_TB
 			// 
 			this->BlueprintText_TB->Anchor = static_cast<System::Windows::Forms::AnchorStyles>(((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left)
@@ -267,7 +312,7 @@ namespace BlueprintConverter {
 			this->BlueprintText_TB->Location = System::Drawing::Point(7, 217);
 			this->BlueprintText_TB->Margin = System::Windows::Forms::Padding(3, 3, 3, 4);
 			this->BlueprintText_TB->Name = L"BlueprintText_TB";
-			this->BlueprintText_TB->Size = System::Drawing::Size(356, 22);
+			this->BlueprintText_TB->Size = System::Drawing::Size(315, 22);
 			this->BlueprintText_TB->TabIndex = 16;
 			this->BlueprintText_TB->TextChanged += gcnew System::EventHandler(this, &SettingsGUI::BlueprintText_TB_TextChanged);
 			// 
@@ -332,18 +377,6 @@ namespace BlueprintConverter {
 			this->BlueprintAdd_BTN->UseVisualStyleBackColor = true;
 			this->BlueprintAdd_BTN->Click += gcnew System::EventHandler(this, &SettingsGUI::BlueprintAdd_BTN_Click);
 			// 
-			// BrowseSMFolder_BTN
-			// 
-			this->BrowseSMFolder_BTN->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Right));
-			this->BrowseSMFolder_BTN->Location = System::Drawing::Point(376, 29);
-			this->BrowseSMFolder_BTN->Margin = System::Windows::Forms::Padding(3, 3, 7, 3);
-			this->BrowseSMFolder_BTN->Name = L"BrowseSMFolder_BTN";
-			this->BrowseSMFolder_BTN->Size = System::Drawing::Size(64, 22);
-			this->BrowseSMFolder_BTN->TabIndex = 4;
-			this->BrowseSMFolder_BTN->Text = L"Browse";
-			this->BrowseSMFolder_BTN->UseVisualStyleBackColor = true;
-			this->BrowseSMFolder_BTN->Click += gcnew System::EventHandler(this, &SettingsGUI::BrowseSMFolder_BTN_Click);
-			// 
 			// SettingsGUI
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
@@ -389,5 +422,7 @@ namespace BlueprintConverter {
 		void AddPathsToWstrArray(std::vector<std::wstring>& vec, System::Windows::Forms::ListBox^ lb);
 		void ChangeSetting(int mask, bool value);
 		System::Void BrowseSMFolder_BTN_Click(System::Object^ sender, System::EventArgs^ e);
+		System::Void ModListDirSearch_BTN_Click(System::Object^ sender, System::EventArgs^ e);
+		System::Void BPDirSearch_BTN_Click(System::Object^ sender, System::EventArgs^ e);
 	};
 }

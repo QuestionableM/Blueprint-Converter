@@ -18,6 +18,10 @@ namespace BlueprintConverter {
 		bool LoadedDatabase = false;
 		int SelItemIndex = -1;
 		std::vector<SMBC::Blueprint>* Blueprints = nullptr;
+	private: System::Windows::Forms::ContextMenuStrip^ BlueprintOptions_CMS;
+	private: System::Windows::Forms::ToolStripMenuItem^ BP_ShowModList_BTN;
+	private: System::Windows::Forms::ToolStripMenuItem^ BP_OpenOutputDir_BTN;
+	public:
 		std::vector<SMBC::Blueprint>* TempBPTable = nullptr;
 		MainGUI(void);
 	protected:
@@ -62,6 +66,9 @@ namespace BlueprintConverter {
 			this->ActionProgress = (gcnew System::Windows::Forms::ProgressBar());
 			this->DatabaseLoader = (gcnew System::ComponentModel::BackgroundWorker());
 			this->BlueprintList = (gcnew System::Windows::Forms::ListBox());
+			this->BlueprintOptions_CMS = (gcnew System::Windows::Forms::ContextMenuStrip(this->components));
+			this->BP_ShowModList_BTN = (gcnew System::Windows::Forms::ToolStripMenuItem());
+			this->BP_OpenOutputDir_BTN = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->BlueprintImage = (gcnew System::Windows::Forms::PictureBox());
 			this->BlueprintLoader = (gcnew System::ComponentModel::BackgroundWorker());
 			this->SearchTB = (gcnew System::Windows::Forms::TextBox());
@@ -77,6 +84,7 @@ namespace BlueprintConverter {
 			this->OpenOutputFolder_BTN = (gcnew System::Windows::Forms::Button());
 			this->OpenInWorkshop_BTN = (gcnew System::Windows::Forms::Button());
 			this->ToolTip_TT = (gcnew System::Windows::Forms::ToolTip(this->components));
+			this->BlueprintOptions_CMS->SuspendLayout();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->BlueprintImage))->BeginInit();
 			this->menuStrip1->SuspendLayout();
 			this->SuspendLayout();
@@ -162,6 +170,7 @@ namespace BlueprintConverter {
 			this->BlueprintList->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Bottom)
 				| System::Windows::Forms::AnchorStyles::Left)
 				| System::Windows::Forms::AnchorStyles::Right));
+			this->BlueprintList->ContextMenuStrip = this->BlueprintOptions_CMS;
 			this->BlueprintList->Enabled = false;
 			this->BlueprintList->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 9.75F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(0)));
@@ -175,6 +184,29 @@ namespace BlueprintConverter {
 			this->BlueprintList->TabIndex = 6;
 			this->BlueprintList->SelectedIndexChanged += gcnew System::EventHandler(this, &MainGUI::BlueprintList_SelectedIndexChanged);
 			this->BlueprintList->EnabledChanged += gcnew System::EventHandler(this, &MainGUI::BlueprintList_EnabledChanged);
+			// 
+			// BlueprintOptions_CMS
+			// 
+			this->BlueprintOptions_CMS->Items->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(2) {
+				this->BP_ShowModList_BTN,
+					this->BP_OpenOutputDir_BTN
+			});
+			this->BlueprintOptions_CMS->Name = L"BlueprintOptions_CMS";
+			this->BlueprintOptions_CMS->Size = System::Drawing::Size(206, 70);
+			// 
+			// BP_ShowModList_BTN
+			// 
+			this->BP_ShowModList_BTN->Name = L"BP_ShowModList_BTN";
+			this->BP_ShowModList_BTN->Size = System::Drawing::Size(205, 22);
+			this->BP_ShowModList_BTN->Text = L"Show Mod List";
+			this->BP_ShowModList_BTN->Click += gcnew System::EventHandler(this, &MainGUI::BP_ShowModList_BTN_Click);
+			// 
+			// BP_OpenOutputDir_BTN
+			// 
+			this->BP_OpenOutputDir_BTN->Name = L"BP_OpenOutputDir_BTN";
+			this->BP_OpenOutputDir_BTN->Size = System::Drawing::Size(205, 22);
+			this->BP_OpenOutputDir_BTN->Text = L"Open Blueprint Directory";
+			this->BP_OpenOutputDir_BTN->Click += gcnew System::EventHandler(this, &MainGUI::BP_OpenOutputDir_BTN_Click);
 			// 
 			// BlueprintImage
 			// 
@@ -353,6 +385,7 @@ namespace BlueprintConverter {
 			this->Text = L"SM Blueprint to Model Converter";
 			this->FormClosing += gcnew System::Windows::Forms::FormClosingEventHandler(this, &MainGUI::MainGUI_FormClosing);
 			this->Shown += gcnew System::EventHandler(this, &MainGUI::MainGUI_Shown);
+			this->BlueprintOptions_CMS->ResumeLayout(false);
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->BlueprintImage))->EndInit();
 			this->menuStrip1->ResumeLayout(false);
 			this->menuStrip1->PerformLayout();
@@ -386,7 +419,9 @@ namespace BlueprintConverter {
 		System::Void OpenOutputFolder_BTN_Click(System::Object^ sender, System::EventArgs^ e);
 		System::Void MainGUI_FormClosing(System::Object^ sender, System::Windows::Forms::FormClosingEventArgs^ e);
 		System::Void OpenInWorkshop_BTN_Click(System::Object^ sender, System::EventArgs^ e);
+		System::Void BP_OpenOutputDir_BTN_Click(System::Object^ sender, System::EventArgs^ e);
 		
 		bool GetCurrentBlueprint(SMBC::Blueprint& bp);
+		System::Void BP_ShowModList_BTN_Click(System::Object^ sender, System::EventArgs^ e);
 	};
 }

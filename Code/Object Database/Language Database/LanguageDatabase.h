@@ -19,6 +19,8 @@ namespace SMBC {
 
 		LangDB(const std::wstring& environment);
 
+		void clear_database();
+
 		void LoadLanguageFile(const std::wstring& path);
 		bool UuidExists(const std::wstring& uuid);
 		void AddTranslation(const SMBC::LangTrans& translation);

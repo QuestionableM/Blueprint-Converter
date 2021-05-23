@@ -42,21 +42,48 @@ namespace SMBC {
 		BlockData() = default;
 	};
 
+	class ModData {
+	public:
+		std::vector<ObjectData> ObjectDB;
+		std::vector<BlockData> BlockDB;
+
+		std::wstring uuid;
+		std::wstring name;
+		std::wstring workshop_id;
+		std::wstring path;
+
+		SMBC::LangDB LoadTranslations();
+		void LoadObjects(SMBC::LangDB& translations);
+		void LoadModData();
+
+		void AddBlockToDatabase(SMBC::BlockData& block);
+		void AddPartToDatabase(SMBC::ObjectData& part);
+
+		bool GetPart(const std::wstring& uuid, SMBC::ObjectData& part);
+		bool GetBlock(const std::wstring& uuid, SMBC::BlockData& block);
+
+		ModData(
+			const std::wstring& uuid,
+			const std::wstring& name,
+			const std::wstring& workshop_id,
+			const std::wstring& path
+		);
+
+		ModData() = default;
+	};
+
 	class ObjectDatabase {
 	public:
-		static std::vector<ObjectData> ObjectDB;
-		static std::vector<BlockData> BlockDB;
+		static std::vector<ModData> ModDB;
 		static SMBC::LangDB GameTranslations;
 
-		static void ClearDatabase();
-
 		static void LoadLanguageFile(const std::wstring& path);
-		static void AddObjectToDatabase(SMBC::ObjectData& obj_data);
 		static glm::vec3 LoadBlockCollision(const nlohmann::json& collision);
 
-		static bool GetBlockByUuid(const std::wstring& uuid, SMBC::BlockData& object);
-		static bool GetPartByUuid(const std::wstring& uuid, SMBC::ObjectData& object);
-		static void AddBlockToDatabase(SMBC::BlockData& blk_data);
+		static bool GetPart(const std::wstring& uuid, SMBC::ObjectData& object);
+		static bool GetBlock(const std::wstring& uuid, SMBC::BlockData& block);
+
+		static long long CountLoadedObjects();
 
 		static void GetRenderableData(
 			const nlohmann::json& renderable,
@@ -64,7 +91,11 @@ namespace SMBC {
 			std::wstring& model_path
 		);
 
-		static void LoadObjectFile(const std::wstring& path, SMBC::LangDB& translations);
+		static void LoadObjectFile(
+			SMBC::ModData& mod,
+			const std::wstring& path,
+			SMBC::LangDB& translations
+		);
 		static void LoadGameDatabase();
 		static void LoadModDatabase();
 	};

@@ -17,6 +17,11 @@ SMBC::LangDB::LangDB(const std::wstring& environment) {
 	this->_Environment = environment;
 }
 
+void SMBC::LangDB::clear_database() {
+	this->_Environment.clear();
+	this->_translations.clear();
+}
+
 void SMBC::LangDB::LoadLanguageFile(const std::wstring& path) {
 	nlohmann::json _LangFile;
 

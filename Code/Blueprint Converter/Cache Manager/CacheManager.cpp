@@ -100,7 +100,7 @@ bool SMBC::CacheManager::LoadModel(
 						indIdx + FaceOffset,
 						(_HasTextureCoords ? (indIdx + TexturePointOffset) : -1),
 						(_HasNormals ? (indIdx + NormalOffset) : -1)
-					});
+						});
 				}
 
 				subMeshData.DataIdx.push_back(DIdx);
