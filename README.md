@@ -13,9 +13,11 @@ If the program won't be able to find Scrap Mechanic, you can specify the path by
 - How to Use
     - In order for that extension for Work, in Blueprint Converter you have to select `Apply Textures` and `Group Materials by Color`.
     - After importing the blueprint, press N to open the side panel and you should see `Blueprint Converter` tab in there:
+    <br/><br/>
     ![Guide 1](https://github.com/QuestionableM/Blueprint-Converter/blob/main/Images/BlenderExtension_Guide1.png)
     - Click on `Assign Materials` and enable Viewport Shading to View the colored textures.
     - See the result:
+    <br/><br/>
     ![Guide 2](https://github.com/QuestionableM/Blueprint-Converter/blob/main/Images/BlenderExtension_Guide2.png)
 
 # Errors and Issues
