@@ -24,7 +24,6 @@ void SMBC::LangDB::clear_database() {
 
 void SMBC::LangDB::LoadLanguageFile(const std::wstring& path) {
 	nlohmann::json _LangFile;
-
 	if (!SMBC::JSON::OpenParseJson(path, _LangFile) || !_LangFile.is_object()) return;
 
 	for (auto& trans : _LangFile.items()) {
@@ -56,10 +55,8 @@ void SMBC::LangDB::AddTranslation(const SMBC::LangTrans& translation) {
 }
 
 std::wstring SMBC::LangDB::GetTranslationString(const std::wstring& uuid) {
-	for (unsigned int a = 0; a < this->_translations.size(); a++) {
-		SMBC::LangTrans& _Translation = this->_translations[a];
-		if (_Translation.uuid == uuid) return _Translation.translation;
-	}
+	for (SMBC::LangTrans& _trans : this->_translations)
+		if (_trans.uuid == uuid) return _trans.translation;
 
-	return L"";
+	return L"BLOCK NOT FOUND";
 }

@@ -38,6 +38,8 @@
     <ClCompile Include="Code\Main.cpp" />
     <ClCompile Include="Code\Object Database\Keyword Replacer\KeywordReplacer.cpp" />
     <ClCompile Include="Code\Object Database\Language Database\LanguageDatabase.cpp" />
+    <ClCompile Include="Code\Object Database\Mod Data\ModData.cpp" />
+    <ClCompile Include="Code\Object Database\Database Loader\DatabaseLoader.cpp" />
     <ClCompile Include="Code\Object Database\ObjectDatabase.cpp" />
     <ClCompile Include="Code\Object Database\Texture Database\TextureDatabase.cpp" />
   </ItemGroup>
@@ -62,6 +64,7 @@
       <FileType>CppForm</FileType>
     </ClInclude>
     <ClInclude Include="Code\Lib\Bit\Bit.h" />
+    <ClInclude Include="Code\Lib\BuildVersion.h" />
     <ClInclude Include="Code\Lib\File\FileFunc.h" />
     <ClInclude Include="Code\Lib\Functions\Functions.h" />
     <ClInclude Include="Code\Lib\GuiLib\GuiLib.h" />
@@ -70,6 +73,8 @@
     <ClInclude Include="Code\Lib\ProgramSettings.h" />
     <ClInclude Include="Code\Object Database\Keyword Replacer\KeywordReplacer.h" />
     <ClInclude Include="Code\Object Database\Language Database\LanguageDatabase.h" />
+    <ClInclude Include="Code\Object Database\Mod Data\ModData.h" />
+    <ClInclude Include="Code\Object Database\Database Loader\DatabaseLoader.h" />
     <ClInclude Include="Code\Object Database\ObjectDatabase.h" />
     <ClInclude Include="Code\Object Database\Texture Database\TextureDatabase.h" />
   </ItemGroup>
@@ -179,6 +184,9 @@
       <AdditionalDependencies>assimp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)\Dependencies\Assimp\Lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+    <PostBuildEvent>
+      <Command>"$(SolutionDir)Dependencies\Version Counter\Version Counter.exe"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -192,6 +200,9 @@
       <AdditionalLibraryDirectories>$(SolutionDir)\Dependencies\Assimp\Lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
     </Link>
+    <PostBuildEvent>
+      <Command>"$(SolutionDir)Dependencies\Version Counter\Version Counter.exe"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -204,6 +215,9 @@
       <AdditionalDependencies>assimp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)\Dependencies\Assimp\Lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+    <PostBuildEvent>
+      <Command>"$(SolutionDir)Dependencies\Version Counter\Version Counter.exe"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -217,6 +231,9 @@
       <AdditionalLibraryDirectories>$(SolutionDir)\Dependencies\Assimp\Lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
     </Link>
+    <PostBuildEvent>
+      <Command>"$(SolutionDir)Dependencies\Version Counter\Version Counter.exe"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

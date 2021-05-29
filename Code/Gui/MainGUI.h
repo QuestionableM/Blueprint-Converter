@@ -18,16 +18,14 @@ namespace BlueprintConverter {
 		bool LoadedDatabase = false;
 		int SelItemIndex = -1;
 		std::vector<SMBC::Blueprint>* Blueprints = nullptr;
-	private: System::Windows::Forms::ContextMenuStrip^ BlueprintOptions_CMS;
-	private: System::Windows::Forms::ToolStripMenuItem^ BP_ShowModList_BTN;
-	private: System::Windows::Forms::ToolStripMenuItem^ BP_OpenOutputDir_BTN;
+	private: System::Windows::Forms::ToolStripSeparator^ toolStripSeparator1;
 	public:
 		std::vector<SMBC::Blueprint>* TempBPTable = nullptr;
 		MainGUI(void);
 	protected:
 		~MainGUI();
 	private:
-		System::Windows::Forms::Label^ Result_LBL;
+
 		System::Windows::Forms::MenuStrip^ menuStrip1;
 		System::Windows::Forms::ToolStripMenuItem^ aboutToolStripMenuItem;
 		System::Windows::Forms::ToolStripMenuItem^ settingsToolStripMenuItem;
@@ -35,13 +33,17 @@ namespace BlueprintConverter {
 		System::Windows::Forms::ToolStripMenuItem^ reloadObjectDatabaseToolStripMenuItem;
 		System::Windows::Forms::ToolStripMenuItem^ settingsToolStripMenuItem1;
 		System::Windows::Forms::TextBox^ SearchTB;
-		System::Windows::Forms::Label^ label2;
+
 		System::Windows::Forms::Label^ ActionLabel;
 		System::Windows::Forms::ProgressBar^ ActionProgress;
 		System::ComponentModel::BackgroundWorker^ DatabaseLoader;
 		System::Windows::Forms::TextBox^ BPPath_TB;
 		System::Windows::Forms::Button^ Start_BTN;
-		System::Windows::Forms::Label^ label1;
+		System::Windows::Forms::ContextMenuStrip^ BlueprintOptions_CMS;
+		System::Windows::Forms::ToolStripMenuItem^ BP_ShowModList_BTN;
+		System::Windows::Forms::ToolStripMenuItem^ BP_OpenOutputDir_BTN;
+		System::Windows::Forms::Label^ BPListStatus_LBL;
+
 		System::Windows::Forms::Timer^ GuiUpdater;
 		System::ComponentModel::BackgroundWorker^ ObjectGenerator;
 		System::Windows::Forms::ListBox^ BlueprintList;
@@ -59,7 +61,6 @@ namespace BlueprintConverter {
 			this->components = (gcnew System::ComponentModel::Container());
 			this->BPPath_TB = (gcnew System::Windows::Forms::TextBox());
 			this->Start_BTN = (gcnew System::Windows::Forms::Button());
-			this->label1 = (gcnew System::Windows::Forms::Label());
 			this->GuiUpdater = (gcnew System::Windows::Forms::Timer(this->components));
 			this->ObjectGenerator = (gcnew System::ComponentModel::BackgroundWorker());
 			this->ActionLabel = (gcnew System::Windows::Forms::Label());
@@ -72,18 +73,18 @@ namespace BlueprintConverter {
 			this->BlueprintImage = (gcnew System::Windows::Forms::PictureBox());
 			this->BlueprintLoader = (gcnew System::ComponentModel::BackgroundWorker());
 			this->SearchTB = (gcnew System::Windows::Forms::TextBox());
-			this->label2 = (gcnew System::Windows::Forms::Label());
 			this->menuStrip1 = (gcnew System::Windows::Forms::MenuStrip());
 			this->aboutToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->settingsToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->reloadBlueprintListToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->reloadObjectDatabaseToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
+			this->toolStripSeparator1 = (gcnew System::Windows::Forms::ToolStripSeparator());
 			this->settingsToolStripMenuItem1 = (gcnew System::Windows::Forms::ToolStripMenuItem());
-			this->Result_LBL = (gcnew System::Windows::Forms::Label());
 			this->OpenBlueprint = (gcnew System::Windows::Forms::Button());
 			this->OpenOutputFolder_BTN = (gcnew System::Windows::Forms::Button());
 			this->OpenInWorkshop_BTN = (gcnew System::Windows::Forms::Button());
 			this->ToolTip_TT = (gcnew System::Windows::Forms::ToolTip(this->components));
+			this->BPListStatus_LBL = (gcnew System::Windows::Forms::Label());
 			this->BlueprintOptions_CMS->SuspendLayout();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->BlueprintImage))->BeginInit();
 			this->menuStrip1->SuspendLayout();
@@ -96,7 +97,8 @@ namespace BlueprintConverter {
 			this->BPPath_TB->Enabled = false;
 			this->BPPath_TB->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 9.75F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(0)));
-			this->BPPath_TB->Location = System::Drawing::Point(12, 47);
+			this->BPPath_TB->Location = System::Drawing::Point(12, 31);
+			this->BPPath_TB->Margin = System::Windows::Forms::Padding(3, 7, 3, 3);
 			this->BPPath_TB->Name = L"BPPath_TB";
 			this->BPPath_TB->Size = System::Drawing::Size(259, 22);
 			this->BPPath_TB->TabIndex = 0;
@@ -118,17 +120,6 @@ namespace BlueprintConverter {
 				L"er");
 			this->Start_BTN->UseVisualStyleBackColor = true;
 			this->Start_BTN->Click += gcnew System::EventHandler(this, &MainGUI::Start_BTN_Click);
-			// 
-			// label1
-			// 
-			this->label1->AutoSize = true;
-			this->label1->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 9.75F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
-				static_cast<System::Byte>(0)));
-			this->label1->Location = System::Drawing::Point(9, 27);
-			this->label1->Name = L"label1";
-			this->label1->Size = System::Drawing::Size(107, 16);
-			this->label1->TabIndex = 3;
-			this->label1->Text = L"Path to Blueprint:";
 			// 
 			// GuiUpdater
 			// 
@@ -178,12 +169,14 @@ namespace BlueprintConverter {
 			this->BlueprintList->HorizontalScrollbar = true;
 			this->BlueprintList->IntegralHeight = false;
 			this->BlueprintList->ItemHeight = 16;
-			this->BlueprintList->Location = System::Drawing::Point(12, 119);
+			this->BlueprintList->Location = System::Drawing::Point(12, 87);
 			this->BlueprintList->Name = L"BlueprintList";
-			this->BlueprintList->Size = System::Drawing::Size(329, 220);
+			this->BlueprintList->Size = System::Drawing::Size(329, 252);
 			this->BlueprintList->TabIndex = 6;
 			this->BlueprintList->SelectedIndexChanged += gcnew System::EventHandler(this, &MainGUI::BlueprintList_SelectedIndexChanged);
 			this->BlueprintList->EnabledChanged += gcnew System::EventHandler(this, &MainGUI::BlueprintList_EnabledChanged);
+			this->BlueprintList->SizeChanged += gcnew System::EventHandler(this, &MainGUI::BlueprintList_SizeChanged);
+			this->BlueprintList->MouseDown += gcnew System::Windows::Forms::MouseEventHandler(this, &MainGUI::BlueprintList_MouseDown);
 			// 
 			// BlueprintOptions_CMS
 			// 
@@ -192,6 +185,7 @@ namespace BlueprintConverter {
 					this->BP_OpenOutputDir_BTN
 			});
 			this->BlueprintOptions_CMS->Name = L"BlueprintOptions_CMS";
+			this->BlueprintOptions_CMS->RenderMode = System::Windows::Forms::ToolStripRenderMode::Professional;
 			this->BlueprintOptions_CMS->Size = System::Drawing::Size(206, 70);
 			// 
 			// BP_ShowModList_BTN
@@ -211,9 +205,10 @@ namespace BlueprintConverter {
 			// BlueprintImage
 			// 
 			this->BlueprintImage->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Right));
-			this->BlueprintImage->Location = System::Drawing::Point(347, 27);
+			this->BlueprintImage->Location = System::Drawing::Point(347, 31);
+			this->BlueprintImage->Margin = System::Windows::Forms::Padding(3, 7, 3, 3);
 			this->BlueprintImage->Name = L"BlueprintImage";
-			this->BlueprintImage->Size = System::Drawing::Size(350, 175);
+			this->BlueprintImage->Size = System::Drawing::Size(350, 171);
 			this->BlueprintImage->SizeMode = System::Windows::Forms::PictureBoxSizeMode::StretchImage;
 			this->BlueprintImage->TabIndex = 7;
 			this->BlueprintImage->TabStop = false;
@@ -230,23 +225,12 @@ namespace BlueprintConverter {
 			this->SearchTB->Enabled = false;
 			this->SearchTB->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 9.75F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(0)));
-			this->SearchTB->Location = System::Drawing::Point(12, 91);
+			this->SearchTB->Location = System::Drawing::Point(12, 59);
 			this->SearchTB->MaxLength = 50;
 			this->SearchTB->Name = L"SearchTB";
 			this->SearchTB->Size = System::Drawing::Size(329, 22);
 			this->SearchTB->TabIndex = 8;
 			this->SearchTB->TextChanged += gcnew System::EventHandler(this, &MainGUI::SearchTB_TextChanged);
-			// 
-			// label2
-			// 
-			this->label2->AutoSize = true;
-			this->label2->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 9.75F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
-				static_cast<System::Byte>(0)));
-			this->label2->Location = System::Drawing::Point(9, 72);
-			this->label2->Name = L"label2";
-			this->label2->Size = System::Drawing::Size(54, 16);
-			this->label2->TabIndex = 9;
-			this->label2->Text = L"Search:";
 			// 
 			// menuStrip1
 			// 
@@ -256,6 +240,7 @@ namespace BlueprintConverter {
 			});
 			this->menuStrip1->Location = System::Drawing::Point(0, 0);
 			this->menuStrip1->Name = L"menuStrip1";
+			this->menuStrip1->RenderMode = System::Windows::Forms::ToolStripRenderMode::System;
 			this->menuStrip1->Size = System::Drawing::Size(709, 24);
 			this->menuStrip1->TabIndex = 10;
 			this->menuStrip1->Text = L"ToolStrip";
@@ -269,9 +254,9 @@ namespace BlueprintConverter {
 			// 
 			// settingsToolStripMenuItem
 			// 
-			this->settingsToolStripMenuItem->DropDownItems->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(3) {
+			this->settingsToolStripMenuItem->DropDownItems->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(4) {
 				this->reloadBlueprintListToolStripMenuItem,
-					this->reloadObjectDatabaseToolStripMenuItem, this->settingsToolStripMenuItem1
+					this->reloadObjectDatabaseToolStripMenuItem, this->toolStripSeparator1, this->settingsToolStripMenuItem1
 			});
 			this->settingsToolStripMenuItem->Name = L"settingsToolStripMenuItem";
 			this->settingsToolStripMenuItem->Size = System::Drawing::Size(61, 20);
@@ -291,25 +276,17 @@ namespace BlueprintConverter {
 			this->reloadObjectDatabaseToolStripMenuItem->Text = L"Reload Object Database";
 			this->reloadObjectDatabaseToolStripMenuItem->Click += gcnew System::EventHandler(this, &MainGUI::reloadObjectDatabaseToolStripMenuItem_Click);
 			// 
+			// toolStripSeparator1
+			// 
+			this->toolStripSeparator1->Name = L"toolStripSeparator1";
+			this->toolStripSeparator1->Size = System::Drawing::Size(196, 6);
+			// 
 			// settingsToolStripMenuItem1
 			// 
 			this->settingsToolStripMenuItem1->Name = L"settingsToolStripMenuItem1";
 			this->settingsToolStripMenuItem1->Size = System::Drawing::Size(199, 22);
 			this->settingsToolStripMenuItem1->Text = L"Settings";
 			this->settingsToolStripMenuItem1->Click += gcnew System::EventHandler(this, &MainGUI::settingsToolStripMenuItem1_Click);
-			// 
-			// Result_LBL
-			// 
-			this->Result_LBL->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Right));
-			this->Result_LBL->AutoSize = true;
-			this->Result_LBL->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 9.75F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
-				static_cast<System::Byte>(0)));
-			this->Result_LBL->Location = System::Drawing::Point(229, 72);
-			this->Result_LBL->Name = L"Result_LBL";
-			this->Result_LBL->Size = System::Drawing::Size(66, 16);
-			this->Result_LBL->TabIndex = 11;
-			this->Result_LBL->Text = L"Results: 0";
-			this->Result_LBL->Visible = false;
 			// 
 			// OpenBlueprint
 			// 
@@ -318,7 +295,8 @@ namespace BlueprintConverter {
 			this->OpenBlueprint->Enabled = false;
 			this->OpenBlueprint->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(0)));
-			this->OpenBlueprint->Location = System::Drawing::Point(277, 47);
+			this->OpenBlueprint->Location = System::Drawing::Point(277, 31);
+			this->OpenBlueprint->Margin = System::Windows::Forms::Padding(3, 7, 3, 3);
 			this->OpenBlueprint->Name = L"OpenBlueprint";
 			this->OpenBlueprint->Size = System::Drawing::Size(64, 22);
 			this->OpenBlueprint->TabIndex = 12;
@@ -359,22 +337,34 @@ namespace BlueprintConverter {
 			this->OpenInWorkshop_BTN->UseVisualStyleBackColor = true;
 			this->OpenInWorkshop_BTN->Click += gcnew System::EventHandler(this, &MainGUI::OpenInWorkshop_BTN_Click);
 			// 
+			// BPListStatus_LBL
+			// 
+			this->BPListStatus_LBL->Anchor = System::Windows::Forms::AnchorStyles::None;
+			this->BPListStatus_LBL->AutoSize = true;
+			this->BPListStatus_LBL->BackColor = System::Drawing::SystemColors::ButtonHighlight;
+			this->BPListStatus_LBL->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 9.75F, System::Drawing::FontStyle::Regular,
+				System::Drawing::GraphicsUnit::Point, static_cast<System::Byte>(0)));
+			this->BPListStatus_LBL->Location = System::Drawing::Point(142, 200);
+			this->BPListStatus_LBL->Name = L"BPListStatus_LBL";
+			this->BPListStatus_LBL->Size = System::Drawing::Size(70, 16);
+			this->BPListStatus_LBL->TabIndex = 15;
+			this->BPListStatus_LBL->Text = L"NO_TEXT";
+			this->BPListStatus_LBL->Visible = false;
+			// 
 			// MainGUI
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->ClientSize = System::Drawing::Size(709, 351);
+			this->Controls->Add(this->BPListStatus_LBL);
 			this->Controls->Add(this->OpenInWorkshop_BTN);
 			this->Controls->Add(this->OpenOutputFolder_BTN);
 			this->Controls->Add(this->OpenBlueprint);
-			this->Controls->Add(this->Result_LBL);
-			this->Controls->Add(this->label2);
 			this->Controls->Add(this->SearchTB);
 			this->Controls->Add(this->BlueprintImage);
 			this->Controls->Add(this->BlueprintList);
 			this->Controls->Add(this->ActionProgress);
 			this->Controls->Add(this->ActionLabel);
-			this->Controls->Add(this->label1);
 			this->Controls->Add(this->Start_BTN);
 			this->Controls->Add(this->BPPath_TB);
 			this->Controls->Add(this->menuStrip1);
@@ -423,5 +413,12 @@ namespace BlueprintConverter {
 		
 		bool GetCurrentBlueprint(SMBC::Blueprint& bp);
 		System::Void BP_ShowModList_BTN_Click(System::Object^ sender, System::EventArgs^ e);
+		std::vector<SMBC::Blueprint>& GetCurrentBPList();
+		void UpdateBlueprintLabel(bool bp_loading);
+		System::Void BlueprintList_SizeChanged(System::Object^ sender, System::EventArgs^ e);
+
+		void UpdateLabelPosition();
+		System::Void BlueprintList_MouseDown(System::Object^ sender, System::Windows::Forms::MouseEventArgs^ e);
+		System::Void MakeFormCentered(System::Windows::Forms::Form^ form);
 	};
 }

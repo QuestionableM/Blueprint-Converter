@@ -33,6 +33,20 @@ _MainGUI::MainGUI() {
 	this->LoadDatabase();
 	this->LoadBlueprints();
 
+	SendMessage(
+		static_cast<HWND>(this->SearchTB->Handle.ToPointer()),
+		EM_SETCUEBANNER,
+		0,
+		(LPARAM)L"Search Blueprints"
+	);
+
+	SendMessage(
+		static_cast<HWND>(this->BPPath_TB->Handle.ToPointer()),
+		EM_SETCUEBANNER,
+		0,
+		(LPARAM)L"Path to Blueprint"
+	);
+
 #if _DEBUG
 	this->Text += " DEBUG";
 #endif
@@ -97,6 +111,7 @@ System::Void _MainGUI::Start_BTN_Click(System::Object^ sender, System::EventArgs
 
 	if (!_BlueprintName.empty() && !_BlueprintFile.empty()) {
 		SMBC::GeneratorSettings^ _GenSettings = gcnew SMBC::GeneratorSettings(_BlueprintName);
+		this->MakeFormCentered(_GenSettings);
 		_GenSettings->ShowDialog();
 
 		if (_GenSettings->BlueprintName_TB->TextLength > 0 && _GenSettings->Success) {
@@ -126,8 +141,6 @@ System::Void _MainGUI::Start_BTN_Click(System::Object^ sender, System::EventArgs
 	);
 }
 
-delegate void ErrorCodeDelegate(int code);
-
 System::Void _MainGUI::ObjectGenerator_DoWork(System::Object^ sender, System::ComponentModel::DoWorkEventArgs^ e) {
 	System::Array^ _Data = safe_cast<System::Array^>(e->Argument);
 
@@ -146,7 +159,7 @@ System::Void _MainGUI::ObjectGenerator_DoWork(System::Object^ sender, System::Co
 	std::wstring _BlueprintName = msclr::interop::marshal_as<std::wstring>(_BlueprintNameS);
 
 	SMBC::BlueprintConversionData::SetNewStage(SMBC_CONV_READING_JSON, 0);
-	SMBC::LastGenerationOutput = SMBC::BPFunction::ConvertBlueprintToObj(
+	e->Result = SMBC::BPFunction::ConvertBlueprintToObj(
 		_BlueprintPath,
 		_BlueprintName,
 		_SeparationMethod,
@@ -181,9 +194,10 @@ System::Void _MainGUI::ObjectGenerator_RunWorkerCompleted(System::Object^ sender
 	this->GuiUpdater->Stop();
 	this->GuiUpdater_Tick(nullptr, nullptr);
 
-	if (SMBC::LastGenerationOutput > 0) SMBC::GUI::Error(
+	int result_code = safe_cast<int>(e->Result);
+	if (result_code > 0) SMBC::GUI::Error(
 		"Conversion Error",
-		gcnew System::String(SMBC::ConversionErrorTable[SMBC::LastGenerationOutput].c_str())
+		gcnew System::String(SMBC::ConversionErrorTable[result_code].c_str())
 	);
 	else SMBC::GUI::Message(
 		"Success",
@@ -199,17 +213,14 @@ System::Void _MainGUI::ObjectGenerator_RunWorkerCompleted(System::Object^ sender
 }
 
 System::Void _MainGUI::DatabaseLoader_DoWork(System::Object^ sender, System::ComponentModel::DoWorkEventArgs^ e) {
-	SMBC::BlueprintConversionData::SetNewStage(SMBC_CONV_READING_DATABASE, 0);
-	SMBC::ObjectDatabase::ModDB.clear();
-	SMBC::ObjectDatabase::LoadGameDatabase();
-	SMBC::ObjectDatabase::LoadModDatabase();
+	SMBC::ObjectDatabase::ReloadDatabase();
 }
 
 System::Void _MainGUI::DatabaseLoader_RunWorkerCompleted(System::Object^ sender, System::ComponentModel::RunWorkerCompletedEventArgs^ e) {
 	SMBC::BlueprintConversionData::SetNewStage(SMBC_CONV_NONE, 0);
 	this->GuiUpdater->Stop();
 	this->ActionProgress->Value = 0;
-	this->ActionLabel->Text = gcnew System::String((L"Successfully loaded " + std::to_wstring(SMBC::ObjectDatabase::CountLoadedObjects()) + L" objects into the database").c_str());
+	this->ActionLabel->Text = gcnew System::String((L"Successfully loaded " + std::to_wstring(SMBC::ObjectDatabase::CountLoadedObjects()) + L" objects from " + std::to_wstring(SMBC::ObjectDatabase::ModDB.size()) + L" mods").c_str());
 	this->ChangeGUIState(this->LoadedBP, true, true);
 }
 
@@ -217,7 +228,8 @@ System::Void _MainGUI::BlueprintLoader_DoWork(System::Object^ sender, System::Co
 	for (std::wstring& BlueprintFolder : SMBC::Settings::BlueprintFolders) {
 		if (!SMBC::FILE::FileExists(BlueprintFolder)) continue;
 
-		for (auto& Folder : fs::directory_iterator(BlueprintFolder, fs::directory_options::skip_permission_denied)) {
+		fs::directory_iterator BPDirIter(BlueprintFolder, fs::directory_options::skip_permission_denied);
+		for (auto& Folder : BPDirIter) {
 			if (!Folder.is_directory()) continue;
 
 			std::wstring BlueprintJson = (Folder.path().wstring() + L"/description.json");
@@ -256,7 +268,9 @@ System::Void _MainGUI::BlueprintLoader_RunWorkerCompleted(System::Object^ sender
 	for (SMBC::Blueprint& _Blueprint : *this->Blueprints)
 		this->BlueprintList->Items->Add(gcnew System::String(_Blueprint.BlueprintName.c_str()));
 	this->BlueprintList->EndUpdate();
+
 	this->ChangeGUIState(true, this->LoadedDatabase, true);
+	this->UpdateBlueprintLabel(false);
 }
 
 System::Void _MainGUI::BlueprintList_SelectedIndexChanged(System::Object^ sender, System::EventArgs^ e) {
@@ -297,32 +311,33 @@ System::Void _MainGUI::BlueprintList_SelectedIndexChanged(System::Object^ sender
 }
 
 System::Void _MainGUI::SearchTB_TextChanged(System::Object^ sender, System::EventArgs^ e) {
-	if (this->TempBPTable->size() > 0) this->TempBPTable->clear();
-	if (this->Blueprints->size() <= 0) return;
-	this->SelItemIndex = -1;
+	this->BP_OpenOutputDir_BTN->Enabled = false;
+	this->BP_ShowModList_BTN->Enabled = false;
+	this->BlueprintOptions_CMS->Enabled = false;
 
-	if (this->SearchTB->TextLength > 0) {
-		std::wstring SearchText = msclr::interop::marshal_as<std::wstring>(this->SearchTB->Text->ToLowerInvariant());
+	if (this->TempBPTable->size() > 0) this->TempBPTable->clear();
+
+	this->SelItemIndex = -1;
+	if (this->SearchTB->TextLength > 0 && !this->Blueprints->empty()) {
+		System::String^ _LowerSearch = this->SearchTB->Text->ToLowerInvariant();
 		for (SMBC::Blueprint& _Blueprint : *this->Blueprints) {
 			System::String^ _StrCopyS = gcnew System::String(_Blueprint.BlueprintName.c_str());
-			std::wstring _StrCopy = msclr::interop::marshal_as<std::wstring>(_StrCopyS->ToLowerInvariant());
 
-			if (_StrCopy.find(SearchText) != std::wstring::npos)
+			if (_StrCopyS->ToLowerInvariant()->IndexOf(_LowerSearch) != -1)
 				this->TempBPTable->push_back(_Blueprint);
 		}
 	}
 
-	std::vector<SMBC::Blueprint>& _CurBlueprint = (this->TempBPTable->size() > 0) ? *this->TempBPTable : *this->Blueprints;
-	if (_CurBlueprint.size() <= 0) return;
-
-	this->Result_LBL->Text = gcnew System::String((L"Results: " + std::to_wstring(this->TempBPTable->size())).c_str());
-	this->Result_LBL->Visible = (this->SearchTB->TextLength > 0);
-
-	this->BlueprintList->BeginUpdate();
-	this->BlueprintList->Items->Clear();
-	for (SMBC::Blueprint& _Blueprint : _CurBlueprint)
-		this->BlueprintList->Items->Add(gcnew System::String(_Blueprint.BlueprintName.c_str()));
-	this->BlueprintList->EndUpdate();
+	std::vector<SMBC::Blueprint>& _CurList = this->GetCurrentBPList();
+	if (!_CurList.empty() || (_CurList.empty() && this->BlueprintList->Items->Count > 0)) {
+		this->BlueprintList->BeginUpdate();
+		this->BlueprintList->Items->Clear();
+		for (SMBC::Blueprint& _Blueprint : _CurList)
+			this->BlueprintList->Items->Add(gcnew System::String(_Blueprint.BlueprintName.c_str()));
+		this->BlueprintList->EndUpdate();
+	}
+	
+	this->UpdateBlueprintLabel(false);
 }
 
 System::Void _MainGUI::BlueprintList_EnabledChanged(System::Object^ sender, System::EventArgs^ e) {
@@ -331,6 +346,7 @@ System::Void _MainGUI::BlueprintList_EnabledChanged(System::Object^ sender, Syst
 
 System::Void _MainGUI::aboutToolStripMenuItem_Click(System::Object^ sender, System::EventArgs^ e) {
 	SMBC::About^ AboutGUI = gcnew SMBC::About();
+	this->MakeFormCentered(AboutGUI);
 	AboutGUI->ShowDialog();
 	delete AboutGUI;
 }
@@ -350,6 +366,10 @@ System::Void _MainGUI::LoadBlueprints() {
 	this->SearchTB->Clear();
 	this->Blueprints->clear();
 	this->TempBPTable->clear();
+
+	this->UpdateBlueprintLabel(true);
+	this->BPListStatus_LBL->Text = L"Loading Blueprints...";
+
 	this->BlueprintLoader->RunWorkerAsync();
 }
 
@@ -412,6 +432,7 @@ System::Void _MainGUI::settingsToolStripMenuItem1_Click(System::Object^ sender, 
 
 System::Void _MainGUI::OpenOptionsGUI() {
 	SMBC::SettingsGUI^ _Settings = gcnew SMBC::SettingsGUI();
+	this->MakeFormCentered(_Settings);
 	_Settings->ShowDialog();
 
 	if (_Settings->scrap_path_changed) {
@@ -424,6 +445,10 @@ System::Void _MainGUI::OpenOptionsGUI() {
 		this->GuiUpdater->Start();
 		this->LoadDatabase();
 		this->LoadBlueprints();
+	}
+	else {
+		if (_Settings->blueprint_paths_changed) this->LoadBlueprints();
+		if (_Settings->mod_paths_changed) this->LoadDatabase();
 	}
 
 	delete _Settings;
@@ -512,8 +537,9 @@ bool _MainGUI::GetCurrentBlueprint(SMBC::Blueprint& bp) {
 
 	if (_CurIdx <= -1) return false;
 
-	std::vector<SMBC::Blueprint>& _CurrentList = (this->TempBPTable->size() > 0) ? *this->TempBPTable : *this->Blueprints;
-	bp = _CurrentList.at(_CurIdx);
+	std::vector<SMBC::Blueprint>& _CurList = this->GetCurrentBPList();
+	if ((int)_CurList.size() < _CurIdx) return false;
+	bp = _CurList.at(_CurIdx);
 	
 	return true;
 }
@@ -523,8 +549,74 @@ System::Void _MainGUI::BP_ShowModList_BTN_Click(System::Object^ sender, System::
 
 	if (!this->GetCurrentBlueprint(sel_blueprint)) return;
 
+	if (!SMBC::FILE::FileExists(sel_blueprint.BlueprintPath)) {
+		SMBC::GUI::Warning(L"Invalid Blueprint", L"The path to specified blueprint doesn't exist anymore!");
+		return;
+	}
+
 	SMBC::ModList^ ModListGUI = gcnew SMBC::ModList(sel_blueprint);
+	this->MakeFormCentered(ModListGUI);
 	ModListGUI->ShowDialog();
 
 	delete ModListGUI;
+}
+
+std::vector<SMBC::Blueprint>& _MainGUI::GetCurrentBPList() {
+	return (this->SearchTB->TextLength > 0) ? *this->TempBPTable : *this->Blueprints;
+}
+
+void _MainGUI::UpdateBlueprintLabel(bool bp_loading) {
+	std::vector<SMBC::Blueprint>& cur_list = this->GetCurrentBPList();
+	bool _visible = (cur_list.empty() || bp_loading);
+
+	if (this->BPListStatus_LBL->Visible != _visible)
+		this->BPListStatus_LBL->Visible = _visible;
+
+	if (!_visible) return;
+
+	System::String^ old_label = this->BPListStatus_LBL->Text;
+
+	if (this->SearchTB->TextLength > 0)
+		this->BPListStatus_LBL->Text = L"No Results";
+	else
+		this->BPListStatus_LBL->Text = L"No Blueprints";
+
+	if ((this->BPListStatus_LBL->Text != old_label) || _visible)
+		this->UpdateLabelPosition();
+}
+
+System::Void _MainGUI::BlueprintList_SizeChanged(System::Object^ sender, System::EventArgs^ e) {
+	if (!this->BPListStatus_LBL->Visible) return;
+
+	this->UpdateLabelPosition();
+}
+
+void _MainGUI::UpdateLabelPosition() {
+	int p_x = (this->BlueprintList->Location.X + this->BlueprintList->Size.Width) / 2;
+	int p_y = (this->BlueprintList->Location.Y + this->BlueprintList->Size.Height) / 2;
+
+	this->BPListStatus_LBL->Location = System::Drawing::Point(
+		p_x - (this->BPListStatus_LBL->Size.Width / 2),
+		p_y - (this->BPListStatus_LBL->Size.Height / 2)
+	);
+}
+
+System::Void _MainGUI::BlueprintList_MouseDown(
+	System::Object^ sender,
+	System::Windows::Forms::MouseEventArgs^ e
+) {
+	if (e->Button != System::Windows::Forms::MouseButtons::Right) return;
+
+	int idx = this->BlueprintList->IndexFromPoint(e->X, e->Y);
+	if (idx <= -1) return;
+
+	this->BlueprintList->SetSelected(idx, true);
+}
+
+System::Void _MainGUI::MakeFormCentered(System::Windows::Forms::Form^ form) {
+	form->StartPosition = System::Windows::Forms::FormStartPosition::Manual;
+	form->Location = System::Drawing::Point(
+		(this->Location.X + this->Size.Width / 2) - (form->Size.Width / 2),
+		(this->Location.Y + this->Size.Height / 2) - (form->Size.Height / 2)
+	);
 }

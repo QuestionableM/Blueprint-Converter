@@ -20,6 +20,7 @@ namespace SMBC {
 		static std::vector<std::wstring> BlueprintFolders;
 		static std::vector<std::wstring> ModFolders;
 		static std::vector<std::wstring> SMDirDatabase;
+		static std::vector<std::wstring> VanillaLanguagePaths;
 		static std::wstring PathToSM;
 		static bool OpenLinksInSteam;
 

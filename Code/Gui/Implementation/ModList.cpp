@@ -6,6 +6,7 @@
 #include "Lib/ProgramSettings.h"
 #include "Lib/OtherFunc/OtherFunc.h"
 #include "Object Database/Keyword Replacer/KeywordReplacer.h"
+#include "Object Database/ObjectDatabase.h"
 
 #include <msclr/marshal_cppstd.h>
 
@@ -107,10 +108,28 @@ System::Void _ModListGUI::ModSearcher_BW_RunWorkerCompleted(
 	this->ModCount_LBL->Text = gcnew System::String((L"Amount of Mods: " + std::to_wstring(this->usedModList->size())).c_str());
 	this->ObjectCount_LBL->Text = gcnew System::String((L"Amount of Objects: " + std::to_wstring(ProgressCounter)).c_str());
 
+	if (e->Result != nullptr) {
+		int result_idx = safe_cast<int>(e->Result);
+
+		System::String^ ErrorMsg;
+
+		switch (result_idx) {
+		case 1:
+			ErrorMsg = L"Couldn't parse the specified blueprint file!";
+			break;
+		default:
+			ErrorMsg = L"Unknown Error";
+			break;
+		}
+
+		SMBC::GUI::Error(L"Error", ErrorMsg);
+		this->Close();
+		return;
+	}
+
 	this->ModList_LB->BeginUpdate();
 	for (SMBC::ModListData& mod_list : *this->usedModList) {
 		SMBC::ModData& _Mod = SMBC::ObjectDatabase::ModDB[mod_list.mod_index];
-
 		std::wstring _ModName = (mod_list.mod_index > -1) ? _Mod.name : L"UNKNOWN_MOD";
 
 		this->ModList_LB->Items->Add(gcnew System::String((_ModName + L" (" + std::to_wstring(mod_list.used_parts) + L")").c_str()));
@@ -168,6 +187,10 @@ System::Void _ModListGUI::ModList_FormClosing(
 }
 
 System::Void _ModListGUI::ModList_LB_SelectedIndexChanged(System::Object^ sender, System::EventArgs^ e) {
+	int sel_idx = this->ModList_LB->SelectedIndex;
+	if (this->selected_mod == sel_idx) return;
+	this->selected_mod = sel_idx;
+	
 	bool _WorkshopIdExists = false;
 	bool _PathExists = false;
 

@@ -77,6 +77,4 @@ namespace SMBC {
 		L"The specified blueprint doesn't have any blocks and parts to convert!",
 		L"The specified blueprint file doesn't contain any blueprint information!"
 	};
-
-	static int LastGenerationOutput = 0;
 };

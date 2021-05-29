@@ -42,6 +42,7 @@ namespace BlueprintConverter {
 				| System::Windows::Forms::AnchorStyles::Right));
 			this->Description_LBL->BackColor = System::Drawing::SystemColors::Menu;
 			this->Description_LBL->BorderStyle = System::Windows::Forms::BorderStyle::None;
+			this->Description_LBL->Cursor = System::Windows::Forms::Cursors::Default;
 			this->Description_LBL->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 9.75F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(0)));
 			this->Description_LBL->Location = System::Drawing::Point(12, 12);
@@ -54,6 +55,8 @@ namespace BlueprintConverter {
 			this->Description_LBL->TabStop = false;
 			this->Description_LBL->Text = L"This application allows you to convert any blueprint from Scrap Mechanic into a 3"
 				L"D model!";
+			this->Description_LBL->MouseDown += gcnew System::Windows::Forms::MouseEventHandler(this, &About::MouseKillFocus);
+			this->Description_LBL->MouseMove += gcnew System::Windows::Forms::MouseEventHandler(this, &About::MouseKillFocus);
 			// 
 			// BBLink_LBL
 			// 
@@ -99,7 +102,7 @@ namespace BlueprintConverter {
 			this->Version_LBL->Name = L"Version_LBL";
 			this->Version_LBL->Size = System::Drawing::Size(87, 16);
 			this->Version_LBL->TabIndex = 6;
-			this->Version_LBL->Text = L"Version: 1.0.4";
+			this->Version_LBL->Text = L"Version: 1.0.5";
 			this->Version_LBL->TextAlign = System::Drawing::ContentAlignment::MiddleLeft;
 			// 
 			// GitHubRepo_LL
@@ -160,5 +163,6 @@ namespace BlueprintConverter {
 		System::Void JSONLink_LBL_LinkClicked(System::Object^ sender, System::Windows::Forms::LinkLabelLinkClickedEventArgs^ e);
 		System::Void GitHubRepo_LL_LinkClicked(System::Object^ sender, System::Windows::Forms::LinkLabelLinkClickedEventArgs^ e);
 		System::Void Creator_LL_LinkClicked(System::Object^ sender, System::Windows::Forms::LinkLabelLinkClickedEventArgs^ e);
+		System::Void MouseKillFocus(System::Object^ sender, System::Windows::Forms::MouseEventArgs^ e);
 	};
 }

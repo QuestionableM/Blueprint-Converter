@@ -22,6 +22,8 @@
     <ClCompile Include="Code\Lib\ProgramSettings.cpp" />
     <ClCompile Include="Code\Lib\Bit\Bit.cpp" />
     <ClCompile Include="Code\Gui\Implementation\ModList.cpp" />
+    <ClCompile Include="Code\Object Database\Database Loader\DatabaseLoader.cpp" />
+    <ClCompile Include="Code\Object Database\Mod Data\ModData.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Code\Blueprint Converter\BlueprintConverter.h" />
@@ -44,5 +46,8 @@
     <ClInclude Include="Code\Lib\ProgramSettings.h" />
     <ClInclude Include="Code\Lib\Bit\Bit.h" />
     <ClInclude Include="Code\Gui\ModList.h" />
+    <ClInclude Include="Code\Lib\BuildVersion.h" />
+    <ClInclude Include="Code\Object Database\Database Loader\DatabaseLoader.h" />
+    <ClInclude Include="Code\Object Database\Mod Data\ModData.h" />
   </ItemGroup>
 </Project>

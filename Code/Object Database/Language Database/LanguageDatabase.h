@@ -18,6 +18,7 @@ namespace SMBC {
 		std::wstring _Environment;
 
 		LangDB(const std::wstring& environment);
+		LangDB() = default;
 
 		void clear_database();
 

@@ -18,7 +18,9 @@ namespace SMBC {
 #define SETTING_SM_PATH		0x0010
 #define SETTING_STEAM_OPEN	0x0001
 
-SMBC::SettingsGUI::SettingsGUI() {
+typedef SMBC::SettingsGUI _SettingsGUI;
+
+_SettingsGUI::SettingsGUI() {
 	this->InitializeComponent();
 
 	this->OpenInWorkshop_CB->Checked = SMBC::Settings::OpenLinksInSteam;
@@ -31,11 +33,14 @@ SMBC::SettingsGUI::SettingsGUI() {
 	this->OpenInWorkshop_CB->CheckedChanged += gcnew System::EventHandler(this, &SettingsGUI::OpenInWorkshop_CB_CheckedChanged);
 }
 
-SMBC::SettingsGUI::~SettingsGUI() {
+_SettingsGUI::~SettingsGUI() {
 	if (components) delete components;
 }
 
-System::Void SMBC::SettingsGUI::SettingsGUI_FormClosing(System::Object^ sender, System::Windows::Forms::FormClosingEventArgs^ e) {
+System::Void _SettingsGUI::SettingsGUI_FormClosing(
+	System::Object^ sender,
+	System::Windows::Forms::FormClosingEventArgs^ e
+) {
 	if (this->Save_BTN->Enabled) {
 		WForms::DialogResult dr = SMBC::GUI::Question(
 			"Unsaved Changes",
@@ -47,7 +52,7 @@ System::Void SMBC::SettingsGUI::SettingsGUI_FormClosing(System::Object^ sender, 
 	}
 }
 
-System::Void SMBC::SettingsGUI::Save_BTN_Click(System::Object^ sender, System::EventArgs^ e) {
+System::Void _SettingsGUI::Save_BTN_Click(System::Object^ sender, System::EventArgs^ e) {
 	std::wstring _NewPathWstr = msclr::interop::marshal_as<std::wstring>(this->SMPath->Text);
 	if (!SMBC::FILE::FileExists(_NewPathWstr)) {
 		SMBC::GUI::Warning("Save Error", "The specified path to Scrap Mechanic is invalid!");
@@ -70,29 +75,35 @@ System::Void SMBC::SettingsGUI::Save_BTN_Click(System::Object^ sender, System::E
 		this->scrap_path_changed = true;
 	}
 	if (_SSteam) SMBC::Settings::OpenLinksInSteam = this->OpenInWorkshop_CB->Checked;
-	if (_SBlueprint) this->AddPathsToWstrArray(SMBC::Settings::BlueprintFolders, this->BlueprintList);
-	if (_SMods) this->AddPathsToWstrArray(SMBC::Settings::ModFolders, this->ModList);
+	if (_SBlueprint) {
+		this->AddPathsToWstrArray(SMBC::Settings::BlueprintFolders, this->BlueprintList);
+		this->blueprint_paths_changed = true;
+	}
+	if (_SMods) {
+		this->AddPathsToWstrArray(SMBC::Settings::ModFolders, this->ModList);
+		this->mod_paths_changed = true;
+	}
 
 	SMBC::Settings::SaveSettingsFile(_SSMP, _SBlueprint, _SMods, _SSteam);
 	this->BinChanges = 0x0000;
 }
 
-System::Void SMBC::SettingsGUI::ModText_TB_TextChanged(System::Object^ sender, System::EventArgs^ e) {
+System::Void _SettingsGUI::ModText_TB_TextChanged(System::Object^ sender, System::EventArgs^ e) {
 	this->ModAdd_BTN->Enabled = (this->ModText_TB->TextLength > 0);
 }
 
-System::Void SMBC::SettingsGUI::ModAdd_BTN_Click(System::Object^ sender, System::EventArgs^ e) {
+System::Void _SettingsGUI::ModAdd_BTN_Click(System::Object^ sender, System::EventArgs^ e) {
 	if (!this->AddStringToListBox(this->ModText_TB, this->ModList)) return;
 
 	bool _TablesEqual = !this->AreTablesEqual(SMBC::Settings::ModFolders, this->ModList);
 	this->ChangeSetting(SETTING_MOD_LIST, _TablesEqual);
 }
 
-System::Void SMBC::SettingsGUI::ModList_SelectedIndexChanged(System::Object^ sender, System::EventArgs^ e) {
+System::Void _SettingsGUI::ModList_SelectedIndexChanged(System::Object^ sender, System::EventArgs^ e) {
 	this->ModRemSelected->Enabled = (this->ModList->SelectedIndex > -1);
 }
 
-System::Void SMBC::SettingsGUI::ModRemSelected_Click(System::Object^ sender, System::EventArgs^ e) {
+System::Void _SettingsGUI::ModRemSelected_Click(System::Object^ sender, System::EventArgs^ e) {
 	int _CurIdx = this->ModList->SelectedIndex;
 	if (_CurIdx <= -1) return;
 
@@ -102,22 +113,22 @@ System::Void SMBC::SettingsGUI::ModRemSelected_Click(System::Object^ sender, Sys
 	this->ChangeSetting(SETTING_MOD_LIST, _TablesEqual);
 }
 
-System::Void SMBC::SettingsGUI::BlueprintText_TB_TextChanged(System::Object^ sender, System::EventArgs^ e) {
+System::Void _SettingsGUI::BlueprintText_TB_TextChanged(System::Object^ sender, System::EventArgs^ e) {
 	this->BlueprintAdd_BTN->Enabled = (this->BlueprintText_TB->TextLength > 0);
 }
 
-System::Void SMBC::SettingsGUI::BlueprintAdd_BTN_Click(System::Object^ sender, System::EventArgs^ e) {
+System::Void _SettingsGUI::BlueprintAdd_BTN_Click(System::Object^ sender, System::EventArgs^ e) {
 	if (!this->AddStringToListBox(this->BlueprintText_TB, this->BlueprintList)) return;
 
 	bool _TablesEqual = !this->AreTablesEqual(SMBC::Settings::BlueprintFolders, this->BlueprintList);
 	this->ChangeSetting(SETTING_BLUEPRINT, _TablesEqual);
 }
 
-System::Void SMBC::SettingsGUI::BlueprintList_SelectedIndexChanged(System::Object^ sender, System::EventArgs^ e) {
+System::Void _SettingsGUI::BlueprintList_SelectedIndexChanged(System::Object^ sender, System::EventArgs^ e) {
 	this->BlueprintRemSelected->Enabled = (this->BlueprintList->SelectedIndex > -1);
 }
 
-System::Void SMBC::SettingsGUI::BlueprintRemSelected_Click(System::Object^ sender, System::EventArgs^ e) {
+System::Void _SettingsGUI::BlueprintRemSelected_Click(System::Object^ sender, System::EventArgs^ e) {
 	int _CurIdx = this->BlueprintList->SelectedIndex;
 	if (_CurIdx <= -1) return;
 
@@ -127,13 +138,13 @@ System::Void SMBC::SettingsGUI::BlueprintRemSelected_Click(System::Object^ sende
 	this->ChangeSetting(SETTING_BLUEPRINT, _TablesEqual);
 }
 
-System::Void SMBC::SettingsGUI::SMPath_TextChanged(System::Object^ sender, System::EventArgs^ e) {
+System::Void _SettingsGUI::SMPath_TextChanged(System::Object^ sender, System::EventArgs^ e) {
 	std::wstring& _WstrPath = msclr::interop::marshal_as<std::wstring>(this->SMPath->Text);
 	bool IsChanged = (_WstrPath != SMBC::Settings::PathToSM);
 	this->ChangeSetting(SETTING_SM_PATH, IsChanged);
 }
 
-System::Void SMBC::SettingsGUI::AddItemsToListBox(
+System::Void _SettingsGUI::AddItemsToListBox(
 	System::Windows::Forms::ListBox^ list,
 	std::vector<std::wstring>& vec
 ) {
@@ -145,14 +156,14 @@ System::Void SMBC::SettingsGUI::AddItemsToListBox(
 	list->EndUpdate();
 }
 
-System::Void SMBC::SettingsGUI::OpenInWorkshop_CB_CheckedChanged(System::Object^ sender, System::EventArgs^ e) {
+System::Void _SettingsGUI::OpenInWorkshop_CB_CheckedChanged(System::Object^ sender, System::EventArgs^ e) {
 	bool _IsChanged = (this->OpenInWorkshop_CB->Checked != SMBC::Settings::OpenLinksInSteam);
 	this->ChangeSetting(SETTING_STEAM_OPEN, _IsChanged);
 }
 
 #include "Lib/File/FileFunc.h"
 
-bool SMBC::SettingsGUI::AddStringToListBox(
+bool _SettingsGUI::AddStringToListBox(
 	System::Windows::Forms::TextBox^ tb,
 	System::Windows::Forms::ListBox^ lb
 ) {
@@ -194,7 +205,7 @@ bool SMBC::SettingsGUI::AddStringToListBox(
 	return true;
 }
 
-bool SMBC::SettingsGUI::AreTablesEqual(
+bool _SettingsGUI::AreTablesEqual(
 	std::vector<std::wstring>& vec,
 	System::Windows::Forms::ListBox^ lb
 ) {
@@ -209,7 +220,7 @@ bool SMBC::SettingsGUI::AreTablesEqual(
 	return true;
 }
 
-void SMBC::SettingsGUI::AddPathsToWstrArray(std::vector<std::wstring>& vec, System::Windows::Forms::ListBox^ lb) {
+void _SettingsGUI::AddPathsToWstrArray(std::vector<std::wstring>& vec, System::Windows::Forms::ListBox^ lb) {
 	vec.clear();
 
 	vec.reserve(lb->Items->Count);
@@ -220,7 +231,7 @@ void SMBC::SettingsGUI::AddPathsToWstrArray(std::vector<std::wstring>& vec, Syst
 	}
 }
 
-void SMBC::SettingsGUI::ChangeSetting(int mask, bool value) {
+void _SettingsGUI::ChangeSetting(int mask, bool value) {
 	int _NewSetting = this->BinChanges;
 	SMBC::Bit::SetBit<int>(_NewSetting, mask, value);
 
@@ -229,7 +240,7 @@ void SMBC::SettingsGUI::ChangeSetting(int mask, bool value) {
 	this->Save_BTN->Enabled = (this->BinChanges > 0);
 }
 
-System::Void SMBC::SettingsGUI::BrowseSMFolder_BTN_Click(System::Object^ sender, System::EventArgs^ e) {
+System::Void _SettingsGUI::BrowseSMFolder_BTN_Click(System::Object^ sender, System::EventArgs^ e) {
 	std::wstring _SM_Path = SMBC::GUI::OpenFileName(
 		L"Select a Scrap Mechanic Folder",
 		FOS_PICKFOLDERS,
@@ -242,7 +253,7 @@ System::Void SMBC::SettingsGUI::BrowseSMFolder_BTN_Click(System::Object^ sender,
 	this->SMPath->Text = gcnew System::String(_SM_Path.c_str());
 }
 
-System::Void SMBC::SettingsGUI::ModListDirSearch_BTN_Click(System::Object^ sender, System::EventArgs^ e) {
+System::Void _SettingsGUI::ModListDirSearch_BTN_Click(System::Object^ sender, System::EventArgs^ e) {
 	std::wstring _ModDirPath = SMBC::GUI::OpenFileName(
 		L"Select a Directory Containing Mods",
 		FOS_PICKFOLDERS,
@@ -255,7 +266,7 @@ System::Void SMBC::SettingsGUI::ModListDirSearch_BTN_Click(System::Object^ sende
 	this->ModText_TB->Text = gcnew System::String(_ModDirPath.c_str());
 }
 
-System::Void SMBC::SettingsGUI::BPDirSearch_BTN_Click(System::Object^ sender, System::EventArgs^ e) {
+System::Void _SettingsGUI::BPDirSearch_BTN_Click(System::Object^ sender, System::EventArgs^ e) {
 	std::wstring _BPDirPath = SMBC::GUI::OpenFileName(
 		L"Select a Directory Containing Blueprints",
 		FOS_PICKFOLDERS,

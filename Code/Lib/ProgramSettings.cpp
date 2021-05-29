@@ -5,6 +5,8 @@
 #include "Object Database/ObjectDatabase.h"
 
 #include <filesystem>
+#include <msclr/marshal_cppstd.h>
+#include <ShlObj.h>
 
 namespace fs = std::filesystem;
 
@@ -45,6 +47,7 @@ void SMBC::Settings::AddArrayPath(
 std::vector<std::wstring> SMBC::Settings::BlueprintFolders = {};
 std::vector<std::wstring> SMBC::Settings::ModFolders = {};
 std::vector<std::wstring> SMBC::Settings::SMDirDatabase = {};
+std::vector<std::wstring> SMBC::Settings::VanillaLanguagePaths = {};
 std::wstring SMBC::Settings::PathToSM = L"";
 bool SMBC::Settings::OpenLinksInSteam = false;
 
@@ -55,11 +58,11 @@ void SMBC::Settings::LoadSettingsFile() {
 	SMBC::Settings::BlueprintFolders.clear();
 	SMBC::Settings::ModFolders.clear();
 	SMBC::Settings::PathToSM.clear();
+	SMBC::Settings::VanillaLanguagePaths.clear();
 	SMBC::Settings::OpenLinksInSteam = false;
 	SMBC::PathReplacer::ClearAllData();
 	SMBC::Settings::SMDirDatabase.clear();
 	SMBC::ObjectDatabase::ModDB.clear();
-	SMBC::ObjectDatabase::GameTranslations.clear_database();
 
 	auto& _ConfigData = _ConfigFile;
 
@@ -105,12 +108,7 @@ void SMBC::Settings::LoadSettingsFile() {
 			SMBC::PathReplacer::ReadResourceUpgrades(_str);
 		
 		SMBC::Settings::LoadJsonWstrArray(_ProgramSettings, "ScrapObjectDatabase", SMBC::Settings::SMDirDatabase);
-
-		std::vector<std::wstring> _LanguageArray = {};
-		SMBC::Settings::LoadJsonWstrArray(_ProgramSettings, "LanguageDirectories", _LanguageArray);
-
-		for (std::wstring& _str : _LanguageArray)
-			SMBC::ObjectDatabase::LoadLanguageFile(_str);
+		SMBC::Settings::LoadJsonWstrArray(_ProgramSettings, "LanguageDirectories", SMBC::Settings::VanillaLanguagePaths);
 	}
 }
 
@@ -163,8 +161,30 @@ void SMBC::Settings::SaveSettingsFile(
 void SMBC::Settings::AddRegistryPathAndSave() {
 	if (!SMBC::Settings::PathToSM.empty()) return;
 
+	System::String^ app_data_path = System::Environment::GetFolderPath(System::Environment::SpecialFolder::ApplicationData);
+	
+	std::wstring SMLocalData = msclr::interop::marshal_as<std::wstring>(app_data_path);
+	SMLocalData += L"\\Axolot Games\\Scrap Mechanic\\User";
+
+	if (SMBC::FILE::FileExists(SMLocalData)) {
+		fs::directory_iterator DirIter(SMLocalData, fs::directory_options::skip_permission_denied);
+
+		for (auto& dir : DirIter) {
+			if (!dir.is_directory()) continue;
+
+			std::wstring BPPath = dir.path().wstring() + L"\\Blueprints";
+			std::wstring ModPath = dir.path().wstring() + L"\\Mods";
+
+			if (SMBC::FILE::FileExists(BPPath))
+				SMBC::Settings::AddArrayPath(BPPath, SMBC::Settings::BlueprintFolders);
+
+			if (SMBC::FILE::FileExists(ModPath))
+				SMBC::Settings::AddArrayPath(ModPath, SMBC::Settings::ModFolders);
+		}
+	}
+
 	std::wstring _Path = SMBC::Other::ReadRegistryKey(L"SOFTWARE\\Valve\\Steam", L"SteamPath");
-	if (_Path.empty())
+	if (_Path.empty() || !SMBC::FILE::FileExists(_Path))
 		_Path = SMBC::Other::ReadRegistryKey(L"SOFTWARE\\WOW6432Node\\Valve\\Steam", L"SteamPath");
 
 	if (_Path.empty() || !SMBC::FILE::FileExists(_Path)) return;

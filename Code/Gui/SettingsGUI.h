@@ -17,6 +17,9 @@ namespace BlueprintConverter {
 		int BinChanges = 0x0000;
 		bool scrap_path_changed = false;
 
+		bool mod_paths_changed = false;
+		bool blueprint_paths_changed = false;
+
 		SettingsGUI(void);
 	protected:
 		~SettingsGUI();

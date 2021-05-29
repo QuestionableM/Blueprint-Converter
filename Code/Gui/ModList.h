@@ -19,6 +19,7 @@ namespace BlueprintConverter {
 	public ref class ModList : public System::Windows::Forms::Form
 	{
 	public:
+		int selected_mod = -1;
 		ModList(const SMBC::Blueprint& blueprint);
 		std::vector<ModListData>* usedModList = nullptr;
 

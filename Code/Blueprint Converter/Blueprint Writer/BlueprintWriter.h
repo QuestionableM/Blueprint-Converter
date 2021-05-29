@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <glm.hpp>
 #include "Blueprint Converter/BlueprintConverter.h"
 #include "Blueprint Converter/Cache Manager/CacheManager.h"
 
@@ -40,25 +41,24 @@ namespace SMBC {
 			long long Vertex = 0ll;
 			long long Normal = 0ll;
 			long long Texture = 0ll;
+
+			glm::vec3 max_val = { 0.0f, 0.0f, 0.0f };
+			glm::vec3 min_val = { 0.0f, 0.0f, 0.0f };
+
+			void UpdateValues(const glm::vec3& val);
 		};
 
-		void LoadBlueprintBlocks(
-			std::vector<SMBC::Model>& Models,
-			SMBC::Model& NewModel,
-			SMBC::SubMeshData& NewSubMeshData,
-			OffsetData& o_data,
-			uint32_t& collection_idx
-		);
-		void LoadBlueprintParts(
-			std::vector<SMBC::Model>& Models,
-			SMBC::Model& NewModel,
-			SMBC::SubMeshData& NewSubMeshData,
-			OffsetData& o_data,
-			uint32_t& collection_idx
-		);
+		std::vector<SMBC::Model> Models;
+		std::vector<SMBC::ObjectCollection> Collections;
+		SMBC::Model NewModel;
+		SMBC::SubMeshData NewSubMeshData;
+		OffsetData offsetData;
+
+		void LoadBlueprintBlocks(SMBC::ObjectCollection& collection);
+		void LoadBlueprintParts(SMBC::ObjectCollection& collection);
 
 	public:
-		bool WriteChunksToFile(std::vector<SMBC::Model>& models);
+		bool WriteChunksToFile(std::vector<SMBC::Model>& models, glm::vec3& posOffset);
 		int ConvertAndWrite();
 	};
 }
