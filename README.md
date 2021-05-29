@@ -8,13 +8,13 @@ If the program won't be able to find Scrap Mechanic, you can specify the path by
 
 # Blender Plugin
 - How to Install
-    1. Download the Blueprint Converter plugin for Blender: `https://github.com/QuestionableM/Blueprint-Converter/blob/main/Blender%20Plugin.zip`.
-    2. In `Edit -> Preferences -> Add-ons` click on `Install...` button and select the .zip file you've just downloaded.
+    - Download the Blueprint Converter plugin for Blender: `https://github.com/QuestionableM/Blueprint-Converter/blob/main/Blender%20Plugin.zip`.
+    - In `Edit -> Preferences -> Add-ons` click on `Install...` button and select the .zip file you've just downloaded.
 - How to Use
-    1. In order for that extension for Work, in Blueprint Converter you have to select `Apply Textures` and `Group Materials by Color`.
-    2. After importing the blueprint, press N to open the side panel and you should see `Blueprint Converter` tab in there.
-    3. Click on `Assign Materials` and enable Viewport Shading to View the colored textures.
-    4. See the result:
+    - In order for that extension for Work, in Blueprint Converter you have to select `Apply Textures` and `Group Materials by Color`.
+    - After importing the blueprint, press N to open the side panel and you should see `Blueprint Converter` tab in there.
+    - Click on `Assign Materials` and enable Viewport Shading to View the colored textures.
+    - See the result:
 
 # Errors and Issues
 You can always report issues here:
