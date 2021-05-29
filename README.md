@@ -21,5 +21,4 @@ If the program won't be able to find Scrap Mechanic, you can specify the path by
     ![Guide 2](https://github.com/QuestionableM/Blueprint-Converter/blob/main/Images/BlenderExtension_Guide2.png)
 
 # Errors and Issues
-You can always report issues here:
-`https://github.com/QuestionableM/Blueprint-Converter/issues`
+You can always report issues [here](https://github.com/QuestionableM/Blueprint-Converter/issues).
