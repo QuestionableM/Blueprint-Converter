@@ -7,6 +7,8 @@
 #include "Lib/OtherFunc/OtherFunc.h"
 #include "Lib/File/FileFunc.h"
 
+#include <gtc/matrix_transform.hpp>
+
 namespace fs = std::filesystem;
 
 bool SMBC::ObjectCollection::is_empty() {
@@ -38,9 +40,11 @@ bool SMBC::ConvertedModel::HasStuffToConvert() {
 	for (SMBC::ObjectCollection& _CurCol : this->ObjCollection) {
 		_StuffCounter += (int64_t)_CurCol.PartList.size();
 		_StuffCounter += (int64_t)_CurCol.BlockList.size();
+
+		if (_StuffCounter > 0) return true;
 	}
 
-	return (_StuffCounter > 0);
+	return false;
 }
 
 SMBC::ConvertedModel::ConvertedModel(SMBC::ConvertedModel::ConvertedModelData& cm_data) {
@@ -53,13 +57,8 @@ SMBC::ConvertedModel::ConvertedModel(SMBC::ConvertedModel::ConvertedModelData& c
 }
 
 void SMBC::ConvertedModel::OffsetData::UpdateValues(const glm::vec3& val) {
-	if (this->min_val.x > val.x) this->min_val.x = val.x;
-	if (this->min_val.y > val.y) this->min_val.y = val.y;
-	if (this->min_val.z > val.z) this->min_val.z = val.z;
-
-	if (this->max_val.x < val.x) this->max_val.x = val.x;
-	if (this->max_val.y < val.y) this->max_val.y = val.y;
-	if (this->max_val.z < val.z) this->max_val.z = val.z;
+	this->pt_sum += val;
+	this->point_count++;
 }
 
 void SMBC::ConvertedModel::LoadBlueprintBlocks(SMBC::ObjectCollection& collection) {
@@ -281,11 +280,15 @@ bool SMBC::ConvertedModel::WriteChunksToFile(
 			_writer.write(_c_name.c_str(), _c_name.length());
 		}
 
+		glm::mat4 _Transform(1.0f);
+		_Transform = glm::rotate(_Transform, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+
 		SMBC::BlueprintConversionData::SetNewStage(SMBC_CONV_WRITING_VERTICES, (uint32_t)DChunk.vertices.size());
 		for (glm::vec3& _vert : DChunk.vertices) {
-			std::string _v_str = "v ";
+			glm::vec3 _vert_pos = glm::vec3(glm::vec4(_vert - posOffset, 1.0f) * _Transform);
 
-			_v_str.append(SMBC::Other::VecToString(_vert - posOffset));
+			std::string _v_str = "v ";
+			_v_str.append(SMBC::Other::VecToString(_vert_pos));
 			_v_str.append("\n");
 
 			_writer.write(_v_str.c_str(), _v_str.length());
@@ -310,9 +313,10 @@ bool SMBC::ConvertedModel::WriteChunksToFile(
 		if (conv_data.export_normals) {
 			SMBC::BlueprintConversionData::SetNewStage(SMBC_CONV_WRITING_NORMALS, (uint32_t)DChunk.normals.size());
 			for (glm::vec3& _norm : DChunk.normals) {
-				std::string _n_str = "vn ";
+				glm::vec3 _norm_pos = glm::vec3(glm::vec4(_norm, 1.0f) * _Transform);
 
-				_n_str.append(SMBC::Other::VecToString(_norm));
+				std::string _n_str = "vn ";
+				_n_str.append(SMBC::Other::VecToString(_norm_pos));
 				_n_str.append("\n");
 
 				_writer.write(_n_str.c_str(), _n_str.length());
@@ -406,7 +410,7 @@ int SMBC::ConvertedModel::ConvertAndWrite() {
 		Models.push_back(NewModel);
 	}
 
-	glm::vec3 _PosOffset = (offsetData.min_val + offsetData.max_val) / 2.0f;
+	glm::vec3 _PosOffset = offsetData.pt_sum / (float)offsetData.point_count;
 	if (!this->WriteChunksToFile(Models, _PosOffset))
 		return SMBC_ERROR_WRITE;
 

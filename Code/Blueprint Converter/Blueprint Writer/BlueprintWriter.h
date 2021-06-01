@@ -42,8 +42,8 @@ namespace SMBC {
 			long long Normal = 0ll;
 			long long Texture = 0ll;
 
-			glm::vec3 max_val = { 0.0f, 0.0f, 0.0f };
-			glm::vec3 min_val = { 0.0f, 0.0f, 0.0f };
+			glm::vec3 pt_sum = { 0.0f, 0.0f, 0.0f };
+			long long point_count = 0;
 
 			void UpdateValues(const glm::vec3& val);
 		};

@@ -186,19 +186,24 @@ namespace BlueprintConverter {
 			});
 			this->BlueprintOptions_CMS->Name = L"BlueprintOptions_CMS";
 			this->BlueprintOptions_CMS->RenderMode = System::Windows::Forms::ToolStripRenderMode::Professional;
-			this->BlueprintOptions_CMS->Size = System::Drawing::Size(206, 70);
+			this->BlueprintOptions_CMS->ShowImageMargin = false;
+			this->BlueprintOptions_CMS->Size = System::Drawing::Size(181, 48);
 			// 
 			// BP_ShowModList_BTN
 			// 
+			this->BP_ShowModList_BTN->DisplayStyle = System::Windows::Forms::ToolStripItemDisplayStyle::Text;
+			this->BP_ShowModList_BTN->Enabled = false;
 			this->BP_ShowModList_BTN->Name = L"BP_ShowModList_BTN";
-			this->BP_ShowModList_BTN->Size = System::Drawing::Size(205, 22);
+			this->BP_ShowModList_BTN->Size = System::Drawing::Size(180, 22);
 			this->BP_ShowModList_BTN->Text = L"Show Mod List";
 			this->BP_ShowModList_BTN->Click += gcnew System::EventHandler(this, &MainGUI::BP_ShowModList_BTN_Click);
 			// 
 			// BP_OpenOutputDir_BTN
 			// 
+			this->BP_OpenOutputDir_BTN->DisplayStyle = System::Windows::Forms::ToolStripItemDisplayStyle::Text;
+			this->BP_OpenOutputDir_BTN->Enabled = false;
 			this->BP_OpenOutputDir_BTN->Name = L"BP_OpenOutputDir_BTN";
-			this->BP_OpenOutputDir_BTN->Size = System::Drawing::Size(205, 22);
+			this->BP_OpenOutputDir_BTN->Size = System::Drawing::Size(180, 22);
 			this->BP_OpenOutputDir_BTN->Text = L"Open Blueprint Directory";
 			this->BP_OpenOutputDir_BTN->Click += gcnew System::EventHandler(this, &MainGUI::BP_OpenOutputDir_BTN_Click);
 			// 
