@@ -106,7 +106,7 @@ void SMBC::DatabaseLoader::GetRenderableData(
 				if (!_TextureList.is_array()) continue;
 
 				auto& idx_obj = SubMesh["idx"];
-				uint32_t _mesh_idx = (idx_obj.is_string() ? idx_obj.get<int>() : _idx);
+				uint32_t _mesh_idx = (idx_obj.is_number() ? idx_obj.get<int>() : _idx);
 
 				std::wstring _DifTex, _AsgTex, _NorTex;
 				SMBC::DatabaseLoader::GetTextureArray(_TextureList, _DifTex, _AsgTex, _NorTex);
