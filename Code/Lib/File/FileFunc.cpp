@@ -37,3 +37,17 @@ bool _File::IsEquivalent(const std::wstring& p1, const std::wstring& p2) {
 
 	return false;
 }
+
+bool _File::SafeCreateDir(const std::wstring& path) {
+	try {
+		fs::directory_entry dir_entr(path);
+		if (dir_entr.exists() && !dir_entr.is_directory())
+			fs::remove(dir_entr.path());
+
+		fs::create_directory(path);
+		return true;
+	}
+	catch (...) {}
+
+	return false;
+}

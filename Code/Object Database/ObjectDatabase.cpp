@@ -12,49 +12,57 @@
 #include "Lib/ProgramSettings.h"
 
 namespace fs = std::filesystem;
+typedef SMBC::ObjectDatabase _ObjectDatabase;
 
-std::vector<SMBC::ModData> SMBC::ObjectDatabase::ModDB = {};
+std::vector<SMBC::ModData*> SMBC::ObjectDatabase::ModDB = {};
 
-bool SMBC::ObjectDatabase::GetPart(const std::wstring& uuid, SMBC::ObjectData& object) {
-	for (SMBC::ModData& mod : SMBC::ObjectDatabase::ModDB) {
-		for (SMBC::ObjectData& part : mod.ObjectDB) {
-			if (part._obj_uuid != uuid) continue;
+SMBC::ObjectData* _ObjectDatabase::GetPart(const std::wstring& uuid) {
+	for (SMBC::ModData*& mod : _ObjectDatabase::ModDB) {
+		for (SMBC::ObjectData*& part : mod->ObjectDB) {
+			if (part->_obj_uuid != uuid) continue;
 
-			object = part;
-			return true;
+			return part;
 		}
 	}
 
-	return false;
+	return nullptr;
 }
 
-bool SMBC::ObjectDatabase::GetBlock(const std::wstring& uuid, SMBC::BlockData& block) {
-	for (SMBC::ModData& mod : SMBC::ObjectDatabase::ModDB) {
-		for (SMBC::BlockData& blk : mod.BlockDB) {
-			if (blk._obj_uuid != uuid) continue;
+SMBC::BlockData* _ObjectDatabase::GetBlock(const std::wstring& uuid) {
+	for (SMBC::ModData*& mod : _ObjectDatabase::ModDB) {
+		for (SMBC::BlockData*& block : mod->BlockDB) {
+			if (block->_obj_uuid != uuid) continue;
 
-			block = blk;
-			return true;
+			return block;
 		}
 	}
 
-	return false;
+	return nullptr;
 }
 
-long long SMBC::ObjectDatabase::CountLoadedObjects() {
+long long _ObjectDatabase::CountLoadedObjects() {
 	long long output = 0;
 
-	for (SMBC::ModData& mod : SMBC::ObjectDatabase::ModDB) {
-		output += (long long)mod.ObjectDB.size();
-		output += (long long)mod.BlockDB.size();
+	for (SMBC::ModData*& mod : _ObjectDatabase::ModDB) {
+		output += (long long)mod->ObjectDB.size();
+		output += (long long)mod->BlockDB.size();
 	}
 
 	return output;
 }
 
-void SMBC::ObjectDatabase::ReloadDatabase() {
-	SMBC::BlueprintConversionData::SetNewStage(SMBC_CONV_READING_DATABASE, 0);
-	SMBC::ObjectDatabase::ModDB.clear();
+void _ObjectDatabase::ClearDatabase() {
+	for (SMBC::ModData*& mod_ptr : _ObjectDatabase::ModDB)
+		delete mod_ptr;
+
+	_ObjectDatabase::ModDB.clear();
+}
+
+void _ObjectDatabase::ReloadDatabase() {
+	SMBC::BPConvData::SetNewStage(SMBC::Stat_ReadingDatabase);
+
+	_ObjectDatabase::ClearDatabase();
+
 	SMBC::DatabaseLoader::LoadGameDatabase();
 	SMBC::DatabaseLoader::LoadModDatabase();
 }

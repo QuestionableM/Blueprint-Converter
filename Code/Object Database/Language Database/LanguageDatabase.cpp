@@ -42,8 +42,8 @@ void SMBC::LangDB::LoadLanguageFile(const std::wstring& path) {
 }
 
 bool SMBC::LangDB::UuidExists(const std::wstring& uuid) {
-	for (unsigned int a = 0; a < this->_translations.size(); a++)
-		if (this->_translations[a].uuid == uuid) return true;
+	for (SMBC::LangTrans& transl : this->_translations)
+		if (transl.uuid == uuid) return true;
 
 	return false;
 }

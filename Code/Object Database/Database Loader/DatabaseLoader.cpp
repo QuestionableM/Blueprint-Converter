@@ -148,14 +148,14 @@ void SMBC::DatabaseLoader::GetRenderableData(
 }
 
 bool SMBC::DatabaseLoader::ModUuidExists(const std::wstring& uuid) {
-	for (SMBC::ModData& mod : SMBC::ObjectDatabase::ModDB)
-		if (mod.uuid == uuid) return true;
+	for (SMBC::ModData*& mod : SMBC::ObjectDatabase::ModDB)
+		if (mod->uuid == uuid) return true;
 
 	return false;
 }
 
 void SMBC::DatabaseLoader::LoadObjectFile(
-	SMBC::ModData& mod,
+	SMBC::ModData* mod,
 	const std::wstring& path,
 	SMBC::LangDB& translations
 ) {
@@ -165,12 +165,13 @@ void SMBC::DatabaseLoader::LoadObjectFile(
 	if (_ObjectFile.contains("blockList") && _ObjectFile.at("blockList").is_array()) {
 		auto& _BlockList = _ObjectFile.at("blockList");
 
-		SMBC::BlueprintConversionData::ProgressBarMax += (int32_t)_BlockList.size();
+		SMBC::BPConvData::ProgressBarMax += (int32_t)_BlockList.size();
 		for (auto& _Block : _BlockList) {
 			auto& _Uuid = _Block["uuid"];
 
 			if (!_Uuid.is_string()) continue;
 			std::wstring _WstrUuid = SMBC::Other::Utf8ToWide(_Uuid.get<std::string>());
+			if (mod->UuidExists(_WstrUuid)) continue;
 
 			std::wstring _BlockName = translations.GetTranslationString(_WstrUuid);
 			_BlockName += (L" (" + translations._Environment + L": " + _WstrUuid + L")");
@@ -190,21 +191,22 @@ void SMBC::DatabaseLoader::LoadObjectFile(
 			int _TilingValue = (_Tiling.is_number() ? _Tiling.get<int>() : 4);
 			if (_TilingValue > 16 || _TilingValue <= 0) _TilingValue = 4;
 
-			SMBC::BlockData _BlockData(_TexList, _WstrUuid, _BlockName, _TilingValue);
+			SMBC::BlockData* _BlockData = new SMBC::BlockData(_TexList, _WstrUuid, _BlockName, _TilingValue);
+			mod->AddBlockToDatabase(_BlockData);
 
-			mod.AddBlockToDatabase(_BlockData);
-			SMBC::BlueprintConversionData::ProgressBarValue++;
+			SMBC::BPConvData::ProgressBarValue++;
 		}
 	}
 
 	if (_ObjectFile.contains("partList") && _ObjectFile.at("partList").is_array()) {
 		auto& _PartList = _ObjectFile.at("partList");
 
-		SMBC::BlueprintConversionData::ProgressBarMax += (int32_t)_PartList.size();
+		SMBC::BPConvData::ProgressBarMax += (int32_t)_PartList.size();
 		for (auto& _Part : _PartList) {
 			auto& _Uuid = _Part["uuid"];
 			if (!_Uuid.is_string()) continue;
 			std::wstring _WstrUuid = SMBC::Other::Utf8ToWide(_Uuid.get<std::string>());
+			if (mod->UuidExists(_WstrUuid)) continue;
 
 			std::wstring _ObjName = translations.GetTranslationString(_WstrUuid);
 			_ObjName += (L" (" + translations._Environment + L": " + _WstrUuid + L")");
@@ -217,12 +219,12 @@ void SMBC::DatabaseLoader::LoadObjectFile(
 				SMBC::Texture::Texture _TextureList(SMBC::Texture::TextureType::None);
 
 				SMBC::DatabaseLoader::GetRenderableData(_Renderable, _TextureList, _Mesh);
-
 				if (_Mesh.empty() || _TextureList.TexType == SMBC::Texture::TextureType::None) continue;
 
-				SMBC::ObjectData _ObjData(_WstrUuid, _Mesh, _ObjName, _TextureList, _ObjectBounds);
-				mod.AddPartToDatabase(_ObjData);
-				SMBC::BlueprintConversionData::ProgressBarValue++;
+				SMBC::ObjectData* _ObjData = new SMBC::ObjectData(_WstrUuid, _Mesh, _ObjName, _TextureList, _ObjectBounds);
+				mod->AddPartToDatabase(_ObjData);
+
+				SMBC::BPConvData::ProgressBarValue++;
 			}
 			else if (_Renderable.is_string()) {
 				std::wstring _RenderableWstr = SMBC::Other::Utf8ToWide(_Renderable.get<std::string>());
@@ -235,19 +237,19 @@ void SMBC::DatabaseLoader::LoadObjectFile(
 				SMBC::Texture::Texture _TextureList(SMBC::Texture::TextureType::None);
 
 				SMBC::DatabaseLoader::GetRenderableData(_RendFile, _TextureList, _Mesh);
-
 				if (_Mesh.empty() || _TextureList.TexType == SMBC::Texture::TextureType::None) continue;
 
-				SMBC::ObjectData _ObjData(_WstrUuid, _Mesh, _ObjName, _TextureList, _ObjectBounds);
-				mod.AddPartToDatabase(_ObjData);
-				SMBC::BlueprintConversionData::ProgressBarValue++;
+				SMBC::ObjectData* _ObjData = new SMBC::ObjectData(_WstrUuid, _Mesh, _ObjName, _TextureList, _ObjectBounds);
+				mod->AddPartToDatabase(_ObjData);
+
+				SMBC::BPConvData::ProgressBarValue++;
 			}
 		}
 	}
 }
 
 void SMBC::DatabaseLoader::LoadGameDatabase() {
-	SMBC::ModData _VanillaParts(
+	SMBC::ModData* _VanillaParts = new SMBC::ModData(
 		L"00000000-0000-0000-0000-000000000000",
 		L"VANILLA GAME",
 		L"",
@@ -255,7 +257,7 @@ void SMBC::DatabaseLoader::LoadGameDatabase() {
 	);
 
 	for (std::wstring& path : SMBC::Settings::VanillaLanguagePaths)
-		_VanillaParts.LoadTranslations(path);
+		_VanillaParts->LoadTranslations(path);
 
 	for (std::wstring& data_path : SMBC::Settings::SMDirDatabase) {
 		if (!SMBC::FILE::FileExists(data_path)) continue;
@@ -266,11 +268,11 @@ void SMBC::DatabaseLoader::LoadGameDatabase() {
 			for (auto& dir : _DifIter) {
 				if (!dir.is_regular_file()) continue;
 
-				SMBC::DatabaseLoader::LoadObjectFile(_VanillaParts, dir.path().wstring(), _VanillaParts.LanguageDB);
+				SMBC::DatabaseLoader::LoadObjectFile(_VanillaParts, dir.path().wstring(), _VanillaParts->LanguageDB);
 			}
 		}
 		else if (CurPath.is_regular_file())
-			SMBC::DatabaseLoader::LoadObjectFile(_VanillaParts, CurPath.path().wstring(), _VanillaParts.LanguageDB);
+			SMBC::DatabaseLoader::LoadObjectFile(_VanillaParts, CurPath.path().wstring(), _VanillaParts->LanguageDB);
 	}
 
 	SMBC::ObjectDatabase::ModDB.push_back(_VanillaParts);
@@ -307,15 +309,15 @@ void SMBC::DatabaseLoader::LoadModDatabase() {
 					_FileId = _FileIdJson.get<long long>();
 			}
 
-			SMBC::ModData NewMod(
+			SMBC::ModData* NewMod = new SMBC::ModData(
 				_ModUuid,
 				_ModName,
 				(_FileId > 0) ? std::to_wstring(_FileId) : L"",
 				dir.path().wstring()
 			);
 
-			NewMod.LoadTranslations();
-			NewMod.LoadObjects();
+			NewMod->LoadTranslations();
+			NewMod->LoadObjects();
 
 			SMBC::ObjectDatabase::ModDB.push_back(NewMod);
 		}

@@ -16,16 +16,15 @@ namespace BlueprintConverter {
 	public:
 		bool LoadedBP = false;
 		bool LoadedDatabase = false;
+		bool isCancelled = false;
 		int SelItemIndex = -1;
 		std::vector<SMBC::Blueprint>* Blueprints = nullptr;
-	private: System::Windows::Forms::ToolStripSeparator^ toolStripSeparator1;
 	public:
 		std::vector<SMBC::Blueprint>* TempBPTable = nullptr;
 		MainGUI(void);
 	protected:
 		~MainGUI();
 	private:
-
 		System::Windows::Forms::MenuStrip^ menuStrip1;
 		System::Windows::Forms::ToolStripMenuItem^ aboutToolStripMenuItem;
 		System::Windows::Forms::ToolStripMenuItem^ settingsToolStripMenuItem;
@@ -43,6 +42,7 @@ namespace BlueprintConverter {
 		System::Windows::Forms::ToolStripMenuItem^ BP_ShowModList_BTN;
 		System::Windows::Forms::ToolStripMenuItem^ BP_OpenOutputDir_BTN;
 		System::Windows::Forms::Label^ BPListStatus_LBL;
+		System::Windows::Forms::ToolStripSeparator^ toolStripSeparator1;
 
 		System::Windows::Forms::Timer^ GuiUpdater;
 		System::ComponentModel::BackgroundWorker^ ObjectGenerator;
@@ -128,6 +128,7 @@ namespace BlueprintConverter {
 			// 
 			// ObjectGenerator
 			// 
+			this->ObjectGenerator->WorkerSupportsCancellation = true;
 			this->ObjectGenerator->DoWork += gcnew System::ComponentModel::DoWorkEventHandler(this, &MainGUI::ObjectGenerator_DoWork);
 			this->ObjectGenerator->RunWorkerCompleted += gcnew System::ComponentModel::RunWorkerCompletedEventHandler(this, &MainGUI::ObjectGenerator_RunWorkerCompleted);
 			// 

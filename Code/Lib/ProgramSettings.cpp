@@ -121,7 +121,7 @@ void SMBC::Settings::SaveSettingsFile(
 	nlohmann::json _JsonOutput;
 	SMBC::JSON::OpenParseJson(SMBC::Settings::ConfigPath, _JsonOutput);
 
-	std::filesystem::create_directory(L"./Resources");
+	SMBC::FILE::SafeCreateDir(L"./Resources");
 	std::ofstream _ConfigJson(SMBC::Settings::ConfigPath);
 
 	if (!_ConfigJson.is_open()) return;

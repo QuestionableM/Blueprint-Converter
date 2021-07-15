@@ -2,56 +2,69 @@
 
 #include <glm.hpp>
 #include "Object Database/Texture Database/TextureDatabase.h"
+#include "Object Database/Mod Data/ModData.h"
 
 namespace SMBC {
-	struct SM_Part {
-		SMBC::Texture::Texture tex;
-		std::wstring object_path;
-		std::wstring name;
+	struct SubMeshData {
+		std::wstring MaterialName;
+		int SubMeshIndex;
+
+		std::vector<std::vector<std::vector<long long>>> DataIdx;
+
+		bool is_empty();
+	};
+
+	struct Model {
+		std::vector<glm::vec3> vertices;
+		std::vector<glm::vec3> normals;
+		std::vector<glm::vec2> uvs;
+		std::vector<SMBC::SubMeshData*> subMeshData;
+
+		std::wstring meshPath;
+
+		bool is_empty();
+
+		~Model();
+	};
+
+	struct CachedBlock {
+		SMBC::BlockData* blkPtr = nullptr;
 		std::wstring uuid;
+		std::wstring color;
+	};
+
+	struct CachedPart {
+		std::wstring uuid;
+		std::wstring name;
+		std::wstring color;
+		std::wstring meshPath;
+		SMBC::Model* modelPtr = nullptr;
+
+		SMBC::Texture::Texture texPaths;
+	};
+
+	struct SM_Part {
+		SMBC::ObjectData* objPtr = nullptr;
+		SMBC::Model* modelPtr = nullptr;
+
 		std::wstring color;
 		glm::vec3 position;
 		glm::vec3 bounds;
 		int xAxis;
 		int zAxis;
 		int _index;
-
-		SM_Part(
-			const std::wstring& path,
-			const std::wstring& name,
-			SMBC::Texture::Texture& tex,
-			const glm::vec3& pos,
-			const glm::vec3& bounds,
-			const int& _XAxis,
-			const int& _ZAxis,
-			const std::wstring& uuid,
-			const std::wstring& color
-		);
 	};
 
 	struct SM_Block {
+		SMBC::BlockData* blkPtr = nullptr;
+
 		glm::vec3 position;
 		glm::vec3 bounds;
 		int xAxis;
 		int zAxis;
-		std::wstring name;
-		SMBC::Texture::TextureList tex_list;
 		std::wstring uuid;
-		int tiling;
 		std::wstring color;
 		long _index;
-
-		SM_Block(
-			const glm::vec3& pos,
-			const glm::vec3& bounds,
-			const int& _XAxis,
-			const int& _ZAxis,
-			const std::wstring& name,
-			const SMBC::Texture::TextureList& tex_list,
-			const std::wstring& uuid,
-			const int& tiling,
-			const std::wstring& color
-		);
 	};
 
 	struct CubeMesh {
@@ -111,6 +124,5 @@ namespace SMBC {
 
 	public:
 		CubeMesh(const glm::vec3& bounds, const glm::vec3& pos, const int& tiling);
-		~CubeMesh();
 	};
 }

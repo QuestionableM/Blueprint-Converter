@@ -4,33 +4,36 @@
 #include <string>
 #include <Windows.h>
 
-#define SMBC_CONV_NONE				-1
-#define SMBC_CONV_READING_JSON		0
-#define SMBC_CONV_GETTING_OBJECTS	1
-#define SMBC_CONV_GETTING_JOINTS	2
-#define SMBC_CONV_READING_BLOCKS	3
-#define SMBC_CONV_READING_PARTS		4
-#define SMBC_CONV_WRITING_VERTICES	5
-#define SMBC_CONV_WRITING_FACES		6
-#define SMBC_CONV_READING_DATABASE	7
-#define SMBC_CONV_WRITING_UVS		8
-#define SMBC_CONV_WRITING_NORMALS	9
-#define SMBC_CONV_WRITING_OBJECTS	10
-
-#define SMBC_ERROR_NONE			0
-#define SMBC_ERROR_FILE			1
-#define SMBC_ERROR_WRITE		2
-#define SMBC_ERROR_NO_BLOCKS	3
-#define SMBC_ERROR_NO_BP_DATA	4
-
 namespace SMBC {
-	class BlueprintConversionData {
+	enum : long {
+		Stat_None =				-1,
+		Stat_ReadingJson =		0,
+		Stat_GettingObjects =	1,
+		Stat_GettingJoints =	2,
+		Stat_ReadingObjects =	3,
+		Stat_ReadingDatabase =	4,
+		Stat_WritingObjects =	5
+	};
+
+	enum : int {
+		Err_None =			0,
+		Err_File =			1,
+		Err_Write =			2,
+		Err_NoBlocks =		3,
+		Err_NoBpData =		4,
+		Err_MainDirCreate = 5,
+		Err_BPDirCreate =	6,
+		Err_InvalidPath =	7
+	};
+
+	//Blueprint Conversion Data
+	class BPConvData {
 	public:
 		static long Stage;
 		static long ProgressBarMax;
 		static long ProgressBarValue;
 
-		static void SetNewStage(const long& Stage, const long& MaxValue);
+		static void SetNewStage(const long& Stage, const long& MaxValue = 0);
 	};
 
 	class Blueprint {
@@ -60,14 +63,9 @@ namespace SMBC {
 		L"Reading Blueprint JSON...",
 		L"Getting Blueprint Blocks and Parts... ",
 		L"Getting Blueprint Joints... ",
-		L"Reading Blueprint Blocks... ",
-		L"Reading Blueprint Parts... ",
-		L"Writing Vertices into the File... ",
-		L"Writing Face Indexes into the File... ",
+		L"Reading Blocks and Parts... ",
 		L"Reading Object Database... ",
-		L"Writing Texture Coordinates into the File... ",
-		L"Writing Normals into the file... ",
-		L"Writing Objects into the file... "
+		L"Writing Objects Into the File... "
 	};
 
 	const static std::vector<std::wstring> ConversionErrorTable = {
@@ -75,6 +73,9 @@ namespace SMBC {
 		L"Couldn't open the specified blueprint file. Possible reasons: Syntax error, Is not a json file",
 		L"Couldn't write converted blueprint into file!",
 		L"The specified blueprint doesn't have any blocks and parts to convert!",
-		L"The specified blueprint file doesn't contain any blueprint information!"
+		L"The specified blueprint file doesn't contain any blueprint information!",
+		L"Couldn't create \"Converted Models\" directory!",
+		L"Couldn't create a directory with the specified blueprint!",
+		L"Blueprint name is invalid!"
 	};
 };

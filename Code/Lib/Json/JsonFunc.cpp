@@ -11,19 +11,14 @@ std::string _JSON::ReadWholeFile(std::ifstream& input) {
 	if (input.is_open()) {
 		bool is_inString = false;
 		for (std::string str; std::getline(input, str);) {
-			for (int a = 0; a < (int)str.size(); a++) {
+			for (std::size_t a = 0; a < str.size(); a++) {
 				char& _cChar = str[a];
-				bool _Far = (a <= (int)str.size() - 1);
 
-				if (_Far) {
-					char& _nChar = str[a + 1];
+				if (_cChar == '\"' && ((a > 0 && str[a - 1] != '\\') || a == 0))
+					is_inString = !is_inString;
 
-					if (_cChar == '\"' && str[a - 1] != '\\')
-						is_inString = !is_inString;
-
-					if (!is_inString && _cChar == '/' && _nChar == '/')
-						break;
-				}
+				if (!is_inString && str.substr(a, 2) == "//")
+					break;
 
 				_Output += _cChar;
 			}

@@ -53,21 +53,25 @@ void SMBC::ModData::LoadObjects() {
 	for (auto& m_dir : RecDirIter) {
 		if (!m_dir.is_regular_file() || !m_dir.path().has_extension() || m_dir.path().extension() != ".json") continue;
 
-		SMBC::DatabaseLoader::LoadObjectFile(*this, m_dir.path().wstring(), this->LanguageDB);
+		SMBC::DatabaseLoader::LoadObjectFile(this, m_dir.path().wstring(), this->LanguageDB);
 	}
 }
 
-void SMBC::ModData::AddBlockToDatabase(SMBC::BlockData& block) {
-	for (SMBC::BlockData& blk : this->BlockDB)
-		if (blk._obj_uuid == block._obj_uuid) return;
+bool SMBC::ModData::UuidExists(const std::wstring& uuid) {
+	for (SMBC::BlockData*& blk : this->BlockDB)
+		if (blk->_obj_uuid == uuid) return true;
 
+	for (SMBC::ObjectData*& part : this->ObjectDB)
+		if (part->_obj_uuid == uuid) return true;
+
+	return false;
+}
+
+void SMBC::ModData::AddBlockToDatabase(SMBC::BlockData*& block) {
 	this->BlockDB.push_back(block);
 }
 
-void SMBC::ModData::AddPartToDatabase(SMBC::ObjectData& part) {
-	for (SMBC::ObjectData& obj : this->ObjectDB)
-		if (obj._obj_uuid == part._obj_uuid) return;
-
+void SMBC::ModData::AddPartToDatabase(SMBC::ObjectData*& part) {
 	this->ObjectDB.push_back(part);
 }
 
@@ -82,4 +86,12 @@ SMBC::ModData::ModData(
 	this->workshop_id = workshop_id;
 	this->path = path;
 	this->LanguageDB._Environment = name;
+}
+
+SMBC::ModData::~ModData() {
+	for (SMBC::ObjectData*& obj_ptr : this->ObjectDB)
+		delete obj_ptr;
+
+	for (SMBC::BlockData*& blk_ptr : this->BlockDB)
+		delete blk_ptr;
 }

@@ -42,8 +42,8 @@ namespace SMBC {
 
 	class ModData {
 	public:
-		std::vector<ObjectData> ObjectDB;
-		std::vector<BlockData> BlockDB;
+		std::vector<ObjectData*> ObjectDB;
+		std::vector<BlockData*> BlockDB;
 		SMBC::LangDB LanguageDB;
 
 		std::wstring uuid;
@@ -54,8 +54,9 @@ namespace SMBC {
 		void LoadTranslations(const std::wstring& path = L"");
 		void LoadObjects();
 
-		void AddBlockToDatabase(SMBC::BlockData& block);
-		void AddPartToDatabase(SMBC::ObjectData& part);
+		bool UuidExists(const std::wstring& uuid);
+		void AddBlockToDatabase(SMBC::BlockData*& block);
+		void AddPartToDatabase(SMBC::ObjectData*& part);
 
 		ModData(
 			const std::wstring& uuid,
@@ -65,5 +66,6 @@ namespace SMBC {
 		);
 
 		ModData() = default;
+		~ModData();
 	};
 }

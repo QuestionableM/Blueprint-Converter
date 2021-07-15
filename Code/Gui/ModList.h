@@ -12,7 +12,7 @@ namespace BlueprintConverter {
 	using namespace System::Drawing;
 
 	struct ModListData {
-		int mod_index = -1;
+		long long mod_index = -1;
 		long long used_parts = 0;
 	};
 
@@ -195,13 +195,13 @@ namespace BlueprintConverter {
 		System::Void ModSearcher_BW_RunWorkerCompleted(System::Object^ sender, System::ComponentModel::RunWorkerCompletedEventArgs^ e);
 		System::Void GuiUpdater_Tick(System::Object^ sender, System::EventArgs^ e);
 
-		int FindModByObjUuid(const std::wstring& uuid);
+		long long FindModByObjUuid(const std::wstring& uuid);
 
-		void AddModToList(const int& idx);
+		void AddModToList(const long long& idx);
 		System::Void ModList_FormClosing(System::Object^ sender, System::Windows::Forms::FormClosingEventArgs^ e);
 		System::Void ModList_LB_SelectedIndexChanged(System::Object^ sender, System::EventArgs^ e);
 		System::Void OpenInWorkshop_BTN_Click(System::Object^ sender, System::EventArgs^ e);
 		System::Void OpenInFileExplorer_BTN_Click(System::Object^ sender, System::EventArgs^ e);
-		bool GetCurrentMod(SMBC::ModData& mod);
+		SMBC::ModData* GetCurrentMod();
 	};
 }

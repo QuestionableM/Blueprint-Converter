@@ -211,7 +211,7 @@ bool _SettingsGUI::AreTablesEqual(
 ) {
 	if (vec.size() != lb->Items->Count) return false;
 
-	for (uint32_t a = 0u; a < vec.size(); a++) {
+	for (std::size_t a = 0; a < vec.size(); a++) {
 		std::wstring _WstrLb = msclr::interop::marshal_as<std::wstring>(lb->Items[a]->ToString());
 		if (vec[a] != _WstrLb)
 			return false;

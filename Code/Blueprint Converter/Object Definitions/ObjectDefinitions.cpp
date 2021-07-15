@@ -1,47 +1,17 @@
 #include "ObjectDefinitions.h"
 
-SMBC::SM_Part::SM_Part(
-	const std::wstring& path,
-	const std::wstring& name,
-	SMBC::Texture::Texture& tex,
-	const glm::vec3& pos,
-	const glm::vec3& bounds,
-	const int& _XAxis,
-	const int& _ZAxis,
-	const std::wstring& uuid,
-	const std::wstring& color
-) {
-	this->object_path = path;
-	this->name = name;
-	this->tex = tex;
-	this->position = pos;
-	this->xAxis = _XAxis;
-	this->zAxis = _ZAxis;
-	this->bounds = bounds;
-	this->uuid = uuid;
-	this->color = color;
+bool SMBC::SubMeshData::is_empty() {
+	return (this->DataIdx.size() <= 0);
 }
 
-SMBC::SM_Block::SM_Block(
-	const glm::vec3& pos,
-	const glm::vec3& bounds,
-	const int& _XAxis,
-	const int& _ZAxis,
-	const std::wstring& name,
-	const SMBC::Texture::TextureList& tex_list,
-	const std::wstring& uuid,
-	const int& tiling,
-	const std::wstring& color
-) {
-	this->position = pos;
-	this->bounds = bounds;
-	this->xAxis = _XAxis;
-	this->zAxis = _ZAxis;
-	this->name = name;
-	this->tex_list = tex_list;
-	this->uuid = uuid;
-	this->tiling = tiling;
-	this->color = color;
+typedef SMBC::Model _Model;
+bool _Model::is_empty() {
+	return (this->subMeshData.size() <= 0 || (this->vertices.size() <= 0 && this->uvs.size() <= 0 && this->normals.size() <= 0));
+}
+
+_Model::~Model() {
+	for (SMBC::SubMeshData*& data_ptr : this->subMeshData)
+		delete data_ptr;
 }
 
 SMBC::CubeMesh::CubeMesh(
@@ -62,7 +32,7 @@ SMBC::CubeMesh::CubeMesh(
 
 	float f_tiling = (float)tiling;
 
-	for (uint32_t a = 0; a < this->TexturePoints.size(); a++)
+	for (std::size_t a = 0; a < this->TexturePoints.size(); a++)
 		this->TexturePoints[a] /= f_tiling;
 
 	glm::vec3 _MulVec = bounds * 2.0f;
@@ -111,18 +81,4 @@ SMBC::CubeMesh::CubeMesh(
 	(this->TexturePoints[7] *= glm::vec2(0.0f, _MulVec.z)) += _Off5;
 	(this->TexturePoints[20] *= glm::vec2(_MulVec.y, _MulVec.z)) += _Off5;
 	this->TexturePoints[8] += _Off5;
-}
-
-SMBC::CubeMesh::~CubeMesh() {
-	this->Vertices.clear();
-	this->TexturePoints.clear();
-
-	for (uint32_t a = 0; a < this->DataIndexes.size(); a++) {
-		for (uint32_t b = 0; b < this->DataIndexes[a].size(); b++)
-			this->DataIndexes[a][b].clear();
-
-		this->DataIndexes[a].clear();
-	}
-
-	this->DataIndexes.clear();
 }

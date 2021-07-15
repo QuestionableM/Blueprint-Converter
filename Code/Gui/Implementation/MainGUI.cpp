@@ -158,7 +158,7 @@ System::Void _MainGUI::ObjectGenerator_DoWork(System::Object^ sender, System::Co
 	std::wstring _BlueprintPath = msclr::interop::marshal_as<std::wstring>(_BlueprintPathS);
 	std::wstring _BlueprintName = msclr::interop::marshal_as<std::wstring>(_BlueprintNameS);
 
-	SMBC::BlueprintConversionData::SetNewStage(SMBC_CONV_READING_JSON, 0);
+	SMBC::BPConvData::SetNewStage(SMBC::Stat_ReadingJson);
 	e->Result = SMBC::BPFunction::ConvertBlueprintToObj(
 		_BlueprintPath,
 		_BlueprintName,
@@ -172,11 +172,11 @@ System::Void _MainGUI::ObjectGenerator_DoWork(System::Object^ sender, System::Co
 }
 
 System::Void _MainGUI::GuiUpdater_Tick(System::Object^ sender, System::EventArgs^ e) {
-	long _Stage = SMBC::BlueprintConversionData::Stage;
+	long _Stage = SMBC::BPConvData::Stage;
 	if (_Stage < 0) return;
 
-	long _MaxValue = SMBC::BlueprintConversionData::ProgressBarMax;
-	long _Value = SMBC::BlueprintConversionData::ProgressBarValue;
+	long _MaxValue = SMBC::BPConvData::ProgressBarMax;
+	long _Value = SMBC::BPConvData::ProgressBarValue;
 
 	this->ActionProgress->Maximum = _MaxValue;
 	if (this->ActionProgress->Maximum < _Value)
@@ -185,7 +185,7 @@ System::Void _MainGUI::GuiUpdater_Tick(System::Object^ sender, System::EventArgs
 
 	std::wstring _ProgressValue;
 	if (_Stage != 0)
-		_ProgressValue = L"(" + std::to_wstring(SMBC::BlueprintConversionData::ProgressBarValue) + L" / " + std::to_wstring(SMBC::BlueprintConversionData::ProgressBarMax) + L")";
+		_ProgressValue = L"(" + std::to_wstring(_Value) + L" / " + std::to_wstring(_MaxValue) + L")";
 
 	this->ActionLabel->Text = gcnew System::String((SMBC::ActionTable[_Stage] + _ProgressValue).c_str());
 }
@@ -206,7 +206,7 @@ System::Void _MainGUI::ObjectGenerator_RunWorkerCompleted(System::Object^ sender
 		System::Windows::Forms::MessageBoxIcon::Information
 	);
 
-	SMBC::BlueprintConversionData::SetNewStage(SMBC_CONV_NONE, 0);
+	SMBC::BPConvData::SetNewStage(SMBC::Stat_None);
 	this->ChangeGUIState(true, true, true);
 	this->ActionProgress->Value = 0;
 	this->ActionLabel->Text = "No Action";
@@ -217,7 +217,7 @@ System::Void _MainGUI::DatabaseLoader_DoWork(System::Object^ sender, System::Com
 }
 
 System::Void _MainGUI::DatabaseLoader_RunWorkerCompleted(System::Object^ sender, System::ComponentModel::RunWorkerCompletedEventArgs^ e) {
-	SMBC::BlueprintConversionData::SetNewStage(SMBC_CONV_NONE, 0);
+	SMBC::BPConvData::SetNewStage(SMBC::Stat_None);
 	this->GuiUpdater->Stop();
 	this->ActionProgress->Value = 0;
 	this->ActionLabel->Text = gcnew System::String((L"Successfully loaded " + std::to_wstring(SMBC::ObjectDatabase::CountLoadedObjects()) + L" objects from " + std::to_wstring(SMBC::ObjectDatabase::ModDB.size()) + L" mods").c_str());
@@ -480,10 +480,10 @@ System::Void _MainGUI::OpenBlueprint_Click(System::Object^ sender, System::Event
 }
 
 System::Void _MainGUI::OpenOutputFolder_BTN_Click(System::Object^ sender, System::EventArgs^ e) {
-	if (!SMBC::FILE::FileExists(L".\\Converted Models"))
-		std::filesystem::create_directory(L".\\Converted Models");
-
-	SMBC::GUI::OpenFolderInExplorer(L".\\Converted Models");
+	if (SMBC::FILE::SafeCreateDir(L".\\Converted Models"))
+		SMBC::GUI::OpenFolderInExplorer(L".\\Converted Models");
+	else
+		SMBC::GUI::Error("Error", "Couldn't open a directory with converted models.");
 }
 
 System::Void _MainGUI::MainGUI_FormClosing(System::Object^ sender, System::Windows::Forms::FormClosingEventArgs^ e) {

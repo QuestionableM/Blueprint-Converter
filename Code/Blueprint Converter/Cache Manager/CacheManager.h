@@ -6,69 +6,36 @@
 #include "Blueprint Converter/Object Definitions/ObjectDefinitions.h"
 
 namespace SMBC {
-	struct SubMeshData {
-		std::wstring MaterialName;
-		int SubMeshIndex;
+	class ModelStorage {
+		static std::vector<SMBC::Model*> CachedModels;
+		static Assimp::Importer Importer;
 
-		std::vector<std::vector<std::vector<long long>>> DataIdx;
-
-		bool is_empty();
-	};
-
-	struct Model {
-		std::vector<glm::vec3> vertices;
-		std::vector<glm::vec3> normals;
-		std::vector<glm::vec2> uvs;
-		std::vector<SMBC::SubMeshData> subMeshData;
-
-		std::wstring meshPath;
-
-		bool is_empty();
-	};
-
-	struct CachedBlock {
-		std::wstring uuid;
-		std::wstring name;
-		std::wstring color;
-		SMBC::Texture::TextureList texList;
-	};
-
-	struct CachedPart {
-		std::wstring uuid;
-		std::wstring name;
-		std::wstring color;
-		std::wstring meshPath;
-
-		SMBC::Texture::Texture texPaths;
-	};
-
-	class CacheManager {
-		std::vector<SMBC::Model> CachedModels;
-		std::vector<SMBC::CachedBlock> CachedBlocks;
-		std::vector<SMBC::CachedPart> CachedParts;
-
-		Assimp::Importer Importer;
 	public:
-		bool LoadModel(
-			std::wstring& path,
-			SMBC::Model& model,
+		static SMBC::Model* LoadModel(
+			const std::wstring& path,
 			const bool& load_uvs,
 			const bool& load_normals
 		);
-		void LoadPart(
+
+		static void ClearStorage();
+	};
+
+	class ObjectStorage {
+		static std::vector<SMBC::CachedBlock*> CachedBlocks;
+		static std::vector<SMBC::CachedPart*> CachedParts;
+
+	public:
+		static SMBC::CachedBlock* LoadBlock(SMBC::SM_Block& block, const bool& mat_by_color);
+		static SMBC::CachedPart* LoadPart(
 			SMBC::SM_Part& part,
-			SMBC::CachedPart& cached_part,
 			const bool& load_uvs,
-			const bool& load_normal,
+			const bool& load_normals,
 			const bool& mat_by_color
 		);
-		void LoadBlock(SMBC::SM_Block& block, const bool& mat_by_color);
 
-		bool GetModel(const std::wstring& path, SMBC::Model& model);
+		static void WriteMtlFile(const std::wstring& path, const bool& add_colors);
+		static void WriteTexturePaths(const std::wstring& path);
 
-		void ClearCache();
-
-		void WriteMtlFile(const std::wstring& path, const bool& add_colors);
-		void WriteTexturePaths(const std::wstring& path);
+		static void ClearStorage();
 	};
 }

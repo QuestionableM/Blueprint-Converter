@@ -9,14 +9,16 @@
 
 namespace fs = std::filesystem;
 
-long SMBC::BlueprintConversionData::Stage = -1;
-long SMBC::BlueprintConversionData::ProgressBarMax = 0;
-long SMBC::BlueprintConversionData::ProgressBarValue = 0;
+typedef SMBC::BPConvData _BPConvData;
 
-void SMBC::BlueprintConversionData::SetNewStage(const long& Stage, const long& MaxValue) {
-	SMBC::BlueprintConversionData::Stage = Stage;
-	SMBC::BlueprintConversionData::ProgressBarValue = 0;
-	SMBC::BlueprintConversionData::ProgressBarMax = MaxValue;
+long _BPConvData::Stage = -1;
+long _BPConvData::ProgressBarMax = 0;
+long _BPConvData::ProgressBarValue = 0;
+
+void _BPConvData::SetNewStage(const long& Stage, const long& MaxValue) {
+	_BPConvData::Stage = Stage;
+	_BPConvData::ProgressBarValue = 0;
+	_BPConvData::ProgressBarMax = MaxValue;
 }
 
 std::vector<std::wstring> SMBC::Blueprint::ImageExtensions = { L".jpg", L".png", L".bmp" };
@@ -33,9 +35,7 @@ bool SMBC::Blueprint::IsSupportedExtension(const std::wstring& _ext) {
 std::wstring SMBC::Blueprint::FixBlueprintName(const std::wstring& name) {
 	std::wstring _Output = L"";
 
-	for (unsigned int a = 0; a < name.size(); a++) {
-		const wchar_t& _Letter = name[a];
-
+	for (const wchar_t& _Letter : name) {
 		if (SMBC::Other::IsLetterAllowed(_Letter))
 			_Output += _Letter;
 	}

@@ -25,7 +25,7 @@ namespace SMBC {
 
 	public:
 		static void LoadObjectFile(
-			SMBC::ModData& mod,
+			SMBC::ModData* mod,
 			const std::wstring& path,
 			SMBC::LangDB& translations
 		);

@@ -12,12 +12,13 @@
 namespace SMBC {
 	class ObjectDatabase {
 	public:
-		static std::vector<SMBC::ModData> ModDB;
+		static std::vector<SMBC::ModData*> ModDB;
 
-		static bool GetPart(const std::wstring& uuid, SMBC::ObjectData& object);
-		static bool GetBlock(const std::wstring& uuid, SMBC::BlockData& block);
+		static SMBC::ObjectData* GetPart(const std::wstring& uuid);
+		static SMBC::BlockData* GetBlock(const std::wstring& uuid);
 
 		static long long CountLoadedObjects();
+		static void ClearDatabase();
 		static void ReloadDatabase();
 	};
 };

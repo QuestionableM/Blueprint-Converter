@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <glm.hpp>
+#include <gtc/matrix_transform.hpp>
 #include "Blueprint Converter/BlueprintConverter.h"
 #include "Blueprint Converter/Cache Manager/CacheManager.h"
 
@@ -27,6 +28,9 @@ namespace SMBC {
 		std::wstring ModelName;
 		std::vector<SMBC::ObjectCollection> ObjCollection;
 
+		bool IsLastCollectionEmpty();
+		std::size_t CreateNewCollection();
+		std::size_t HasUuidCollection(const std::wstring& uuid, const std::wstring& color, const bool& useColor);
 		bool AddJointToChildShape(SMBC::SM_Part& joint);
 		bool HasStuffToConvert();
 
@@ -34,8 +38,6 @@ namespace SMBC {
 
 	private:
 		ConvertedModelData conv_data;
-		SMBC::CacheManager CacheManager;
-		Assimp::Importer Importer;
 
 		struct OffsetData {
 			long long Vertex = 0ll;
@@ -48,17 +50,16 @@ namespace SMBC {
 			void UpdateValues(const glm::vec3& val);
 		};
 
-		std::vector<SMBC::Model> Models;
-		std::vector<SMBC::ObjectCollection> Collections;
-		SMBC::Model NewModel;
-		SMBC::SubMeshData NewSubMeshData;
 		OffsetData offsetData;
+		const glm::mat4 rotMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 
 		void LoadBlueprintBlocks(SMBC::ObjectCollection& collection);
 		void LoadBlueprintParts(SMBC::ObjectCollection& collection);
 
+		int WriteBlueprintToFile(const long& objectCount);
+
 	public:
-		bool WriteChunksToFile(std::vector<SMBC::Model>& models, glm::vec3& posOffset);
+		int LoadBlueprintData(const std::wstring& blueprint_path);
 		int ConvertAndWrite();
 	};
 }

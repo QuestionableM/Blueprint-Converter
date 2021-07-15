@@ -1,16 +1,16 @@
 #pragma once
 
 #include <string>
-#include <vector>
 #include <glm.hpp>
 
-#include "Object Database/ObjectDatabase.h"
-#include "Cache Manager/CacheManager.h"
-
-#define SMBC_SEPARATION_BLOCKS 1
-#define SMBC_SEPARATION_JOINTS 2
-
 namespace SMBC {
+	enum : int {
+		Sep_Blocks =		1,
+		Sep_Joints =		2,
+		Sep_Uuid =			3,
+		Sep_UuidAndColor =	4
+	};
+
 	namespace BPFunction {
 		int ConvertBlueprintToObj(
 			const std::wstring& blueprint_path,
