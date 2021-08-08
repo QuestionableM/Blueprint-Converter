@@ -6,6 +6,8 @@
 #include <string>
 #include <glm.hpp>
 
+#include <unordered_map>
+
 namespace SMBC {
 	struct ObjectData {
 		std::wstring _obj_uuid;
@@ -42,11 +44,10 @@ namespace SMBC {
 
 	class ModData {
 	public:
-		std::vector<ObjectData*> ObjectDB;
-		std::vector<BlockData*> BlockDB;
+		std::unordered_map<std::wstring, ObjectData*> ObjectDB;
+		std::unordered_map<std::wstring, BlockData*> BlockDB;
 		SMBC::LangDB LanguageDB;
 
-		std::wstring uuid;
 		std::wstring name;
 		std::wstring workshop_id;
 		std::wstring path;
@@ -59,7 +60,6 @@ namespace SMBC {
 		void AddPartToDatabase(SMBC::ObjectData*& part);
 
 		ModData(
-			const std::wstring& uuid,
 			const std::wstring& name,
 			const std::wstring& workshop_id,
 			const std::wstring& path

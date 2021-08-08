@@ -14,46 +14,46 @@
 namespace fs = std::filesystem;
 typedef SMBC::ObjectDatabase _ObjectDatabase;
 
-std::vector<SMBC::ModData*> SMBC::ObjectDatabase::ModDB = {};
+std::unordered_map<std::wstring, SMBC::ModData*> _ObjectDatabase::ModDB = {};
 
 SMBC::ObjectData* _ObjectDatabase::GetPart(const std::wstring& uuid) {
-	for (SMBC::ModData*& mod : _ObjectDatabase::ModDB) {
-		for (SMBC::ObjectData*& part : mod->ObjectDB) {
-			if (part->_obj_uuid != uuid) continue;
+	for (const auto& mod_data : _ObjectDatabase::ModDB) {
+		SMBC::ModData* mod = mod_data.second;
 
-			return part;
-		}
+		if (mod->ObjectDB.find(uuid) != mod->ObjectDB.end())
+			return mod->ObjectDB.at(uuid);
 	}
 
 	return nullptr;
 }
 
 SMBC::BlockData* _ObjectDatabase::GetBlock(const std::wstring& uuid) {
-	for (SMBC::ModData*& mod : _ObjectDatabase::ModDB) {
-		for (SMBC::BlockData*& block : mod->BlockDB) {
-			if (block->_obj_uuid != uuid) continue;
+	for (const auto& mod_data : _ObjectDatabase::ModDB) {
+		SMBC::ModData* mod = mod_data.second;
 
-			return block;
-		}
+		if (mod->BlockDB.find(uuid) != mod->BlockDB.end())
+			return mod->BlockDB.at(uuid);
 	}
 
 	return nullptr;
 }
 
-long long _ObjectDatabase::CountLoadedObjects() {
-	long long output = 0;
+std::size_t _ObjectDatabase::CountLoadedObjects() {
+	std::size_t output = 0;
 
-	for (SMBC::ModData*& mod : _ObjectDatabase::ModDB) {
-		output += (long long)mod->ObjectDB.size();
-		output += (long long)mod->BlockDB.size();
+	for (const auto& mod_data : _ObjectDatabase::ModDB) {
+		SMBC::ModData* mod = mod_data.second;
+
+		output += mod->ObjectDB.size();
+		output += mod->BlockDB.size();
 	}
 
 	return output;
 }
 
 void _ObjectDatabase::ClearDatabase() {
-	for (SMBC::ModData*& mod_ptr : _ObjectDatabase::ModDB)
-		delete mod_ptr;
+	for (auto& mod_data : _ObjectDatabase::ModDB)
+		delete mod_data.second;
 
 	_ObjectDatabase::ModDB.clear();
 }

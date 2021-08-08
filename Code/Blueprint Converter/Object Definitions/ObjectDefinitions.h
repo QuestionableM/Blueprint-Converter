@@ -29,12 +29,10 @@ namespace SMBC {
 
 	struct CachedBlock {
 		SMBC::BlockData* blkPtr = nullptr;
-		std::wstring uuid;
 		std::wstring color;
 	};
 
 	struct CachedPart {
-		std::wstring uuid;
 		std::wstring name;
 		std::wstring color;
 		std::wstring meshPath;

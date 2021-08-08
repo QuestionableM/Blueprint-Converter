@@ -5,58 +5,48 @@
 #include "Lib/Json/JsonFunc.h"
 #include "Lib/OtherFunc/OtherFunc.h"
 
-SMBC::LangTrans::LangTrans(
-	const std::wstring& uuid,
-	const std::wstring& translation
-) {
-	this->uuid = uuid;
-	this->translation = translation;
-}
+typedef SMBC::LangDB _LangDB;
 
-SMBC::LangDB::LangDB(const std::wstring& environment) {
+_LangDB::LangDB(const std::wstring& environment) {
 	this->_Environment = environment;
 }
 
-void SMBC::LangDB::clear_database() {
+void _LangDB::clear_database() {
 	this->_Environment.clear();
-	this->_translations.clear();
+	this->_Translations.clear();
 }
 
-void SMBC::LangDB::LoadLanguageFile(const std::wstring& path) {
+void _LangDB::LoadLanguageFile(const std::wstring& path) {
 	nlohmann::json _LangFile;
-	if (!SMBC::JSON::OpenParseJson(path, _LangFile) || !_LangFile.is_object()) return;
+
+	if (!SMBC::Json::ParseJson(path, _LangFile) || !_LangFile.is_object())
+		return;
 
 	for (auto& trans : _LangFile.items()) {
 		if (!trans.value().is_object()) continue;
 
-		auto& _Title = trans.value()["title"];
+		const auto& _Title = SMBC::Json::Get(trans.value(), "title");
 		if (!_Title.is_string()) continue;
 
 		std::wstring _WstrTitle = SMBC::Other::Utf8ToWide(_Title.get<std::string>());
 		SMBC::PathReplacer::RemoveNewLineCharacters(_WstrTitle);
 
-		std::wstring _WstrKey = SMBC::Other::Utf8ToWide(trans.key());
-
-		this->_translations.push_back(SMBC::LangTrans(_WstrKey, _WstrTitle));
+		this->AddTranslation(
+			SMBC::Other::Utf8ToWide(trans.key()),
+			_WstrTitle
+		);
 	}
 }
 
-bool SMBC::LangDB::UuidExists(const std::wstring& uuid) {
-	for (SMBC::LangTrans& transl : this->_translations)
-		if (transl.uuid == uuid) return true;
-
-	return false;
+void _LangDB::AddTranslation(const std::wstring& uuid, const std::wstring& trans) {
+	if (this->_Translations.find(uuid) == this->_Translations.end())
+		this->_Translations.insert(std::make_pair(uuid, trans));
 }
 
-void SMBC::LangDB::AddTranslation(const SMBC::LangTrans& translation) {
-	if (this->UuidExists(translation.uuid)) return;
+static const std::wstring BlockNotFoundString = L"BLOCK NOT FOUND";
+const std::wstring& _LangDB::GetTranslation(const std::wstring& uuid) {
+	if (this->_Translations.find(uuid) != this->_Translations.end())
+		return this->_Translations.at(uuid);
 
-	this->_translations.push_back(translation);
-}
-
-std::wstring SMBC::LangDB::GetTranslationString(const std::wstring& uuid) {
-	for (SMBC::LangTrans& _trans : this->_translations)
-		if (_trans.uuid == uuid) return _trans.translation;
-
-	return L"BLOCK NOT FOUND";
+	return BlockNotFoundString;
 }

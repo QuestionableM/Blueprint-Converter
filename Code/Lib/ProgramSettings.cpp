@@ -37,7 +37,7 @@ void SMBC::Settings::AddArrayPath(
 	std::vector<std::wstring>& _array
 ) {
 	for (std::wstring& _wstr : _array) {
-		if (_wstr == element || SMBC::FILE::IsEquivalent(_wstr, element))
+		if (_wstr == element || SMBC::File::IsEquivalent(_wstr, element))
 			return;
 	}
 
@@ -53,7 +53,9 @@ bool SMBC::Settings::OpenLinksInSteam = false;
 
 void SMBC::Settings::LoadSettingsFile() {
 	nlohmann::json _ConfigFile;
-	if (!SMBC::JSON::OpenParseJson(SMBC::Settings::ConfigPath, _ConfigFile)) return;
+
+	if (!SMBC::Json::ParseJson(SMBC::Settings::ConfigPath, _ConfigFile))
+		return;
 
 	SMBC::Settings::BlueprintFolders.clear();
 	SMBC::Settings::ModFolders.clear();
@@ -64,12 +66,10 @@ void SMBC::Settings::LoadSettingsFile() {
 	SMBC::Settings::SMDirDatabase.clear();
 	SMBC::ObjectDatabase::ModDB.clear();
 
-	auto& _ConfigData = _ConfigFile;
-
-	auto& _UserSettings = _ConfigData["UserSettings"];
+	const auto& _UserSettings = SMBC::Json::Get(_ConfigFile, "UserSettings");
 	if (_UserSettings.is_object()) {
-		auto& _SMPath = _UserSettings["ScrapPath"];
-		auto& _OpenInSteam = _UserSettings["OpenLinksInSteam"];
+		const auto& _SMPath = SMBC::Json::Get(_UserSettings, "ScrapPath");
+		const auto& _OpenInSteam = SMBC::Json::Get(_UserSettings, "OpenLinksInSteam");
 
 		SMBC::Settings::LoadJsonWstrArray(_UserSettings, "BlueprintPaths", SMBC::Settings::BlueprintFolders);
 		SMBC::Settings::LoadJsonWstrArray(_UserSettings, "ScrapModsPath", SMBC::Settings::ModFolders);
@@ -83,11 +83,11 @@ void SMBC::Settings::LoadSettingsFile() {
 
 	SMBC::Settings::AddRegistryPathAndSave();
 	if (!SMBC::Settings::PathToSM.empty())
-		SMBC::PathReplacer::Add(SMBC::KeyReplacement(L"$GAME_FOLDER", SMBC::Settings::PathToSM));
+		SMBC::PathReplacer::Add(L"$GAME_FOLDER", SMBC::Settings::PathToSM);
 
-	auto& _ProgramSettings = _ConfigData["ProgramSettings"];
+	const auto& _ProgramSettings = SMBC::Json::Get(_ConfigFile, "ProgramSettings");
 	if (_ProgramSettings.is_object()) {
-		auto& _KeyWords = _ProgramSettings["Keywords"];
+		const auto& _KeyWords = SMBC::Json::Get(_ProgramSettings, "Keywords");
 
 		if (_KeyWords.is_object()) {
 			for (auto& keyword : _KeyWords.items()) {
@@ -97,7 +97,7 @@ void SMBC::Settings::LoadSettingsFile() {
 				std::wstring _WstrRepl = SMBC::Other::Utf8ToWide(keyword.value().get<std::string>());
 				_WstrRepl = SMBC::PathReplacer::ReplaceKey(_WstrRepl);
 
-				SMBC::PathReplacer::Add(SMBC::KeyReplacement(_WstrKey, _WstrRepl));
+				SMBC::PathReplacer::Add(_WstrKey, _WstrRepl);
 			}
 		}
 
@@ -119,9 +119,9 @@ void SMBC::Settings::SaveSettingsFile(
 	const bool open_in_steam
 ) {
 	nlohmann::json _JsonOutput;
-	SMBC::JSON::OpenParseJson(SMBC::Settings::ConfigPath, _JsonOutput);
+	SMBC::Json::ParseJson(SMBC::Settings::ConfigPath, _JsonOutput);
 
-	SMBC::FILE::SafeCreateDir(L"./Resources");
+	SMBC::File::SafeCreateDir(L"./Resources");
 	std::ofstream _ConfigJson(SMBC::Settings::ConfigPath);
 
 	if (!_ConfigJson.is_open()) return;
@@ -153,7 +153,7 @@ void SMBC::Settings::SaveSettingsFile(
 	if (open_in_steam)
 		_JsonOutput["UserSettings"]["OpenLinksInSteam"] = SMBC::Settings::OpenLinksInSteam;
 
-	_ConfigJson << std::setw(4) << _JsonOutput;
+	_ConfigJson << std::setfill('\t') << std::setw(1) << _JsonOutput;
 
 	_ConfigJson.close();
 }
@@ -166,7 +166,7 @@ void SMBC::Settings::AddRegistryPathAndSave() {
 	std::wstring SMLocalData = msclr::interop::marshal_as<std::wstring>(app_data_path);
 	SMLocalData += L"\\Axolot Games\\Scrap Mechanic\\User";
 
-	if (SMBC::FILE::FileExists(SMLocalData)) {
+	if (SMBC::File::FileExists(SMLocalData)) {
 		fs::directory_iterator DirIter(SMLocalData, fs::directory_options::skip_permission_denied);
 
 		for (auto& dir : DirIter) {
@@ -175,25 +175,25 @@ void SMBC::Settings::AddRegistryPathAndSave() {
 			std::wstring BPPath = dir.path().wstring() + L"\\Blueprints";
 			std::wstring ModPath = dir.path().wstring() + L"\\Mods";
 
-			if (SMBC::FILE::FileExists(BPPath))
+			if (SMBC::File::FileExists(BPPath))
 				SMBC::Settings::AddArrayPath(BPPath, SMBC::Settings::BlueprintFolders);
 
-			if (SMBC::FILE::FileExists(ModPath))
+			if (SMBC::File::FileExists(ModPath))
 				SMBC::Settings::AddArrayPath(ModPath, SMBC::Settings::ModFolders);
 		}
 	}
 
 	std::wstring _Path = SMBC::Other::ReadRegistryKey(L"SOFTWARE\\Valve\\Steam", L"SteamPath");
-	if (_Path.empty() || !SMBC::FILE::FileExists(_Path))
+	if (_Path.empty() || !SMBC::File::FileExists(_Path))
 		_Path = SMBC::Other::ReadRegistryKey(L"SOFTWARE\\WOW6432Node\\Valve\\Steam", L"SteamPath");
 
-	if (_Path.empty() || !SMBC::FILE::FileExists(_Path)) return;
+	if (_Path.empty() || !SMBC::File::FileExists(_Path)) return;
 
 	std::wstring _ScrapPath = _Path + L"/steamapps/common/scrap mechanic";
 	std::wstring _ScrapWorkshop = _Path + L"/steamapps/workshop/content/387990";
 
-	if (SMBC::FILE::FileExists(_ScrapPath)) SMBC::Settings::PathToSM = _ScrapPath;
-	if (SMBC::FILE::FileExists(_ScrapWorkshop)) {
+	if (SMBC::File::FileExists(_ScrapPath)) SMBC::Settings::PathToSM = _ScrapPath;
+	if (SMBC::File::FileExists(_ScrapWorkshop)) {
 		SMBC::Settings::AddArrayPath(_ScrapWorkshop, SMBC::Settings::ModFolders);
 		SMBC::Settings::AddArrayPath(_ScrapWorkshop, SMBC::Settings::BlueprintFolders);
 	}

@@ -21,8 +21,6 @@ namespace SMBC {
 			std::wstring& model_path
 		);
 
-		static bool ModUuidExists(const std::wstring& uuid);
-
 	public:
 		static void LoadObjectFile(
 			SMBC::ModData* mod,

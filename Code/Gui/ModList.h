@@ -12,8 +12,8 @@ namespace BlueprintConverter {
 	using namespace System::Drawing;
 
 	struct ModListData {
-		long long mod_index = -1;
-		long long used_parts = 0;
+		SMBC::ModData* ptr = nullptr;
+		unsigned long long used_parts = 0;
 	};
 
 	public ref class ModList : public System::Windows::Forms::Form
@@ -195,9 +195,9 @@ namespace BlueprintConverter {
 		System::Void ModSearcher_BW_RunWorkerCompleted(System::Object^ sender, System::ComponentModel::RunWorkerCompletedEventArgs^ e);
 		System::Void GuiUpdater_Tick(System::Object^ sender, System::EventArgs^ e);
 
-		long long FindModByObjUuid(const std::wstring& uuid);
+		SMBC::ModData* FindModByObjUuid(const std::wstring& uuid);
 
-		void AddModToList(const long long& idx);
+		void AddModToList(SMBC::ModData* ModPtr);
 		System::Void ModList_FormClosing(System::Object^ sender, System::Windows::Forms::FormClosingEventArgs^ e);
 		System::Void ModList_LB_SelectedIndexChanged(System::Object^ sender, System::EventArgs^ e);
 		System::Void OpenInWorkshop_BTN_Click(System::Object^ sender, System::EventArgs^ e);

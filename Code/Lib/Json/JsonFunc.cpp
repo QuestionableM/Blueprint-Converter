@@ -3,7 +3,7 @@
 #include <sstream>
 #include "Lib/OtherFunc/OtherFunc.h"
 
-namespace _JSON = SMBC::JSON;
+namespace _JSON = SMBC::Json;
 
 std::string _JSON::ReadWholeFile(std::ifstream& input) {
 	std::string _Output = "";
@@ -28,7 +28,7 @@ std::string _JSON::ReadWholeFile(std::ifstream& input) {
 	return _Output;
 }
 
-bool _JSON::OpenParseJson(const std::wstring& path, nlohmann::json& obj, const bool _stringify) {
+bool _JSON::ParseJson(const std::wstring& path, nlohmann::json& obj, const bool _stringify) {
 	try {
 		std::ifstream _InputFile(path);
 
@@ -54,7 +54,21 @@ bool _JSON::OpenParseJson(const std::wstring& path, nlohmann::json& obj, const b
 	return false;
 }
 
-std::wstring _JSON::GetJsonWstr(nlohmann::json& json, const std::string& key) {
+const nlohmann::json& _JSON::Get(const nlohmann::json& json, const std::string& key) {
+	if (json.contains(key))
+		return json.at(key);
+
+	return _JSON::NullObject;
+}
+
+const nlohmann::json& _JSON::Get(const nlohmann::json& json, const std::size_t& key) {
+	if (key < json.size())
+		return json[key];
+
+	return _JSON::NullObject;
+}
+
+std::wstring _JSON::GetWstr(nlohmann::json& json, const std::string& key) {
 	std::wstring _Output = L"";
 	
 	if (json.contains(key)) {

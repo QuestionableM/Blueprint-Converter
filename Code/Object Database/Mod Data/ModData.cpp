@@ -38,16 +38,15 @@ void SMBC::ModData::LoadTranslations(const std::wstring& path) {
 	std::wstring _LangFile = _Path + L"/inventoryDescriptions.json";
 	std::wstring _OtherLangFile = _Path + L"/InventoryItemDescriptions.json";
 
-	std::wstring _FinalPath = (SMBC::FILE::FileExists(_LangFile) ? _LangFile : SMBC::FILE::FileExists(_OtherLangFile) ? _OtherLangFile : L"");
+	std::wstring _FinalPath = (SMBC::File::FileExists(_LangFile) ? _LangFile : SMBC::File::FileExists(_OtherLangFile) ? _OtherLangFile : L"");
 
 	this->LanguageDB.LoadLanguageFile(_FinalPath);
 }
 
 void SMBC::ModData::LoadObjects() {
-	SMBC::PathReplacer::SetModData(this->path, this->uuid);
 	std::wstring _ObjDirectory = this->path + L"/Objects/Database/ShapeSets";
 
-	if (!SMBC::FILE::FileExists(_ObjDirectory)) return;
+	if (!SMBC::File::FileExists(_ObjDirectory)) return;
 
 	fs::recursive_directory_iterator RecDirIter(_ObjDirectory, fs::directory_options::skip_permission_denied);
 	for (auto& m_dir : RecDirIter) {
@@ -58,30 +57,27 @@ void SMBC::ModData::LoadObjects() {
 }
 
 bool SMBC::ModData::UuidExists(const std::wstring& uuid) {
-	for (SMBC::BlockData*& blk : this->BlockDB)
-		if (blk->_obj_uuid == uuid) return true;
-
-	for (SMBC::ObjectData*& part : this->ObjectDB)
-		if (part->_obj_uuid == uuid) return true;
+	if (this->BlockDB.find(uuid) != this->BlockDB.end()) return true;
+	if (this->ObjectDB.find(uuid) != this->ObjectDB.end()) return true;
 
 	return false;
 }
 
 void SMBC::ModData::AddBlockToDatabase(SMBC::BlockData*& block) {
-	this->BlockDB.push_back(block);
+	if (this->BlockDB.find(block->_obj_uuid) == this->BlockDB.end())
+		this->BlockDB.insert(std::make_pair(block->_obj_uuid, block));
 }
 
 void SMBC::ModData::AddPartToDatabase(SMBC::ObjectData*& part) {
-	this->ObjectDB.push_back(part);
+	if (this->ObjectDB.find(part->_obj_uuid) == this->ObjectDB.end())
+		this->ObjectDB.insert(std::make_pair(part->_obj_uuid, part));
 }
 
 SMBC::ModData::ModData(
-	const std::wstring& uuid,
 	const std::wstring& name,
 	const std::wstring& workshop_id,
 	const std::wstring& path
 ) {
-	this->uuid = uuid;
 	this->name = name;
 	this->workshop_id = workshop_id;
 	this->path = path;
@@ -89,9 +85,9 @@ SMBC::ModData::ModData(
 }
 
 SMBC::ModData::~ModData() {
-	for (SMBC::ObjectData*& obj_ptr : this->ObjectDB)
-		delete obj_ptr;
+	for (auto& obj_Itr : this->ObjectDB)
+		delete obj_Itr.second;
 
-	for (SMBC::BlockData*& blk_ptr : this->BlockDB)
-		delete blk_ptr;
+	for (auto& blk_Itr : this->BlockDB)
+		delete blk_Itr.second;
 }

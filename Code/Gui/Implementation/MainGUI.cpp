@@ -65,7 +65,7 @@ System::Void _MainGUI::BPPath_TB_TextChanged(System::Object^ sender, System::Eve
 
 System::Void _MainGUI::Start_BTN_Click(System::Object^ sender, System::EventArgs^ e) {
 	std::wstring _BlueprintPath = msclr::interop::marshal_as<std::wstring>(this->BPPath_TB->Text);
-	if (!SMBC::FILE::FileExists(_BlueprintPath)) {
+	if (!SMBC::File::FileExists(_BlueprintPath)) {
 		SMBC::GUI::Warning("Invalid path", "The specified path doesn't exist!");
 		return;
 	}
@@ -79,13 +79,13 @@ System::Void _MainGUI::Start_BTN_Click(System::Object^ sender, System::EventArgs
 
 		nlohmann::json _DescrJson;
 
-		if (!SMBC::JSON::OpenParseJson(_BPFileDesc, _DescrJson, true)) {
+		if (!SMBC::Json::ParseJson(_BPFileDesc, _DescrJson, true)) {
 			SMBC::GUI::Warning("Parse Error", "Couldn't parse \"description.json\"");
 			return;
 		}
 
-		std::wstring _BPType = SMBC::JSON::GetJsonWstr(_DescrJson, "type");
-		std::wstring _BPName = SMBC::JSON::GetJsonWstr(_DescrJson, "name");
+		std::wstring _BPType = SMBC::Json::GetWstr(_DescrJson, "type");
+		std::wstring _BPName = SMBC::Json::GetWstr(_DescrJson, "name");
 
 		if (_BPType != L"Blueprint" || _BPName.empty()) {
 			SMBC::GUI::Warning("No Data", "The specified folder does not contain any information about the blueprint!");
@@ -226,7 +226,7 @@ System::Void _MainGUI::DatabaseLoader_RunWorkerCompleted(System::Object^ sender,
 
 System::Void _MainGUI::BlueprintLoader_DoWork(System::Object^ sender, System::ComponentModel::DoWorkEventArgs^ e) {
 	for (std::wstring& BlueprintFolder : SMBC::Settings::BlueprintFolders) {
-		if (!SMBC::FILE::FileExists(BlueprintFolder)) continue;
+		if (!SMBC::File::FileExists(BlueprintFolder)) continue;
 
 		fs::directory_iterator BPDirIter(BlueprintFolder, fs::directory_options::skip_permission_denied);
 		for (auto& Folder : BPDirIter) {
@@ -235,20 +235,16 @@ System::Void _MainGUI::BlueprintLoader_DoWork(System::Object^ sender, System::Co
 			std::wstring BlueprintJson = (Folder.path().wstring() + L"/description.json");
 			nlohmann::json _BlueprintDesc;
 
-			if (!SMBC::JSON::OpenParseJson(BlueprintJson, _BlueprintDesc, true)) continue;
+			if (!SMBC::Json::ParseJson(BlueprintJson, _BlueprintDesc, true))
+				continue;
 
-			std::wstring _BPName = SMBC::JSON::GetJsonWstr(_BlueprintDesc, "name");
-			std::wstring _BPType = SMBC::JSON::GetJsonWstr(_BlueprintDesc, "type");
+			std::wstring _BPName = SMBC::Json::GetWstr(_BlueprintDesc, "name");
+			std::wstring _BPType = SMBC::Json::GetWstr(_BlueprintDesc, "type");
 
 			if (_BPName.empty() || _BPType != L"Blueprint") continue;
 
-			long long _FileId = 0;
-			if (_BlueprintDesc.contains("fileId")) {
-				auto& _FileIdJson = _BlueprintDesc.at("fileId");
-
-				if (_FileIdJson.is_number())
-					_FileId = _FileIdJson.get<long long>();
-			}
+			const auto& _FileIdJson = SMBC::Json::Get(_BlueprintDesc, "fileId");
+			long long _FileId = _FileIdJson.is_number() ? _FileIdJson.get<long long>() : 0ll;
 
 			SMBC::Blueprint _NewBlueprint(
 				_BPName,
@@ -266,7 +262,7 @@ System::Void _MainGUI::BlueprintLoader_RunWorkerCompleted(System::Object^ sender
 	this->BlueprintList->BeginUpdate();
 	this->BlueprintList->Items->Clear();
 	for (SMBC::Blueprint& _Blueprint : *this->Blueprints)
-		this->BlueprintList->Items->Add(gcnew System::String(_Blueprint.BlueprintName.c_str()));
+		this->BlueprintList->Items->Add(gcnew System::String(_Blueprint.Name.c_str()));
 	this->BlueprintList->EndUpdate();
 
 	this->ChangeGUIState(true, this->LoadedDatabase, true);
@@ -294,9 +290,9 @@ System::Void _MainGUI::BlueprintList_SelectedIndexChanged(System::Object^ sender
 		return;
 	}
 
-	this->BP_OpenOutputDir_BTN->Enabled = !_CurBlueprint.BlueprintFolder.empty();
-	this->BP_ShowModList_BTN->Enabled = !_CurBlueprint.BlueprintPath.empty();
-	this->BlueprintOptions_CMS->Enabled = (!_CurBlueprint.BlueprintFolder.empty() || !_CurBlueprint.BlueprintPath.empty());
+	this->BP_OpenOutputDir_BTN->Enabled = !_CurBlueprint.Folder.empty();
+	this->BP_ShowModList_BTN->Enabled = !_CurBlueprint.Path.empty();
+	this->BlueprintOptions_CMS->Enabled = (!_CurBlueprint.Folder.empty() || !_CurBlueprint.Path.empty());
 
 	std::wstring _BPImage = _CurBlueprint.FindBlueprintImage();
 	this->OpenInWorkshop_BTN->Enabled = !_CurBlueprint.WorkshopId.empty();
@@ -307,7 +303,7 @@ System::Void _MainGUI::BlueprintList_SelectedIndexChanged(System::Object^ sender
 
 	if (!_BPImage.empty())
 		this->BlueprintImage->ImageLocation = gcnew System::String(_BPImage.c_str());
-	this->BPPath_TB->Text = gcnew System::String(_CurBlueprint.BlueprintFolder.c_str());
+	this->BPPath_TB->Text = gcnew System::String(_CurBlueprint.Folder.c_str());
 }
 
 System::Void _MainGUI::SearchTB_TextChanged(System::Object^ sender, System::EventArgs^ e) {
@@ -319,11 +315,11 @@ System::Void _MainGUI::SearchTB_TextChanged(System::Object^ sender, System::Even
 
 	this->SelItemIndex = -1;
 	if (this->SearchTB->TextLength > 0 && !this->Blueprints->empty()) {
-		System::String^ _LowerSearch = this->SearchTB->Text->ToLowerInvariant();
-		for (SMBC::Blueprint& _Blueprint : *this->Blueprints) {
-			System::String^ _StrCopyS = gcnew System::String(_Blueprint.BlueprintName.c_str());
+		std::wstring l_SearchWstr = msclr::interop::marshal_as<std::wstring>(this->SearchTB->Text);
+		SMBC::PathReplacer::ToLowercaseR(l_SearchWstr);
 
-			if (_StrCopyS->ToLowerInvariant()->IndexOf(_LowerSearch) != -1)
+		for (SMBC::Blueprint& _Blueprint : *this->Blueprints) {
+			if (_Blueprint.LowerName.find(l_SearchWstr) != std::wstring::npos)
 				this->TempBPTable->push_back(_Blueprint);
 		}
 	}
@@ -333,7 +329,7 @@ System::Void _MainGUI::SearchTB_TextChanged(System::Object^ sender, System::Even
 		this->BlueprintList->BeginUpdate();
 		this->BlueprintList->Items->Clear();
 		for (SMBC::Blueprint& _Blueprint : _CurList)
-			this->BlueprintList->Items->Add(gcnew System::String(_Blueprint.BlueprintName.c_str()));
+			this->BlueprintList->Items->Add(gcnew System::String(_Blueprint.Name.c_str()));
 		this->BlueprintList->EndUpdate();
 	}
 	
@@ -399,8 +395,8 @@ System::Void _MainGUI::ChangeGUIState(bool bploaded, bool databaseloaded, bool b
 		SMBC::Blueprint _CurBlueprint;
 		if (this->GetCurrentBlueprint(_CurBlueprint)) {
 			_HasWorkshopId = !_CurBlueprint.WorkshopId.empty();
-			_HasBPFolder = !_CurBlueprint.BlueprintFolder.empty();
-			_HasBPPath = !_CurBlueprint.BlueprintPath.empty();
+			_HasBPFolder = !_CurBlueprint.Folder.empty();
+			_HasBPPath = !_CurBlueprint.Path.empty();
 		}
 
 		this->BlueprintOptions_CMS->Enabled = (_HasBPFolder || _HasBPPath);
@@ -480,7 +476,7 @@ System::Void _MainGUI::OpenBlueprint_Click(System::Object^ sender, System::Event
 }
 
 System::Void _MainGUI::OpenOutputFolder_BTN_Click(System::Object^ sender, System::EventArgs^ e) {
-	if (SMBC::FILE::SafeCreateDir(L".\\Converted Models"))
+	if (SMBC::File::SafeCreateDir(L".\\Converted Models"))
 		SMBC::GUI::OpenFolderInExplorer(L".\\Converted Models");
 	else
 		SMBC::GUI::Error("Error", "Couldn't open a directory with converted models.");
@@ -521,12 +517,12 @@ System::Void _MainGUI::BP_OpenOutputDir_BTN_Click(System::Object^ sender, System
 	SMBC::Blueprint _CurBlueprint;
 	if (!this->GetCurrentBlueprint(_CurBlueprint)) return;
 
-	if (!SMBC::FILE::FileExists(_CurBlueprint.BlueprintFolder)) {
+	if (!SMBC::File::FileExists(_CurBlueprint.Folder)) {
 		SMBC::GUI::Error("Internal Error", "The path to the selected blueprint doesn't exist!");
 		return;
 	}
 
-	std::wstring path_cpy = _CurBlueprint.BlueprintFolder;
+	std::wstring path_cpy = _CurBlueprint.Folder;
 	SMBC::PathReplacer::ReplaceAll(path_cpy, L'/', L'\\');
 	
 	SMBC::GUI::OpenFolderInExplorer(path_cpy);
@@ -549,7 +545,7 @@ System::Void _MainGUI::BP_ShowModList_BTN_Click(System::Object^ sender, System::
 
 	if (!this->GetCurrentBlueprint(sel_blueprint)) return;
 
-	if (!SMBC::FILE::FileExists(sel_blueprint.BlueprintPath)) {
+	if (!SMBC::File::FileExists(sel_blueprint.Path)) {
 		SMBC::GUI::Warning(L"Invalid Blueprint", L"The path to specified blueprint doesn't exist anymore!");
 		return;
 	}

@@ -5,9 +5,11 @@
 #include "Object Database/Texture Database/TextureDatabase.h"
 #include "Blueprint Converter/Object Definitions/ObjectDefinitions.h"
 
+#include <unordered_map>
+
 namespace SMBC {
 	class ModelStorage {
-		static std::vector<SMBC::Model*> CachedModels;
+		static std::unordered_map<std::wstring, SMBC::Model*> CachedModels;
 		static Assimp::Importer Importer;
 
 	public:
@@ -21,8 +23,8 @@ namespace SMBC {
 	};
 
 	class ObjectStorage {
-		static std::vector<SMBC::CachedBlock*> CachedBlocks;
-		static std::vector<SMBC::CachedPart*> CachedParts;
+		static std::unordered_map<std::wstring, SMBC::CachedBlock*> CachedBlocks;
+		static std::unordered_map<std::wstring, SMBC::CachedPart*> CachedParts;
 
 	public:
 		static SMBC::CachedBlock* LoadBlock(SMBC::SM_Block& block, const bool& mat_by_color);

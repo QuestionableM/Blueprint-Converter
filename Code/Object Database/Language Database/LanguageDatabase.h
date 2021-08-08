@@ -1,20 +1,12 @@
 #pragma once
 
 #include <string>
-#include <vector>
+#include <unordered_map>
 
 namespace SMBC {
-	class LangTrans {
-	public:
-		std::wstring uuid;
-		std::wstring translation;
-
-		LangTrans(const std::wstring& uuid, const std::wstring& translation);
-	};
-
 	class LangDB {
 	public:
-		std::vector<SMBC::LangTrans> _translations;
+		std::unordered_map<std::wstring, std::wstring> _Translations;
 		std::wstring _Environment;
 
 		LangDB(const std::wstring& environment);
@@ -24,7 +16,7 @@ namespace SMBC {
 
 		void LoadLanguageFile(const std::wstring& path);
 		bool UuidExists(const std::wstring& uuid);
-		void AddTranslation(const SMBC::LangTrans& translation);
-		std::wstring GetTranslationString(const std::wstring& uuid);
+		void AddTranslation(const std::wstring& uuid, const std::wstring& trans);
+		const std::wstring& GetTranslation(const std::wstring& uuid);
 	};
 }

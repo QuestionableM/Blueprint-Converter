@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include <vector>
+#include <unordered_map>
 #include <vec3.hpp>
 #include <nlohmann/json.hpp>
 
@@ -12,12 +12,12 @@
 namespace SMBC {
 	class ObjectDatabase {
 	public:
-		static std::vector<SMBC::ModData*> ModDB;
+		static std::unordered_map<std::wstring, SMBC::ModData*> ModDB;
 
 		static SMBC::ObjectData* GetPart(const std::wstring& uuid);
 		static SMBC::BlockData* GetBlock(const std::wstring& uuid);
 
-		static long long CountLoadedObjects();
+		static std::size_t CountLoadedObjects();
 		static void ClearDatabase();
 		static void ReloadDatabase();
 	};

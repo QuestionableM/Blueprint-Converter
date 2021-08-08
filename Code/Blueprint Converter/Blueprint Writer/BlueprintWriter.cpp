@@ -136,16 +136,16 @@ void _ConvertedModel::LoadBlueprintParts(SMBC::ObjectCollection& collection) {
 }
 
 int _ConvertedModel::WriteBlueprintToFile(const long& objectCount) {
-	if (!SMBC::FILE::SafeCreateDir(L"./Converted Models"))
+	if (!SMBC::File::SafeCreateDir(L"./Converted Models"))
 		return SMBC::Err_MainDirCreate;
 
 	std::wstring _ModelPath = L"./Converted Models/" + this->ModelName;
-	if (SMBC::FILE::IsBadPath(_ModelPath)) return SMBC::Err_InvalidPath;
+	if (SMBC::File::IsBadPath(_ModelPath)) return SMBC::Err_InvalidPath;
 
 	std::ofstream _writer;
 
 	if (conv_data.tex_list || conv_data.apply_texture) {
-		if (!SMBC::FILE::SafeCreateDir(_ModelPath))
+		if (!SMBC::File::SafeCreateDir(_ModelPath))
 			return SMBC::Err_BPDirCreate;
 		
 		std::wstring _path = _ModelPath + L"/" + this->ModelName;
@@ -398,7 +398,7 @@ int _ConvertedModel::WriteBlueprintToFile(const long& objectCount) {
 int _ConvertedModel::LoadBlueprintData(const std::wstring& blueprint_path) {
 	nlohmann::json _BlueprintJson;
 
-	if (!SMBC::JSON::OpenParseJson(blueprint_path, _BlueprintJson))
+	if (!SMBC::Json::ParseJson(blueprint_path, _BlueprintJson))
 		return SMBC::Err_File;
 
 	if (!_BlueprintJson.contains("bodies") && !_BlueprintJson.contains("joints"))

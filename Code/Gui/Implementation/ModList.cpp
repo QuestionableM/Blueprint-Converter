@@ -25,10 +25,10 @@ _ModListGUI::ModList(const SMBC::Blueprint& blueprint) {
 	ProgressCounter = 0;
 	ProgressMaxCounter = 0;
 	this->usedModList = new std::vector<SMBC::ModListData>();
-	this->BPName_LBL->Text = gcnew System::String((L"Blueprint Name: " + blueprint.BlueprintName).c_str());
+	this->BPName_LBL->Text = gcnew System::String((L"Blueprint Name: " + blueprint.Name).c_str());
 
 	this->GuiUpdater->Start();
-	this->ModSearcher_BW->RunWorkerAsync(gcnew System::String(blueprint.BlueprintFolder.c_str()));
+	this->ModSearcher_BW->RunWorkerAsync(gcnew System::String(blueprint.Folder.c_str()));
 }
 
 _ModListGUI::~ModList() {
@@ -48,51 +48,48 @@ System::Void _ModListGUI::ModSearcher_BW_DoWork(
 	std::wstring BP_Json_path = BP_Path + L"/blueprint.json";
 
 	nlohmann::json bp_json;
-	if (!SMBC::JSON::OpenParseJson(BP_Json_path, bp_json)) {
+	if (!SMBC::Json::ParseJson(BP_Json_path, bp_json)) {
 		e->Result = 1;
 		return;
 	}
 
-	auto& bp_data = bp_json;
-
-	auto& bodies = bp_data["bodies"];
+	const auto& bodies = SMBC::Json::Get(bp_json, "bodies");
 	if (bodies.is_array()) {
 		ProgressMaxCounter += (int)bodies.size();
 
 		for (auto& body : bodies) {
-			auto& childs = body["childs"];
+			const auto& childs = SMBC::Json::Get(body, "childs");
 
 			if (!childs.is_array()) continue;
 
 			for (auto& child : childs) {
 				ProgressCounter++;
 
-				auto& uuid = child["shapeId"];
+				const auto& uuid = SMBC::Json::Get(child, "shapeId");
 				if (!uuid.is_string()) continue;
 
 				std::wstring UuidWstr = SMBC::Other::Utf8ToWide(uuid.get<std::string>());
-				long long _ModIdx = this->FindModByObjUuid(UuidWstr);
+				SMBC::ModData* _ModPtr = this->FindModByObjUuid(UuidWstr);
 
-				this->AddModToList(_ModIdx);
+				this->AddModToList(_ModPtr);
 			}
 		}
 	}
 
-	auto& joints = bp_data["joints"];
-
+	const auto& joints = SMBC::Json::Get(bp_json, "joints");
 	if (joints.is_array()) {
 		ProgressMaxCounter += (int)joints.size();
 
 		for (auto& joint : joints) {
 			ProgressCounter++;
 
-			auto& uuid = joint["shapeId"];
+			const auto& uuid = SMBC::Json::Get(joint, "shapeId");
 			if (!uuid.is_string()) continue;
 
 			std::wstring UuidWstr = SMBC::Other::Utf8ToWide(uuid.get<std::string>());
-			long long _ModIdx = this->FindModByObjUuid(UuidWstr);
+			SMBC::ModData* _ModPtr = this->FindModByObjUuid(UuidWstr);
 
-			this->AddModToList(_ModIdx);
+			this->AddModToList(_ModPtr);
 		}
 	}
 }
@@ -132,8 +129,8 @@ System::Void _ModListGUI::ModSearcher_BW_RunWorkerCompleted(
 	for (SMBC::ModListData& mod_list : *this->usedModList) {
 		std::wstring _ModName = L"UNKNOWN_MOD";
 
-		if (mod_list.mod_index > -1)
-			_ModName = SMBC::ObjectDatabase::ModDB[mod_list.mod_index]->name;
+		if (mod_list.ptr != nullptr)
+			_ModName = mod_list.ptr->name;
 
 		this->ModList_LB->Items->Add(gcnew System::String((_ModName + L" (" + std::to_wstring(mod_list.used_parts) + L")").c_str()));
 	}
@@ -154,32 +151,25 @@ System::Void _ModListGUI::GuiUpdater_Tick(System::Object^ sender, System::EventA
 	this->ModSearchProgress->Value = _ProgressCopy;
 }
 
-long long _ModListGUI::FindModByObjUuid(const std::wstring& uuid) {
-	for (long long idx = 0ll; idx < (long long)SMBC::ObjectDatabase::ModDB.size(); idx++) {
-		SMBC::ModData*& mod = SMBC::ObjectDatabase::ModDB[idx];
+SMBC::ModData* _ModListGUI::FindModByObjUuid(const std::wstring& uuid) {
+	for (const auto& mod_data : SMBC::ObjectDatabase::ModDB) {
+		SMBC::ModData* mod = mod_data.second;
 
-		for (SMBC::BlockData*& block : mod->BlockDB)
-			if (block->_obj_uuid == uuid) return idx;
-
-		for (SMBC::ObjectData*& obj : mod->ObjectDB)
-			if (obj->_obj_uuid == uuid) return idx;
+		if (mod->ObjectDB.find(uuid) != mod->ObjectDB.end()) return mod;
+		if (mod->BlockDB.find(uuid) != mod->BlockDB.end()) return mod;
 	}
-
-	return -1;
+	
+	return nullptr;
 }
 
-void _ModListGUI::AddModToList(const long long& idx) {
+void _ModListGUI::AddModToList(SMBC::ModData* ModData) {
 	for (SMBC::ModListData& list_data : *this->usedModList)
-		if (list_data.mod_index == idx) {
+		if (list_data.ptr == ModData) {
 			list_data.used_parts++;
 			return;
 		}
 
-	SMBC::ModListData _NewListData;
-	_NewListData.mod_index = idx;
-	_NewListData.used_parts = 1;
-
-	this->usedModList->push_back(_NewListData);
+	this->usedModList->push_back({ModData, 1});
 }
 
 System::Void _ModListGUI::ModList_FormClosing(
@@ -228,7 +218,7 @@ System::Void _ModListGUI::OpenInFileExplorer_BTN_Click(System::Object^ sender, S
 	SMBC::ModData* CurMod = this->GetCurrentMod();
 	if (CurMod == nullptr) return;
 
-	if (!SMBC::FILE::FileExists(CurMod->path)) {
+	if (!SMBC::File::FileExists(CurMod->path)) {
 		SMBC::GUI::Error(L"Internal Error", L"The path to specified mod directory doesn't exist!");
 		return;
 	}
@@ -244,7 +234,6 @@ SMBC::ModData* _ModListGUI::GetCurrentMod() {
 	if (_index <= -1) return nullptr;
 
 	SMBC::ModListData& _ModList = this->usedModList->at(_index);
-	if (_ModList.mod_index <= -1) return nullptr;
 
-	return SMBC::ObjectDatabase::ModDB[_ModList.mod_index];
+	return _ModList.ptr;
 }

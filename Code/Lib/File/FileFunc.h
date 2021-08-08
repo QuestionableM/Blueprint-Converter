@@ -3,12 +3,13 @@
 #include <string>
 
 namespace SMBC {
-	namespace FILE {
+	namespace File {
 		bool IsDirectory(const std::wstring& path);
 		bool IsBadPath(const std::wstring& path);
 
 		bool FileExists(const std::wstring& path);
 		bool IsEquivalent(const std::wstring& p1, const std::wstring& p2);
 		bool SafeCreateDir(const std::wstring& path);
+		bool GetCanonicalPath(std::wstring& path);
 	}
 }

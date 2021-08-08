@@ -1,28 +1,25 @@
 #pragma once
 
 #include <string>
-#include <vector>
+#include <unordered_map>
 
 namespace SMBC {
-	class KeyReplacement {
-	public:
-		std::wstring _Key;
-		std::wstring _Replacement;
-
-		KeyReplacement(const std::wstring& key, const std::wstring& replacement);
-	};
-
 	class PathReplacer {
-		static std::vector<SMBC::KeyReplacement> PathReplacements;
-		static std::vector<SMBC::KeyReplacement> _Replacements;
+		static std::unordered_map<std::wstring, std::wstring> PathReplacements;
+		static std::unordered_map<std::wstring, std::wstring> KeyReplacements;
 		static std::wstring _ModDataReplacement;
 		static std::wstring _ContentDataReplacement;
+
+		static bool ReplaceKeyInternal(std::wstring& path);
 	public:
 		static void ReadResourceUpgrades(const std::wstring& path);
 		static std::wstring GetResourceUpgrade(const std::wstring& path);
 		static std::wstring ToLowercase(const std::wstring& path);
+		static void ToLowercaseR(std::wstring& path);
 
-		static void Add(const SMBC::KeyReplacement& k_repl);
+		static void CreateKey(std::wstring& key, std::wstring& value);
+
+		static void Add(const std::wstring& key, const std::wstring& value);
 		static void ClearAllData();
 
 		static void SetModData(const std::wstring& path, const std::wstring& uuid);

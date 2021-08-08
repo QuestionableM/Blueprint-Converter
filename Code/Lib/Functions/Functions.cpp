@@ -7,6 +7,8 @@
 
 #include "Lib/File/FileFunc.h"
 
+#include <cwctype>
+
 namespace fs = std::filesystem;
 
 typedef SMBC::BPConvData _BPConvData;
@@ -44,9 +46,9 @@ std::wstring SMBC::Blueprint::FixBlueprintName(const std::wstring& name) {
 }
 
 std::wstring SMBC::Blueprint::FindBlueprintImage() {
-	if (!SMBC::FILE::FileExists(this->BlueprintFolder)) return L"";
+	if (!SMBC::File::FileExists(this->Folder)) return L"";
 
-	fs::directory_iterator _Iter(this->BlueprintFolder, fs::directory_options::skip_permission_denied);
+	fs::directory_iterator _Iter(this->Folder, fs::directory_options::skip_permission_denied);
 	for (auto& Image : _Iter) {
 		const fs::path& _img_p = Image.path();
 
@@ -60,8 +62,8 @@ std::wstring SMBC::Blueprint::FindBlueprintImage() {
 }
 
 bool SMBC::Blueprint::BlueprintExists() {
-	bool _FolderExists = SMBC::FILE::FileExists(this->BlueprintFolder);
-	bool _PathExists = SMBC::FILE::FileExists(this->BlueprintPath);
+	bool _FolderExists = SMBC::File::FileExists(this->Folder);
+	bool _PathExists = SMBC::File::FileExists(this->Path);
 
 	return (_FolderExists && _PathExists);
 }
@@ -72,8 +74,12 @@ SMBC::Blueprint::Blueprint(
 	const std::wstring& folder,
 	const std::wstring& workshop_id
 ) {
-	this->BlueprintName = name;
-	this->BlueprintPath = path;
-	this->BlueprintFolder = folder;
+	this->Name = name;
+	this->Path = path;
+	this->Folder = folder;
 	this->WorkshopId = workshop_id;
+
+	this->LowerName = this->Name;
+	for (wchar_t& curChar : this->LowerName)
+		curChar = std::towlower(curChar);
 }

@@ -8,9 +8,11 @@
 #include <filesystem>
 #include <nlohmann/json.hpp>
 
+#include "DebugCon.h"
+
 typedef SMBC::ModelStorage _ModelStorage;
 
-std::vector<SMBC::Model*> _ModelStorage::CachedModels = {};
+std::unordered_map<std::wstring, SMBC::Model*> _ModelStorage::CachedModels = {};
 Assimp::Importer _ModelStorage::Importer = Assimp::Importer();
 
 SMBC::Model* _ModelStorage::LoadModel(
@@ -18,9 +20,10 @@ SMBC::Model* _ModelStorage::LoadModel(
 	const bool& load_uvs,
 	const bool& load_normals
 ) {
-	for (SMBC::Model*& model_ptr : _ModelStorage::CachedModels)
-		if (model_ptr->meshPath == path || SMBC::FILE::IsEquivalent(model_ptr->meshPath, path))
-			return model_ptr;
+	if (_ModelStorage::CachedModels.find(path) != _ModelStorage::CachedModels.end())
+		return _ModelStorage::CachedModels.at(path);
+
+	DebugOut("[Model] Loading: ", path, "\n");
 
 	const aiScene* ModelScene = _ModelStorage::Importer.ReadFile(
 		SMBC::Other::WideToUtf8(path).c_str(),
@@ -110,7 +113,7 @@ SMBC::Model* _ModelStorage::LoadModel(
 		}
 
 		newModel->meshPath = path;
-		_ModelStorage::CachedModels.push_back(newModel);
+		_ModelStorage::CachedModels.insert(std::make_pair(path, newModel));
 		_ModelStorage::Importer.FreeScene();
 
 		return newModel;
@@ -121,8 +124,8 @@ SMBC::Model* _ModelStorage::LoadModel(
 }
 
 void _ModelStorage::ClearStorage() {
-	for (SMBC::Model*& model_ptr : _ModelStorage::CachedModels)
-		delete model_ptr;
+	for (auto& model_data : _ModelStorage::CachedModels)
+		delete model_data.second;
 
 	_ModelStorage::CachedModels.clear();
 }
@@ -130,8 +133,8 @@ void _ModelStorage::ClearStorage() {
 
 typedef SMBC::ObjectStorage _ObjectStorage;
 
-std::vector<SMBC::CachedBlock*> _ObjectStorage::CachedBlocks = {};
-std::vector<SMBC::CachedPart*> _ObjectStorage::CachedParts = {};
+std::unordered_map<std::wstring, SMBC::CachedBlock*> _ObjectStorage::CachedBlocks = {};
+std::unordered_map<std::wstring, SMBC::CachedPart*> _ObjectStorage::CachedParts = {};
 
 SMBC::CachedBlock* _ObjectStorage::LoadBlock(SMBC::SM_Block& block, const bool& mat_by_color) {
 	std::wstring _UuidStr = block.uuid;
@@ -140,15 +143,14 @@ SMBC::CachedBlock* _ObjectStorage::LoadBlock(SMBC::SM_Block& block, const bool& 
 		_UuidStr.append(block.color);
 	}
 
-	for (SMBC::CachedBlock*& block_ptr : _ObjectStorage::CachedBlocks)
-		if (block_ptr->uuid == _UuidStr) return block_ptr;
+	if (_ObjectStorage::CachedBlocks.find(_UuidStr) != _ObjectStorage::CachedBlocks.end())
+		return _ObjectStorage::CachedBlocks.at(_UuidStr);
 
 	SMBC::CachedBlock* newBlock = new SMBC::CachedBlock();
 	newBlock->blkPtr = block.blkPtr;
-	newBlock->uuid = _UuidStr;
 	newBlock->color = block.color;
 
-	_ObjectStorage::CachedBlocks.push_back(newBlock);
+	_ObjectStorage::CachedBlocks.insert(std::make_pair(_UuidStr, newBlock));
 	return newBlock;
 }
 
@@ -164,29 +166,24 @@ SMBC::CachedPart* _ObjectStorage::LoadPart(
 		_UuidStr.append(part.color);
 	}
 
-	for (SMBC::CachedPart*& part_ptr : _ObjectStorage::CachedParts)
-		if (part_ptr->uuid == _UuidStr) return part_ptr;
+	if (_ObjectStorage::CachedParts.find(_UuidStr) != _ObjectStorage::CachedParts.end())
+		return _ObjectStorage::CachedParts.at(_UuidStr);
 
 	SMBC::CachedPart* newPart = new SMBC::CachedPart();
 	newPart->meshPath = part.objPtr->_obj_path;
 	newPart->name = part.objPtr->_obj_name;
 	newPart->texPaths = part.objPtr->obj_textures;
 	newPart->color = part.color;
-	newPart->uuid = _UuidStr;
 	newPart->modelPtr = _ModelStorage::LoadModel(part.objPtr->_obj_path, load_uvs, load_normals);
 
-	_ObjectStorage::CachedParts.push_back(newPart);
+	_ObjectStorage::CachedParts.insert(std::make_pair(_UuidStr, newPart));
 	return newPart;
 }
 
-std::string HexToFloat(std::wstring& f) {
-	int ir = std::stoi(f.substr(0, 2), nullptr, 16);
-	int ig = std::stoi(f.substr(2, 2), nullptr, 16);
-	int ib = std::stoi(f.substr(4, 2), nullptr, 16);
-
-	float fr = (float)ir / 255.0f;
-	float fg = (float)ig / 255.0f;
-	float fb = (float)ib / 255.0f;
+std::string HexToFloat(const std::wstring& f) {
+	float fr = (float)std::stoi(f.substr(0, 2), nullptr, 16) / 255.0f;
+	float fg = (float)std::stoi(f.substr(2, 2), nullptr, 16) / 255.0f;
+	float fb = (float)std::stoi(f.substr(4, 2), nullptr, 16) / 255.0f;
 
 	std::string _output;
 	_output.append(std::to_string(fr));
@@ -206,15 +203,15 @@ void _ObjectStorage::WriteMtlFile(const std::wstring& path, const bool& add_colo
 	std::string _fp_t = "Ns 324\nKa 1 1 1\nKd ";
 	std::string _sp_t = "Ks 0.5 0.5 0.5\nKe 0 0 0\nNi 1.45\nd 1\nillum2\n";
 
-	for (std::size_t a = 0; a < _ObjectStorage::CachedParts.size(); a++) {
-		SMBC::CachedPart*& _CPart = _ObjectStorage::CachedParts[a];
+	for (const auto& _PartData : _ObjectStorage::CachedParts) {
+		SMBC::CachedPart* _CPart = _PartData.second;
 		
 		if (_CPart->modelPtr == nullptr) continue;
 
 		for (std::size_t b = 0; b < _CPart->modelPtr->subMeshData.size(); b++) {
 			SMBC::SubMeshData*& SMData = _CPart->modelPtr->subMeshData[b];
 
-			std::wstring _MtlName = _CPart->uuid + L' ' + std::to_wstring(SMData->SubMeshIndex);
+			std::wstring _MtlName = _PartData.first + L' ' + std::to_wstring(SMData->SubMeshIndex);
 
 			std::string _mtl_mat;
 			_mtl_mat.append("newmtl " + SMBC::Other::WideToUtf8(_MtlName) + '\n');
@@ -265,12 +262,13 @@ void _ObjectStorage::WriteMtlFile(const std::wstring& path, const bool& add_colo
 		}
 	}
 
-	for (std::size_t a = 0; a < _ObjectStorage::CachedBlocks.size(); a++) {
-		SMBC::CachedBlock*& _CBlock = _ObjectStorage::CachedBlocks[a];
+	for (const auto& _BlockData : _ObjectStorage::CachedBlocks) {
+		SMBC::CachedBlock* _CBlock = _BlockData.second;
+
 		if (_CBlock->blkPtr == nullptr) continue;
 
 		std::string _mtl_mat;
-		_mtl_mat.append("newmtl " + SMBC::Other::WideToUtf8(_CBlock->uuid) + '\n');
+		_mtl_mat.append("newmtl " + SMBC::Other::WideToUtf8(_BlockData.first) + '\n');
 		_mtl_mat.append(_fp_t);
 
 		if (add_colors)
@@ -314,7 +312,9 @@ void _ObjectStorage::WriteTexturePaths(const std::wstring& path) {
 
 	nlohmann::json _TextureList;
 
-	for (SMBC::CachedPart*& _CMesh : _ObjectStorage::CachedParts) {
+	for (const auto& _CMeshData : _ObjectStorage::CachedParts) {
+		SMBC::CachedPart* _CMesh = _CMeshData.second;
+
 		SMBC::Texture::Texture& _CurTex = _CMesh->texPaths;
 		if (_CurTex.TexList.size() == 0) continue;
 
@@ -349,7 +349,9 @@ void _ObjectStorage::WriteTexturePaths(const std::wstring& path) {
 		}
 	}
 
-	for (SMBC::CachedBlock*& _CBlock : _ObjectStorage::CachedBlocks) {
+	for (const auto& _CBlockData : _ObjectStorage::CachedBlocks) {
+		SMBC::CachedBlock* _CBlock = _CBlockData.second;
+
 		if (_CBlock->blkPtr == nullptr) continue;
 
 		std::string _MeshNameStr = SMBC::Other::WideToUtf8(_CBlock->blkPtr->_obj_name);
@@ -365,16 +367,16 @@ void _ObjectStorage::WriteTexturePaths(const std::wstring& path) {
 		_TextureList[_MeshNameStr].push_back(_TexObj);
 	}
 
-	_TextureOutput << std::setw(4) << _TextureList;
+	_TextureOutput << std::setfill('\t') << std::setw(1) << _TextureList;
 	_TextureOutput.close();
 }
 
 void _ObjectStorage::ClearStorage() {
-	for (SMBC::CachedBlock*& block_ptr : _ObjectStorage::CachedBlocks)
-		delete block_ptr;
+	for (const auto& _BlockData : _ObjectStorage::CachedBlocks)
+		delete _BlockData.second;
 
-	for (SMBC::CachedPart*& part_ptr : _ObjectStorage::CachedParts)
-		delete part_ptr;
+	for (const auto& _PartData : _ObjectStorage::CachedParts)
+		delete _PartData.second;
 
 	_ObjectStorage::CachedBlocks.clear();
 	_ObjectStorage::CachedParts.clear();

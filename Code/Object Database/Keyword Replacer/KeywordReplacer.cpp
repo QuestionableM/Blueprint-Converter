@@ -2,34 +2,46 @@
 
 #include "Lib/Json/JsonFunc.h"
 #include "Lib/OtherFunc/OtherFunc.h"
+#include "Lib/File/FileFunc.h"
 
-#include <msclr/marshal_cppstd.h>
+#include <cwctype>
 
-SMBC::KeyReplacement::KeyReplacement(
-	const std::wstring& key,
-	const std::wstring& replacement
-) {
-	std::wstring _key_cpy = SMBC::PathReplacer::ToLowercase(key);
-	std::wstring _repl_cpy = SMBC::PathReplacer::ToLowercase(replacement);
+#include "DebugCon.h"
 
-	SMBC::PathReplacer::ReplaceAll(_key_cpy, L'\\', L'/');
-	SMBC::PathReplacer::ReplaceAll(_repl_cpy, L'\\', L'/');
+typedef SMBC::PathReplacer _PathReplacer;
 
-	this->_Key = _key_cpy;
-	this->_Replacement = _repl_cpy;
+std::unordered_map<std::wstring, std::wstring> _PathReplacer::PathReplacements = {};
+std::unordered_map<std::wstring, std::wstring> _PathReplacer::KeyReplacements = {};
+std::wstring _PathReplacer::_ModDataReplacement = L"";
+std::wstring _PathReplacer::_ContentDataReplacement = L"";
+
+bool _PathReplacer::ReplaceKeyInternal(std::wstring& path) {
+	for (auto& k_ReplData : _PathReplacer::KeyReplacements)
+		if (path.find(k_ReplData.first) != std::wstring::npos) {
+			path = (k_ReplData.second + path.substr(k_ReplData.first.size()));
+			return true;
+		}
+
+	const std::wstring& _ContentKey = _PathReplacer::_ContentDataReplacement;
+	if (path.find(L"$mod_data") != std::wstring::npos) {
+		path = (_PathReplacer::_ModDataReplacement + path.substr(9));
+		return true;
+	}
+	else if (path.find(_ContentKey) != std::wstring::npos) {
+		path = (_PathReplacer::_ModDataReplacement + path.substr(_ContentKey.size()));
+		return true;
+	}
+
+	return false;
 }
 
-std::vector<SMBC::KeyReplacement> SMBC::PathReplacer::PathReplacements = {};
-std::vector<SMBC::KeyReplacement> SMBC::PathReplacer::_Replacements = {};
-std::wstring SMBC::PathReplacer::_ModDataReplacement = L"";
-std::wstring SMBC::PathReplacer::_ContentDataReplacement = L"";
-
-void SMBC::PathReplacer::ReadResourceUpgrades(const std::wstring& path) {
+void _PathReplacer::ReadResourceUpgrades(const std::wstring& path) {
 	nlohmann::json _json;
-	if (!SMBC::JSON::OpenParseJson(path, _json)) return;
-	auto& upgrades_json = _json;
 
-	auto& upgrades = _json["upgrade"];
+	if (!SMBC::Json::ParseJson(path, _json))
+		return;
+
+	const auto& upgrades = SMBC::Json::Get(_json, "upgrade");
 	if (!upgrades.is_array()) return;
 
 	for (auto& upgrade_list : upgrades) {
@@ -38,75 +50,94 @@ void SMBC::PathReplacer::ReadResourceUpgrades(const std::wstring& path) {
 		for (auto& upgrade_item : upgrade_list) {
 			if (!upgrade_item.is_array()) continue;
 
-			auto& key = upgrade_item[0];
-			auto& replacement = upgrade_item[1];
+			const auto& key = SMBC::Json::Get(upgrade_item, 0);
+			const auto& replacement = SMBC::Json::Get(upgrade_item, 1);
 
 			if (!key.is_string() || !replacement.is_string()) continue;
 
 			std::wstring key_wstr = SMBC::Other::Utf8ToWide(key.get<std::string>());
 			std::wstring repl_wstr = SMBC::Other::Utf8ToWide(replacement.get<std::string>());
 
-			SMBC::PathReplacer::PathReplacements.push_back(SMBC::KeyReplacement(key_wstr, repl_wstr));
+			_PathReplacer::CreateKey(key_wstr, repl_wstr);
+			_PathReplacer::PathReplacements.insert(std::make_pair(key_wstr, repl_wstr));
 		}
 	}
 }
 
-std::wstring SMBC::PathReplacer::GetResourceUpgrade(const std::wstring& path) {
-	std::wstring _path_cpy = SMBC::PathReplacer::ToLowercase(path);
-	SMBC::PathReplacer::ReplaceAll(_path_cpy, L'\\', L'/');
+std::wstring _PathReplacer::GetResourceUpgrade(const std::wstring& path) {
+	std::wstring _path_cpy = _PathReplacer::ToLowercase(path);
+	_PathReplacer::ReplaceAll(_path_cpy, L'\\', L'/');
 
-	for (SMBC::KeyReplacement& item : SMBC::PathReplacer::PathReplacements)
-		if (item._Key == _path_cpy) return item._Replacement;
+	if (_PathReplacer::PathReplacements.find(_path_cpy) != _PathReplacer::PathReplacements.end())
+		return _PathReplacer::PathReplacements.at(_path_cpy);
 
 	return _path_cpy;
 }
 
-std::wstring SMBC::PathReplacer::ToLowercase(const std::wstring& path) {
-	System::String^ _s_path = gcnew System::String(path.c_str());
-	_s_path = _s_path->ToLower();
+std::wstring _PathReplacer::ToLowercase(const std::wstring& path) {
+	std::wstring _Output = path;
 
-	return msclr::interop::marshal_as<std::wstring>(_s_path);
+	for (wchar_t& curChar : _Output)
+		curChar = std::towlower(curChar);
+
+	return _Output;
 }
 
-void SMBC::PathReplacer::Add(const SMBC::KeyReplacement& k_repl) {
-	SMBC::PathReplacer::_Replacements.push_back(k_repl);
+void _PathReplacer::ToLowercaseR(std::wstring& path) {
+	for (wchar_t& curChar : path)
+		curChar = std::towlower(curChar);
 }
 
-void SMBC::PathReplacer::ClearAllData() {
-	SMBC::PathReplacer::PathReplacements.clear();
-	SMBC::PathReplacer::_Replacements.clear();
-	SMBC::PathReplacer::_ModDataReplacement.clear();
-	SMBC::PathReplacer::_ContentDataReplacement.clear();
+void _PathReplacer::CreateKey(std::wstring& key, std::wstring& value) {
+	key = _PathReplacer::ToLowercase(key);
+	value = _PathReplacer::ToLowercase(value);
+
+	_PathReplacer::ReplaceAll(key, L'\\', L'/');
+	_PathReplacer::ReplaceAll(value, L'\\', L'/');
 }
 
-void SMBC::PathReplacer::SetModData(const std::wstring& path, const std::wstring& uuid) {
-	SMBC::PathReplacer::_ModDataReplacement = path;
-	SMBC::PathReplacer::_ContentDataReplacement = (L"$content_" + uuid);
+void _PathReplacer::Add(const std::wstring& key, const std::wstring& value) {
+	std::wstring key_cpy = key;
+	std::wstring val_cpy = value;
+
+	_PathReplacer::CreateKey(key_cpy, val_cpy);
+
+	if (_PathReplacer::KeyReplacements.find(key_cpy) == _PathReplacer::KeyReplacements.end())
+		_PathReplacer::KeyReplacements.insert(std::make_pair(key_cpy, val_cpy));
 }
 
-void SMBC::PathReplacer::ReplaceAll(std::wstring& str, const wchar_t& to_replace, const wchar_t& replacer) {
+void _PathReplacer::ClearAllData() {
+	_PathReplacer::PathReplacements.clear();
+	_PathReplacer::KeyReplacements.clear();
+	_PathReplacer::_ModDataReplacement.clear();
+	_PathReplacer::_ContentDataReplacement.clear();
+}
+
+void _PathReplacer::SetModData(const std::wstring& path, const std::wstring& uuid) {
+	_PathReplacer::_ModDataReplacement = path;
+	_PathReplacer::_ContentDataReplacement = (L"$content_" + uuid);
+}
+
+void _PathReplacer::ReplaceAll(std::wstring& str, const wchar_t& to_replace, const wchar_t& replacer) {
 	size_t _idx = 0;
 	while ((_idx = str.find(to_replace)) != std::wstring::npos)
 		str[_idx] = replacer;
 }
 
-std::wstring SMBC::PathReplacer::ReplaceKey(const std::wstring& str) {
-	std::wstring str_copy = SMBC::PathReplacer::GetResourceUpgrade(str);
+std::wstring _PathReplacer::ReplaceKey(const std::wstring& str) {
+	std::wstring final_path = _PathReplacer::GetResourceUpgrade(str);
 
-	for (SMBC::KeyReplacement& _Repl : SMBC::PathReplacer::_Replacements)
-		if (str_copy.find(_Repl._Key) != std::wstring::npos)
-			return (_Repl._Replacement + str_copy.substr(_Repl._Key.size()));
+	if (_PathReplacer::ReplaceKeyInternal(final_path)) {
+		if (SMBC::File::GetCanonicalPath(final_path))
+			_PathReplacer::ToLowercaseR(final_path);
 
-	std::wstring& _ContentKey = SMBC::PathReplacer::_ContentDataReplacement;
-	if (str_copy.find(L"$mod_data") != std::wstring::npos)
-		return (SMBC::PathReplacer::_ModDataReplacement + str_copy.substr(9));
-	else if (str_copy.find(_ContentKey) != std::wstring::npos)
-		return (SMBC::PathReplacer::_ModDataReplacement + str_copy.substr(_ContentKey.size()));
+		return final_path;
+	}
 
 	return L"";
 }
 
-void SMBC::PathReplacer::RemoveNewLineCharacters(std::wstring& str) {
-	SMBC::PathReplacer::ReplaceAll(str, L'\n', L' ');
-	SMBC::PathReplacer::ReplaceAll(str, L'\r', L' ');
+void _PathReplacer::RemoveNewLineCharacters(std::wstring& str) {
+	_PathReplacer::ReplaceAll(str, L'\n', L' ');
+	_PathReplacer::ReplaceAll(str, L'\r', L' ');
 }

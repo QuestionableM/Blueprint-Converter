@@ -54,11 +54,13 @@ System::Void _SettingsGUI::SettingsGUI_FormClosing(
 
 System::Void _SettingsGUI::Save_BTN_Click(System::Object^ sender, System::EventArgs^ e) {
 	std::wstring _NewPathWstr = msclr::interop::marshal_as<std::wstring>(this->SMPath->Text);
-	if (!SMBC::FILE::FileExists(_NewPathWstr)) {
+
+	if (!SMBC::File::FileExists(_NewPathWstr)) {
 		SMBC::GUI::Warning("Save Error", "The specified path to Scrap Mechanic is invalid!");
 		return;
 	}
-	if (!SMBC::FILE::IsDirectory(_NewPathWstr)) {
+
+	if (!SMBC::File::IsDirectory(_NewPathWstr)) {
 		SMBC::GUI::Warning("Save Error", "The specified path to Scrap Mechanic does not lead to a directory!");
 		return;
 	}
@@ -170,12 +172,12 @@ bool _SettingsGUI::AddStringToListBox(
 	if (tb->TextLength <= -1) return false;
 
 	std::wstring _Path = msclr::interop::marshal_as<std::wstring>(tb->Text);
-	if (!SMBC::FILE::FileExists(_Path)) {
+	if (!SMBC::File::FileExists(_Path)) {
 		SMBC::GUI::Warning("Invalid Path", "The specified path is invalid!");
 		return false;
 	}
 
-	if (!SMBC::FILE::IsDirectory(_Path)) {
+	if (!SMBC::File::IsDirectory(_Path)) {
 		SMBC::GUI::Warning("Invalid Path", "The specified path does not lead to a directory!");
 		return false;
 	}
@@ -183,7 +185,7 @@ bool _SettingsGUI::AddStringToListBox(
 	for (int a = 0; a < lb->Items->Count; a++) {
 		std::wstring _Ws = msclr::interop::marshal_as<std::wstring>(lb->Items[a]->ToString());
 
-		if (SMBC::FILE::IsEquivalent(_Path, _Ws)) {
+		if (SMBC::File::IsEquivalent(_Path, _Ws)) {
 			SMBC::GUI::Warning(
 				"Equivalent Path",
 				"The specified path is equivalent to one of the items in the list!"
