@@ -4,9 +4,8 @@
 
 #include "Gui/SettingsGUI.h"
 #include "Lib/ProgramSettings.h"
-#include "Lib/Functions/Functions.h"
 #include "Lib/GuiLib/GuiLib.h"
-#include "Lib/Bit/Bit.h"
+#include "Lib/Bit.h"
 #include "Lib/File/FileFunc.h"
 
 namespace SMBC {
@@ -42,7 +41,7 @@ System::Void _SettingsGUI::SettingsGUI_FormClosing(
 	System::Windows::Forms::FormClosingEventArgs^ e
 ) {
 	if (this->Save_BTN->Enabled) {
-		WForms::DialogResult dr = SMBC::GUI::Question(
+		WForms::DialogResult dr = SMBC::Gui::Question(
 			"Unsaved Changes",
 			"Are you sure that you want to close the settings window without saving any changes?\n\nAll unsaved changes will be lost!"
 		);
@@ -55,13 +54,13 @@ System::Void _SettingsGUI::SettingsGUI_FormClosing(
 System::Void _SettingsGUI::Save_BTN_Click(System::Object^ sender, System::EventArgs^ e) {
 	std::wstring _NewPathWstr = msclr::interop::marshal_as<std::wstring>(this->SMPath->Text);
 
-	if (!SMBC::File::FileExists(_NewPathWstr)) {
-		SMBC::GUI::Warning("Save Error", "The specified path to Scrap Mechanic is invalid!");
+	if (!SMBC::File::Exists(_NewPathWstr)) {
+		SMBC::Gui::Warning("Save Error", "The specified path to Scrap Mechanic is invalid!");
 		return;
 	}
 
 	if (!SMBC::File::IsDirectory(_NewPathWstr)) {
-		SMBC::GUI::Warning("Save Error", "The specified path to Scrap Mechanic does not lead to a directory!");
+		SMBC::Gui::Warning("Save Error", "The specified path to Scrap Mechanic does not lead to a directory!");
 		return;
 	}
 
@@ -172,13 +171,13 @@ bool _SettingsGUI::AddStringToListBox(
 	if (tb->TextLength <= -1) return false;
 
 	std::wstring _Path = msclr::interop::marshal_as<std::wstring>(tb->Text);
-	if (!SMBC::File::FileExists(_Path)) {
-		SMBC::GUI::Warning("Invalid Path", "The specified path is invalid!");
+	if (!SMBC::File::Exists(_Path)) {
+		SMBC::Gui::Warning("Invalid Path", "The specified path is invalid!");
 		return false;
 	}
 
 	if (!SMBC::File::IsDirectory(_Path)) {
-		SMBC::GUI::Warning("Invalid Path", "The specified path does not lead to a directory!");
+		SMBC::Gui::Warning("Invalid Path", "The specified path does not lead to a directory!");
 		return false;
 	}
 
@@ -186,7 +185,7 @@ bool _SettingsGUI::AddStringToListBox(
 		std::wstring _Ws = msclr::interop::marshal_as<std::wstring>(lb->Items[a]->ToString());
 
 		if (SMBC::File::IsEquivalent(_Path, _Ws)) {
-			SMBC::GUI::Warning(
+			SMBC::Gui::Warning(
 				"Equivalent Path",
 				"The specified path is equivalent to one of the items in the list!"
 			);
@@ -194,7 +193,7 @@ bool _SettingsGUI::AddStringToListBox(
 		}
 
 		if (_Path == _Ws) {
-			SMBC::GUI::Warning(
+			SMBC::Gui::Warning(
 				"Value Exists",
 				"The specified string already exists!"
 			);
@@ -243,9 +242,9 @@ void _SettingsGUI::ChangeSetting(int mask, bool value) {
 }
 
 System::Void _SettingsGUI::BrowseSMFolder_BTN_Click(System::Object^ sender, System::EventArgs^ e) {
-	std::wstring _SM_Path = SMBC::GUI::OpenFileName(
+	std::wstring _SM_Path = SMBC::Gui::OpenFileName(
 		L"Select a Scrap Mechanic Folder",
-		FOS_PICKFOLDERS,
+		FOS_PICKFOLDERS | FOS_DONTADDTORECENT,
 		L"All Files (*.*)\0*.*\0",
 		static_cast<HWND>(this->Handle.ToPointer())
 	);
@@ -256,9 +255,9 @@ System::Void _SettingsGUI::BrowseSMFolder_BTN_Click(System::Object^ sender, Syst
 }
 
 System::Void _SettingsGUI::ModListDirSearch_BTN_Click(System::Object^ sender, System::EventArgs^ e) {
-	std::wstring _ModDirPath = SMBC::GUI::OpenFileName(
+	std::wstring _ModDirPath = SMBC::Gui::OpenFileName(
 		L"Select a Directory Containing Mods",
-		FOS_PICKFOLDERS,
+		FOS_PICKFOLDERS | FOS_DONTADDTORECENT,
 		L"All Files (*.*)\0*.*\0",
 		static_cast<HWND>(this->Handle.ToPointer())
 	);
@@ -269,9 +268,9 @@ System::Void _SettingsGUI::ModListDirSearch_BTN_Click(System::Object^ sender, Sy
 }
 
 System::Void _SettingsGUI::BPDirSearch_BTN_Click(System::Object^ sender, System::EventArgs^ e) {
-	std::wstring _BPDirPath = SMBC::GUI::OpenFileName(
+	std::wstring _BPDirPath = SMBC::Gui::OpenFileName(
 		L"Select a Directory Containing Blueprints",
-		FOS_PICKFOLDERS,
+		FOS_PICKFOLDERS | FOS_DONTADDTORECENT,
 		L"All Files (*.*)\0*.*\0",
 		static_cast<HWND>(this->Handle.ToPointer())
 	);

@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-#include <vector>
+#include <unordered_map>
 
 namespace SMBC {
 	namespace Texture {
@@ -10,13 +10,11 @@ namespace SMBC {
 			std::wstring dif;
 			std::wstring asg;
 			std::wstring nor;
-			std::wstring name;
 
 			TextureList(
 				const std::wstring& dif,
 				const std::wstring& asg,
-				const std::wstring& nor,
-				const std::wstring& name = L""
+				const std::wstring& nor
 			);
 
 			TextureList() = default;
@@ -28,12 +26,12 @@ namespace SMBC {
 		class Texture {
 		public:
 			SMBC::Texture::TextureType TexType = SMBC::Texture::TextureType::None;
-			std::vector<SMBC::Texture::TextureList> TexList;
+			std::unordered_map<std::wstring, SMBC::Texture::TextureList> TexList;
 
 			Texture(const SMBC::Texture::TextureType& tex_type);
 			Texture() = default;
 
-			void AddTexture(const SMBC::Texture::TextureList& tex_list);
+			void AddTexture(const std::wstring& name, const SMBC::Texture::TextureList& tex_list);
 			bool GetTextureByName(const std::wstring& name, SMBC::Texture::TextureList& tex_list);
 		};
 	}

@@ -1,7 +1,7 @@
 #include "KeywordReplacer.h"
 
 #include "Lib/Json/JsonFunc.h"
-#include "Lib/OtherFunc/OtherFunc.h"
+#include "Lib/String/String.h"
 #include "Lib/File/FileFunc.h"
 
 #include <cwctype>
@@ -55,8 +55,8 @@ void _PathReplacer::ReadResourceUpgrades(const std::wstring& path) {
 
 			if (!key.is_string() || !replacement.is_string()) continue;
 
-			std::wstring key_wstr = SMBC::Other::Utf8ToWide(key.get<std::string>());
-			std::wstring repl_wstr = SMBC::Other::Utf8ToWide(replacement.get<std::string>());
+			std::wstring key_wstr = SMBC::String::ToWide(key.get<std::string>());
+			std::wstring repl_wstr = SMBC::String::ToWide(replacement.get<std::string>());
 
 			_PathReplacer::CreateKey(key_wstr, repl_wstr);
 			_PathReplacer::PathReplacements.insert(std::make_pair(key_wstr, repl_wstr));
@@ -128,10 +128,10 @@ std::wstring _PathReplacer::ReplaceKey(const std::wstring& str) {
 	std::wstring final_path = _PathReplacer::GetResourceUpgrade(str);
 
 	if (_PathReplacer::ReplaceKeyInternal(final_path)) {
-		if (SMBC::File::GetCanonicalPath(final_path))
-			_PathReplacer::ToLowercaseR(final_path);
+		std::wstring CanonicalPath = SMBC::File::GetCanonicalPathW(final_path);
+		_PathReplacer::ToLowercaseR(CanonicalPath);
 
-		return final_path;
+		return CanonicalPath;
 	}
 
 	return L"";

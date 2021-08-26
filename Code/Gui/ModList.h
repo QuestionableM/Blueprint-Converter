@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Object Database/ObjectDatabase.h"
-#include "Lib/Functions/Functions.h"
+#include "Object Database/Blueprint/Blueprint.h"
 
 namespace BlueprintConverter {
 	using namespace System;
@@ -36,11 +36,9 @@ namespace BlueprintConverter {
 		System::Windows::Forms::Label^ ObjectCount_LBL;
 		System::ComponentModel::BackgroundWorker^ ModSearcher_BW;
 		System::Windows::Forms::Timer^ GuiUpdater;
-	private: System::ComponentModel::IContainer^ components;
+		System::ComponentModel::IContainer^ components;
+
 	protected:
-
-
-
 #pragma region Windows Form Designer generated code
 		void InitializeComponent(void)
 		{

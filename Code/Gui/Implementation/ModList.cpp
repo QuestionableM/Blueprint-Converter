@@ -4,7 +4,7 @@
 #include "Lib/File/FileFunc.h"
 #include "Lib/GuiLib/GuiLib.h"
 #include "Lib/ProgramSettings.h"
-#include "Lib/OtherFunc/OtherFunc.h"
+#include "Lib/String/String.h"
 #include "Object Database/Keyword Replacer/KeywordReplacer.h"
 #include "Object Database/ObjectDatabase.h"
 
@@ -68,7 +68,7 @@ System::Void _ModListGUI::ModSearcher_BW_DoWork(
 				const auto& uuid = SMBC::Json::Get(child, "shapeId");
 				if (!uuid.is_string()) continue;
 
-				std::wstring UuidWstr = SMBC::Other::Utf8ToWide(uuid.get<std::string>());
+				std::wstring UuidWstr = SMBC::String::ToWide(uuid.get<std::string>());
 				SMBC::ModData* _ModPtr = this->FindModByObjUuid(UuidWstr);
 
 				this->AddModToList(_ModPtr);
@@ -86,7 +86,7 @@ System::Void _ModListGUI::ModSearcher_BW_DoWork(
 			const auto& uuid = SMBC::Json::Get(joint, "shapeId");
 			if (!uuid.is_string()) continue;
 
-			std::wstring UuidWstr = SMBC::Other::Utf8ToWide(uuid.get<std::string>());
+			std::wstring UuidWstr = SMBC::String::ToWide(uuid.get<std::string>());
 			SMBC::ModData* _ModPtr = this->FindModByObjUuid(UuidWstr);
 
 			this->AddModToList(_ModPtr);
@@ -120,7 +120,7 @@ System::Void _ModListGUI::ModSearcher_BW_RunWorkerCompleted(
 			break;
 		}
 
-		SMBC::GUI::Error(L"Error", ErrorMsg);
+		SMBC::Gui::Error(L"Error", ErrorMsg);
 		this->Close();
 		return;
 	}
@@ -202,14 +202,13 @@ System::Void _ModListGUI::OpenInWorkshop_BTN_Click(System::Object^ sender, Syste
 	if (CurMod == nullptr) return;
 
 	if (CurMod->workshop_id.empty()) {
-		SMBC::GUI::Error("Error", "Couldn't open the workshop link to the specified blueprint!");
+		SMBC::Gui::Error("Error", "Couldn't open the workshop link to the specified blueprint!");
 		return;
 	}
 
 	std::wstring _WorkshopLink;
 	if (SMBC::Settings::OpenLinksInSteam) _WorkshopLink.append(L"steam://openurl/");
-	_WorkshopLink.append(L"https://steamcommunity.com/sharedfiles/filedetails/?id=");
-	_WorkshopLink.append(CurMod->workshop_id);
+	SMBC::String::Combine(_WorkshopLink, L"https://steamcommunity.com/sharedfiles/filedetails/?id=", CurMod->workshop_id);
 
 	System::Diagnostics::Process::Start(gcnew System::String(_WorkshopLink.c_str()));
 }
@@ -218,15 +217,15 @@ System::Void _ModListGUI::OpenInFileExplorer_BTN_Click(System::Object^ sender, S
 	SMBC::ModData* CurMod = this->GetCurrentMod();
 	if (CurMod == nullptr) return;
 
-	if (!SMBC::File::FileExists(CurMod->path)) {
-		SMBC::GUI::Error(L"Internal Error", L"The path to specified mod directory doesn't exist!");
+	if (!SMBC::File::Exists(CurMod->path)) {
+		SMBC::Gui::Error(L"Internal Error", L"The path to specified mod directory doesn't exist!");
 		return;
 	}
 
 	std::wstring path_cpy = CurMod->path;
 	SMBC::PathReplacer::ReplaceAll(path_cpy, L'/', L'\\');
 
-	SMBC::GUI::OpenFolderInExplorer(path_cpy);
+	SMBC::Gui::OpenFolderInExplorer(path_cpy);
 }
 
 SMBC::ModData* _ModListGUI::GetCurrentMod() {

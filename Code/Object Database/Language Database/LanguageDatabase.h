@@ -6,8 +6,8 @@
 namespace SMBC {
 	class LangDB {
 	public:
-		std::unordered_map<std::wstring, std::wstring> _Translations;
-		std::wstring _Environment;
+		std::unordered_map<std::wstring, std::wstring> Translations;
+		std::wstring Environment;
 
 		LangDB(const std::wstring& environment);
 		LangDB() = default;

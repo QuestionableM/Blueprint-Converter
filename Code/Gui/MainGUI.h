@@ -1,7 +1,8 @@
 #pragma once
 
 #include "Blueprint Converter/BlueprintConverter.h"
-#include "Lib/Functions/Functions.h"
+#include "Lib/ConvData/ConvData.h"
+#include "Object Database/Blueprint/Blueprint.h"
 
 namespace BlueprintConverter {
 	using namespace System;

@@ -1,7 +1,7 @@
 #include "JsonFunc.h"
 
 #include <sstream>
-#include "Lib/OtherFunc/OtherFunc.h"
+#include "Lib/String/String.h"
 
 namespace _JSON = SMBC::Json;
 
@@ -75,7 +75,7 @@ std::wstring _JSON::GetWstr(nlohmann::json& json, const std::string& key) {
 		auto& _value = json.at(key);
 
 		if (_value.is_string())
-			_Output.append(SMBC::Other::Utf8ToWide(_value.get<std::string>()));
+			_Output.append(SMBC::String::ToWide(_value.get<std::string>()));
 	}
 
 	return _Output;

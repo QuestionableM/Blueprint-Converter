@@ -5,7 +5,7 @@
 #include "Object Database/Keyword Replacer/KeywordReplacer.h"
 #include "Database Loader/DatabaseLoader.h"
 
-#include "Lib/Functions/Functions.h"
+#include "Lib/ConvData/ConvData.h"
 #include "Lib/File/FileFunc.h"
 #include "Lib/OtherFunc/OtherFunc.h"
 #include "Lib/Json/JsonFunc.h"
@@ -59,7 +59,7 @@ void _ObjectDatabase::ClearDatabase() {
 }
 
 void _ObjectDatabase::ReloadDatabase() {
-	SMBC::BPConvData::SetNewStage(SMBC::Stat_ReadingDatabase);
+	SMBC::ConvData::SetState(SMBC::State::ReadingDatabase);
 
 	_ObjectDatabase::ClearDatabase();
 

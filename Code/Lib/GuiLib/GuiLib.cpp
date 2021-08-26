@@ -1,6 +1,8 @@
 #include "GuiLib.h"
 
-std::wstring SMBC::GUI::OpenFileName(
+namespace _GUI = SMBC::Gui;
+
+std::wstring _GUI::OpenFileName(
 	const std::wstring& title,
 	FILEOPENDIALOGOPTIONS options,
 	LPCWSTR filter,
@@ -44,11 +46,11 @@ std::wstring SMBC::GUI::OpenFileName(
 	return _Output;
 }
 
-void SMBC::GUI::OpenFolderInExplorer(const std::wstring& path) {
+void _GUI::OpenFolderInExplorer(const std::wstring& path) {
 	System::Diagnostics::Process::Start("explorer.exe", gcnew System::String(path.c_str()));
 }
 
-WForms::DialogResult SMBC::GUI::Message(
+WForms::DialogResult _GUI::Message(
 	System::String^ title,
 	System::String^ description,
 	WForms::MessageBoxButtons buttons,
@@ -61,11 +63,11 @@ WForms::DialogResult SMBC::GUI::Message(
 	return _result;
 }
 
-WForms::DialogResult SMBC::GUI::Error(
+WForms::DialogResult _GUI::Error(
 	System::String^ title,
 	System::String^ description
 ) {
-	WForms::DialogResult _result = SMBC::GUI::Message(
+	WForms::DialogResult _result = _GUI::Message(
 		title, description,
 		WForms::MessageBoxButtons::OK,
 		WForms::MessageBoxIcon::Error
@@ -74,11 +76,11 @@ WForms::DialogResult SMBC::GUI::Error(
 	return _result;
 }
 
-WForms::DialogResult SMBC::GUI::Warning(
+WForms::DialogResult _GUI::Warning(
 	System::String^ title,
 	System::String^ description
 ) {
-	WForms::DialogResult _result = SMBC::GUI::Message(
+	WForms::DialogResult _result = _GUI::Message(
 		title, description,
 		WForms::MessageBoxButtons::OK,
 		WForms::MessageBoxIcon::Warning
@@ -87,11 +89,11 @@ WForms::DialogResult SMBC::GUI::Warning(
 	return _result;
 }
 
-WForms::DialogResult SMBC::GUI::Question(
+WForms::DialogResult _GUI::Question(
 	System::String^ title,
 	System::String^ description
 ) {
-	WForms::DialogResult _result = SMBC::GUI::Message(
+	WForms::DialogResult _result = _GUI::Message(
 		title, description,
 		WForms::MessageBoxButtons::YesNo,
 		WForms::MessageBoxIcon::Question

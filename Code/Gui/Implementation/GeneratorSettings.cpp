@@ -23,7 +23,7 @@ System::Void _GenSet::Convert_BTN_Click(System::Object^ sender, System::EventArg
 	std::wstring _bp_name = msclr::interop::marshal_as<std::wstring>(this->BlueprintName_TB->Text);
 
 	if (SMBC::File::IsBadPath(L"./Converted Models/" + _bp_name)) {
-		SMBC::GUI::Warning(
+		SMBC::Gui::Warning(
 			"Invalid name",
 			"The specified blueprint name is invalid.\n\nPlease, pick the other name"
 		);

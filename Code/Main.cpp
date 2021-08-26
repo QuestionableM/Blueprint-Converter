@@ -3,18 +3,14 @@
 
 #include "Gui/MainGUI.h"
 #include "Lib/ProgramSettings.h"
-#include "Lib/Functions/Functions.h"
-
-#include "Object Database/Texture Database/TextureDatabase.h"
-#include "Object Database/Keyword Replacer/KeywordReplacer.h"
-
-#include "Lib/GuiLib/GuiLib.h"
 
 #include "DebugCon.h"
 
 namespace SMBC {
 	using namespace BlueprintConverter;
 }
+
+#include "Lib/File/FileFunc.h"
 
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #if _DEBUG

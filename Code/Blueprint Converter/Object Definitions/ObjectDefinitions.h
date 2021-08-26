@@ -33,12 +33,10 @@ namespace SMBC {
 	};
 
 	struct CachedPart {
-		std::wstring name;
-		std::wstring color;
-		std::wstring meshPath;
+		SMBC::ObjectData* objPtr = nullptr;
 		SMBC::Model* modelPtr = nullptr;
 
-		SMBC::Texture::Texture texPaths;
+		std::wstring color;
 	};
 
 	struct SM_Part {

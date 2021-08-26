@@ -1,40 +1,24 @@
-#include "Functions.h"
+#include "Blueprint.h"
 
-#include <sstream>
-#include <fstream>
-#include <filesystem>
-#include <msclr/marshal_cppstd.h>
-
+#include "Lib/OtherFunc/OtherFunc.h"
 #include "Lib/File/FileFunc.h"
 
+#include <filesystem>
 #include <cwctype>
 
 namespace fs = std::filesystem;
+typedef SMBC::Blueprint _Blueprint;
 
-typedef SMBC::BPConvData _BPConvData;
+std::vector<std::wstring> _Blueprint::ImageExtensions = { L".jpg", L".png", L".bmp" };
 
-long _BPConvData::Stage = -1;
-long _BPConvData::ProgressBarMax = 0;
-long _BPConvData::ProgressBarValue = 0;
-
-void _BPConvData::SetNewStage(const long& Stage, const long& MaxValue) {
-	_BPConvData::Stage = Stage;
-	_BPConvData::ProgressBarValue = 0;
-	_BPConvData::ProgressBarMax = MaxValue;
-}
-
-std::vector<std::wstring> SMBC::Blueprint::ImageExtensions = { L".jpg", L".png", L".bmp" };
-
-bool SMBC::Blueprint::IsSupportedExtension(const std::wstring& _ext) {
+bool _Blueprint::IsSupportedExtension(const std::wstring& _ext) {
 	for (std::wstring& _Ext : SMBC::Blueprint::ImageExtensions)
 		if (_Ext == _ext) return true;
 
 	return false;
 }
 
-#include "Lib/OtherFunc/OtherFunc.h"
-
-std::wstring SMBC::Blueprint::FixBlueprintName(const std::wstring& name) {
+std::wstring _Blueprint::FixBlueprintName(const std::wstring& name) {
 	std::wstring _Output = L"";
 
 	for (const wchar_t& _Letter : name) {
@@ -45,8 +29,8 @@ std::wstring SMBC::Blueprint::FixBlueprintName(const std::wstring& name) {
 	return _Output;
 }
 
-std::wstring SMBC::Blueprint::FindBlueprintImage() {
-	if (!SMBC::File::FileExists(this->Folder)) return L"";
+std::wstring _Blueprint::FindBlueprintImage() {
+	if (!SMBC::File::Exists(this->Folder)) return L"";
 
 	fs::directory_iterator _Iter(this->Folder, fs::directory_options::skip_permission_denied);
 	for (auto& Image : _Iter) {
@@ -57,18 +41,18 @@ std::wstring SMBC::Blueprint::FindBlueprintImage() {
 			this->IsSupportedExtension(_img_p.extension().wstring())
 		) return _img_p.wstring();
 	}
-	
+
 	return L"";
 }
 
-bool SMBC::Blueprint::BlueprintExists() {
-	bool _FolderExists = SMBC::File::FileExists(this->Folder);
-	bool _PathExists = SMBC::File::FileExists(this->Path);
+bool _Blueprint::BlueprintExists() {
+	bool _FolderExists = SMBC::File::Exists(this->Folder);
+	bool _PathExists = SMBC::File::Exists(this->Path);
 
 	return (_FolderExists && _PathExists);
 }
 
-SMBC::Blueprint::Blueprint(
+_Blueprint::Blueprint(
 	const std::wstring& name,
 	const std::wstring& path,
 	const std::wstring& folder,

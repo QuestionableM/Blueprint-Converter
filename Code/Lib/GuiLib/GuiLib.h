@@ -7,7 +7,7 @@
 namespace WForms = System::Windows::Forms;
 
 namespace SMBC {
-	namespace GUI {
+	namespace Gui {
 		std::wstring OpenFileName(
 			const std::wstring& title,
 			FILEOPENDIALOGOPTIONS options = 0,

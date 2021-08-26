@@ -10,11 +10,11 @@
 
 namespace SMBC {
 	struct ObjectData {
-		std::wstring _obj_uuid;
-		std::wstring _obj_name;
-		std::wstring _obj_path;
-		SMBC::Texture::Texture obj_textures;
-		glm::vec3 _obj_bounds;
+		std::wstring uuid;
+		std::wstring name;
+		std::wstring path;
+		SMBC::Texture::Texture texList;
+		glm::vec3 bounds;
 
 		ObjectData(
 			const std::wstring& obj_uuid,
@@ -28,10 +28,10 @@ namespace SMBC {
 	};
 
 	struct BlockData {
-		SMBC::Texture::TextureList _block_tex;
-		std::wstring _obj_uuid;
-		std::wstring _obj_name;
-		int _tiling;
+		SMBC::Texture::TextureList texList;
+		std::wstring uuid;
+		std::wstring name;
+		int tiling;
 
 		BlockData(
 			const SMBC::Texture::TextureList& tex_list,
@@ -39,6 +39,7 @@ namespace SMBC {
 			const std::wstring& name,
 			const int& tiling
 		);
+
 		BlockData() = default;
 	};
 
@@ -56,8 +57,8 @@ namespace SMBC {
 		void LoadObjects();
 
 		bool UuidExists(const std::wstring& uuid);
-		void AddBlockToDatabase(SMBC::BlockData*& block);
-		void AddPartToDatabase(SMBC::ObjectData*& part);
+		void AddBlock(SMBC::BlockData*& block);
+		void AddPart(SMBC::ObjectData*& part);
 
 		ModData(
 			const std::wstring& name,

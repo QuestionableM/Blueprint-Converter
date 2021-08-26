@@ -3,6 +3,8 @@
 #include <string>
 #include <glm.hpp>
 
+#include "Lib/ConvData/ConvData.h"
+
 namespace SMBC {
 	enum : int {
 		Sep_Blocks =		1,
@@ -12,7 +14,7 @@ namespace SMBC {
 	};
 
 	namespace BPFunction {
-		int ConvertBlueprintToObj(
+		SMBC::Error ConvertBlueprintToObj(
 			const std::wstring& blueprint_path,
 			const std::wstring blueprint_name,
 			const int& separation_method,

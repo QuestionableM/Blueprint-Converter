@@ -1,7 +1,5 @@
 #include "BlueprintConverter.h"
-
 #include "Blueprint Converter/Blueprint Writer/BlueprintWriter.h"
-#include "Lib/Functions/Functions.h"
 
 #include <gtc/matrix_transform.hpp>
 
@@ -133,7 +131,7 @@ glm::vec3 SMBC::BPFunction::GetPartRotation(
 	return _TranslatedPos;
 }
 
-int SMBC::BPFunction::ConvertBlueprintToObj(
+SMBC::Error SMBC::BPFunction::ConvertBlueprintToObj(
 	const std::wstring& blueprint_path,
 	const std::wstring blueprint_name,
 	const int& separation_method,
@@ -154,8 +152,9 @@ int SMBC::BPFunction::ConvertBlueprintToObj(
 	SMBC::ConvertedModel _ConvModel(conv_data);
 	_ConvModel.ModelName = blueprint_name;
 
-	int loadResult = _ConvModel.LoadBlueprintData(blueprint_path);
-	if (loadResult != SMBC::Err_None)
+	SMBC::ConvData::SetState(SMBC::State::ReadingJson);
+	SMBC::Error loadResult = _ConvModel.LoadBlueprintData(blueprint_path);
+	if (loadResult != SMBC::Error::None)
 		return loadResult;
 
 	return _ConvModel.ConvertAndWrite();

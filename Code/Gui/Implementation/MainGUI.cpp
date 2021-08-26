@@ -11,10 +11,11 @@
 #include "Blueprint Converter/BlueprintConverter.h"
 #include "Object Database/Keyword Replacer/KeywordReplacer.h"
 
-#include "Lib/Functions/Functions.h"
+#include "Lib/ConvData/ConvData.h"
 #include "Lib/GuiLib/GuiLib.h"
 #include "Lib/File/FileFunc.h"
 #include "Lib/Json/JsonFunc.h"
+#include "Lib/String/String.h"
 #include "Lib/ProgramSettings.h"
 
 namespace SMBC {
@@ -65,8 +66,8 @@ System::Void _MainGUI::BPPath_TB_TextChanged(System::Object^ sender, System::Eve
 
 System::Void _MainGUI::Start_BTN_Click(System::Object^ sender, System::EventArgs^ e) {
 	std::wstring _BlueprintPath = msclr::interop::marshal_as<std::wstring>(this->BPPath_TB->Text);
-	if (!SMBC::File::FileExists(_BlueprintPath)) {
-		SMBC::GUI::Warning("Invalid path", "The specified path doesn't exist!");
+	if (!SMBC::File::Exists(_BlueprintPath)) {
+		SMBC::Gui::Warning("Invalid path", "The specified path doesn't exist!");
 		return;
 	}
 
@@ -80,7 +81,7 @@ System::Void _MainGUI::Start_BTN_Click(System::Object^ sender, System::EventArgs
 		nlohmann::json _DescrJson;
 
 		if (!SMBC::Json::ParseJson(_BPFileDesc, _DescrJson, true)) {
-			SMBC::GUI::Warning("Parse Error", "Couldn't parse \"description.json\"");
+			SMBC::Gui::Warning("Parse Error", "Couldn't parse \"description.json\"");
 			return;
 		}
 
@@ -88,7 +89,7 @@ System::Void _MainGUI::Start_BTN_Click(System::Object^ sender, System::EventArgs
 		std::wstring _BPName = SMBC::Json::GetWstr(_DescrJson, "name");
 
 		if (_BPType != L"Blueprint" || _BPName.empty()) {
-			SMBC::GUI::Warning("No Data", "The specified folder does not contain any information about the blueprint!");
+			SMBC::Gui::Warning("No Data", "The specified folder does not contain any information about the blueprint!");
 			return;
 		}
 
@@ -105,7 +106,7 @@ System::Void _MainGUI::Start_BTN_Click(System::Object^ sender, System::EventArgs
 			_BlueprintName = L"UnknownBlueprint";
 	}
 	else {
-		SMBC::GUI::Warning("Invalid path", "Unknown file type");
+		SMBC::Gui::Warning("Invalid path", "Unknown file type");
 		return;
 	}
 
@@ -135,7 +136,7 @@ System::Void _MainGUI::Start_BTN_Click(System::Object^ sender, System::EventArgs
 		return;
 	}
 
-	SMBC::GUI::Warning(
+	SMBC::Gui::Warning(
 		"Something went wrong",
 		"This message shouldn't be seen at all, so contact the application developer and provide all the useful info"
 	);
@@ -158,8 +159,7 @@ System::Void _MainGUI::ObjectGenerator_DoWork(System::Object^ sender, System::Co
 	std::wstring _BlueprintPath = msclr::interop::marshal_as<std::wstring>(_BlueprintPathS);
 	std::wstring _BlueprintName = msclr::interop::marshal_as<std::wstring>(_BlueprintNameS);
 
-	SMBC::BPConvData::SetNewStage(SMBC::Stat_ReadingJson);
-	e->Result = SMBC::BPFunction::ConvertBlueprintToObj(
+	SMBC::Error error_data = SMBC::BPFunction::ConvertBlueprintToObj(
 		_BlueprintPath,
 		_BlueprintName,
 		_SeparationMethod,
@@ -169,25 +169,29 @@ System::Void _MainGUI::ObjectGenerator_DoWork(System::Object^ sender, System::Co
 		_ExportNormals,
 		_MaterialsByColor && _ApplyTextures && _ExportUvs
 	);
+
+	e->Result = static_cast<int>(error_data);
 }
 
 System::Void _MainGUI::GuiUpdater_Tick(System::Object^ sender, System::EventArgs^ e) {
-	long _Stage = SMBC::BPConvData::Stage;
-	if (_Stage < 0) return;
+	long _State = static_cast<long>(SMBC::ConvData::State);
+	if (_State < 0l) return;
 
-	long _MaxValue = SMBC::BPConvData::ProgressBarMax;
-	long _Value = SMBC::BPConvData::ProgressBarValue;
+	unsigned long long _MaxValue = SMBC::ConvData::ProgressMax;
+	unsigned long long _Value = SMBC::ConvData::ProgressValue;
 
-	this->ActionProgress->Maximum = _MaxValue;
-	if (this->ActionProgress->Maximum < _Value)
-		_Value = this->ActionProgress->Maximum;
-	this->ActionProgress->Value = _Value;
+	this->ActionProgress->Maximum = (int)_MaxValue;
 
-	std::wstring _ProgressValue;
-	if (_Stage != 0)
-		_ProgressValue = L"(" + std::to_wstring(_Value) + L" / " + std::to_wstring(_MaxValue) + L")";
+	unsigned long long _MaxCast = this->ActionProgress->Maximum;
+	if (_MaxCast < _Value) _Value = _MaxCast;
 
-	this->ActionLabel->Text = gcnew System::String((SMBC::ActionTable[_Stage] + _ProgressValue).c_str());
+	this->ActionProgress->Value = (int)_Value;
+
+	std::wstring _ProgressValue = SMBC::ActionTable[_State];
+	if (_State != 0l)
+		SMBC::String::Combine(_ProgressValue, L"(", _Value, L" / ", _MaxValue, L")");
+
+	this->ActionLabel->Text = gcnew System::String(_ProgressValue.c_str());
 }
 
 System::Void _MainGUI::ObjectGenerator_RunWorkerCompleted(System::Object^ sender, System::ComponentModel::RunWorkerCompletedEventArgs^ e) {
@@ -195,18 +199,18 @@ System::Void _MainGUI::ObjectGenerator_RunWorkerCompleted(System::Object^ sender
 	this->GuiUpdater_Tick(nullptr, nullptr);
 
 	int result_code = safe_cast<int>(e->Result);
-	if (result_code > 0) SMBC::GUI::Error(
+	if (result_code > 0) SMBC::Gui::Error(
 		"Conversion Error",
 		gcnew System::String(SMBC::ConversionErrorTable[result_code].c_str())
 	);
-	else SMBC::GUI::Message(
+	else SMBC::Gui::Message(
 		"Success",
 		"Successfully finished generating a 3D model!",
 		System::Windows::Forms::MessageBoxButtons::OK,
 		System::Windows::Forms::MessageBoxIcon::Information
 	);
 
-	SMBC::BPConvData::SetNewStage(SMBC::Stat_None);
+	SMBC::ConvData::SetState(SMBC::State::None);
 	this->ChangeGUIState(true, true, true);
 	this->ActionProgress->Value = 0;
 	this->ActionLabel->Text = "No Action";
@@ -217,7 +221,7 @@ System::Void _MainGUI::DatabaseLoader_DoWork(System::Object^ sender, System::Com
 }
 
 System::Void _MainGUI::DatabaseLoader_RunWorkerCompleted(System::Object^ sender, System::ComponentModel::RunWorkerCompletedEventArgs^ e) {
-	SMBC::BPConvData::SetNewStage(SMBC::Stat_None);
+	SMBC::ConvData::SetState(SMBC::State::None);
 	this->GuiUpdater->Stop();
 	this->ActionProgress->Value = 0;
 	this->ActionLabel->Text = gcnew System::String((L"Successfully loaded " + std::to_wstring(SMBC::ObjectDatabase::CountLoadedObjects()) + L" objects from " + std::to_wstring(SMBC::ObjectDatabase::ModDB.size()) + L" mods").c_str());
@@ -226,7 +230,7 @@ System::Void _MainGUI::DatabaseLoader_RunWorkerCompleted(System::Object^ sender,
 
 System::Void _MainGUI::BlueprintLoader_DoWork(System::Object^ sender, System::ComponentModel::DoWorkEventArgs^ e) {
 	for (std::wstring& BlueprintFolder : SMBC::Settings::BlueprintFolders) {
-		if (!SMBC::File::FileExists(BlueprintFolder)) continue;
+		if (!SMBC::File::Exists(BlueprintFolder)) continue;
 
 		fs::directory_iterator BPDirIter(BlueprintFolder, fs::directory_options::skip_permission_denied);
 		for (auto& Folder : BPDirIter) {
@@ -276,12 +280,12 @@ System::Void _MainGUI::BlueprintList_SelectedIndexChanged(System::Object^ sender
 
 	SMBC::Blueprint _CurBlueprint;
 	if (!this->GetCurrentBlueprint(_CurBlueprint)) {
-		SMBC::GUI::Error("Error", "Couldn't get the specified blueprint!");
+		SMBC::Gui::Error("Error", "Couldn't get the specified blueprint!");
 		return;
 	}
 
 	if (!_CurBlueprint.BlueprintExists()) {
-		SMBC::GUI::Warning(
+		SMBC::Gui::Warning(
 			"Blueprint Doesn't Exist",
 			"The blueprint you have just selected doesn't exist anymore!\n\nThe blueprint list will be automatically reloaded as soon as this message will be closed"
 		);
@@ -453,7 +457,7 @@ System::Void _MainGUI::OpenOptionsGUI() {
 System::Void _MainGUI::MainGUI_Shown(System::Object^ sender, System::EventArgs^ e) {
 	if (!SMBC::Settings::PathToSM.empty()) return;
 
-	WForms::DialogResult dr = SMBC::GUI::Question(
+	WForms::DialogResult dr = SMBC::Gui::Question(
 		"Missing Path",
 		"This program requires a path to Scrap Mechanic to work properly\n\nWould you like to set it up right now?"
 	);
@@ -463,7 +467,7 @@ System::Void _MainGUI::MainGUI_Shown(System::Object^ sender, System::EventArgs^ 
 }
 
 System::Void _MainGUI::OpenBlueprint_Click(System::Object^ sender, System::EventArgs^ e) {
-	std::wstring _FileName = SMBC::GUI::OpenFileName(
+	std::wstring _FileName = SMBC::Gui::OpenFileName(
 		L"Select a Blueprint File",
 		0,
 		L"All Files (*.*)\0*.*\0",
@@ -477,14 +481,14 @@ System::Void _MainGUI::OpenBlueprint_Click(System::Object^ sender, System::Event
 
 System::Void _MainGUI::OpenOutputFolder_BTN_Click(System::Object^ sender, System::EventArgs^ e) {
 	if (SMBC::File::SafeCreateDir(L".\\Converted Models"))
-		SMBC::GUI::OpenFolderInExplorer(L".\\Converted Models");
+		SMBC::Gui::OpenFolderInExplorer(L".\\Converted Models");
 	else
-		SMBC::GUI::Error("Error", "Couldn't open a directory with converted models.");
+		SMBC::Gui::Error("Error", "Couldn't open a directory with converted models.");
 }
 
 System::Void _MainGUI::MainGUI_FormClosing(System::Object^ sender, System::Windows::Forms::FormClosingEventArgs^ e) {
 	if (this->ObjectGenerator->IsBusy) {
-		WForms::DialogResult dr = SMBC::GUI::Question(
+		WForms::DialogResult dr = SMBC::Gui::Question(
 			"Close",
 			"Are you sure that you want to close the program while it's converting a blueprint?\n\nThis might corrupt the file it's currently writing!"
 		);
@@ -499,7 +503,7 @@ System::Void _MainGUI::OpenInWorkshop_BTN_Click(System::Object^ sender, System::
 	if (!this->GetCurrentBlueprint(_CurBlueprint)) return;
 
 	if (_CurBlueprint.WorkshopId.empty()) {
-		SMBC::GUI::Error("Error", "Couldn't open the workshop link to the specified blueprint!");
+		SMBC::Gui::Error("Error", "Couldn't open the workshop link to the specified blueprint!");
 		return;
 	}
 
@@ -507,8 +511,7 @@ System::Void _MainGUI::OpenInWorkshop_BTN_Click(System::Object^ sender, System::
 	if (SMBC::Settings::OpenLinksInSteam)
 		_WorkshopLink.append(L"steam://openurl/");
 
-	_WorkshopLink.append(L"https://steamcommunity.com/sharedfiles/filedetails/?id=");
-	_WorkshopLink.append(_CurBlueprint.WorkshopId);
+	SMBC::String::Combine(_WorkshopLink, L"https://steamcommunity.com/sharedfiles/filedetails/?id=", _CurBlueprint.WorkshopId);
 
 	System::Diagnostics::Process::Start(gcnew System::String(_WorkshopLink.c_str()));
 }
@@ -517,15 +520,15 @@ System::Void _MainGUI::BP_OpenOutputDir_BTN_Click(System::Object^ sender, System
 	SMBC::Blueprint _CurBlueprint;
 	if (!this->GetCurrentBlueprint(_CurBlueprint)) return;
 
-	if (!SMBC::File::FileExists(_CurBlueprint.Folder)) {
-		SMBC::GUI::Error("Internal Error", "The path to the selected blueprint doesn't exist!");
+	if (!SMBC::File::Exists(_CurBlueprint.Folder)) {
+		SMBC::Gui::Error("Internal Error", "The path to the selected blueprint doesn't exist!");
 		return;
 	}
 
 	std::wstring path_cpy = _CurBlueprint.Folder;
 	SMBC::PathReplacer::ReplaceAll(path_cpy, L'/', L'\\');
 	
-	SMBC::GUI::OpenFolderInExplorer(path_cpy);
+	SMBC::Gui::OpenFolderInExplorer(path_cpy);
 }
 
 bool _MainGUI::GetCurrentBlueprint(SMBC::Blueprint& bp) {
@@ -545,8 +548,8 @@ System::Void _MainGUI::BP_ShowModList_BTN_Click(System::Object^ sender, System::
 
 	if (!this->GetCurrentBlueprint(sel_blueprint)) return;
 
-	if (!SMBC::File::FileExists(sel_blueprint.Path)) {
-		SMBC::GUI::Warning(L"Invalid Blueprint", L"The path to specified blueprint doesn't exist anymore!");
+	if (!SMBC::File::Exists(sel_blueprint.Path)) {
+		SMBC::Gui::Warning(L"Invalid Blueprint", L"The path to specified blueprint doesn't exist anymore!");
 		return;
 	}
 

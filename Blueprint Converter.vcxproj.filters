@@ -15,16 +15,17 @@
     <ClCompile Include="Code\Object Database\Language Database\LanguageDatabase.cpp" />
     <ClCompile Include="Code\Object Database\Texture Database\TextureDatabase.cpp" />
     <ClCompile Include="Code\Lib\File\FileFunc.cpp" />
-    <ClCompile Include="Code\Lib\Functions\Functions.cpp" />
     <ClCompile Include="Code\Lib\GuiLib\GuiLib.cpp" />
     <ClCompile Include="Code\Lib\Json\JsonFunc.cpp" />
     <ClCompile Include="Code\Lib\OtherFunc\OtherFunc.cpp" />
     <ClCompile Include="Code\Lib\ProgramSettings.cpp" />
-    <ClCompile Include="Code\Lib\Bit\Bit.cpp" />
     <ClCompile Include="Code\Gui\Implementation\ModList.cpp" />
     <ClCompile Include="Code\Object Database\Database Loader\DatabaseLoader.cpp" />
     <ClCompile Include="Code\Object Database\Mod Data\ModData.cpp" />
     <ClCompile Include="Code\DebugCon.cpp" />
+    <ClCompile Include="Code\Lib\String\String.cpp" />
+    <ClCompile Include="Code\Object Database\Blueprint\Blueprint.cpp" />
+    <ClCompile Include="Code\Lib\ConvData\ConvData.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Code\Blueprint Converter\BlueprintConverter.h" />
@@ -40,16 +41,18 @@
     <ClInclude Include="Code\Object Database\Language Database\LanguageDatabase.h" />
     <ClInclude Include="Code\Object Database\Texture Database\TextureDatabase.h" />
     <ClInclude Include="Code\Lib\File\FileFunc.h" />
-    <ClInclude Include="Code\Lib\Functions\Functions.h" />
     <ClInclude Include="Code\Lib\GuiLib\GuiLib.h" />
     <ClInclude Include="Code\Lib\Json\JsonFunc.h" />
     <ClInclude Include="Code\Lib\OtherFunc\OtherFunc.h" />
     <ClInclude Include="Code\Lib\ProgramSettings.h" />
-    <ClInclude Include="Code\Lib\Bit\Bit.h" />
+    <ClInclude Include="Code\Lib\Bit.h" />
     <ClInclude Include="Code\Gui\ModList.h" />
     <ClInclude Include="Code\Lib\BuildVersion.h" />
     <ClInclude Include="Code\Object Database\Database Loader\DatabaseLoader.h" />
     <ClInclude Include="Code\Object Database\Mod Data\ModData.h" />
     <ClInclude Include="Code\DebugCon.h" />
+    <ClInclude Include="Code\Lib\String\String.h" />
+    <ClInclude Include="Code\Object Database\Blueprint\Blueprint.h" />
+    <ClInclude Include="Code\Lib\ConvData\ConvData.h" />
   </ItemGroup>
 </Project>

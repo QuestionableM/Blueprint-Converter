@@ -29,14 +29,15 @@
     <ClCompile Include="Code\Gui\Implementation\MainGUI.cpp" />
     <ClCompile Include="Code\Gui\Implementation\SettingsGUI.cpp" />
     <ClCompile Include="Code\Gui\Implementation\ModList.cpp" />
-    <ClCompile Include="Code\Lib\Bit\Bit.cpp" />
+    <ClCompile Include="Code\Lib\ConvData\ConvData.cpp" />
     <ClCompile Include="Code\Lib\File\FileFunc.cpp" />
-    <ClCompile Include="Code\Lib\Functions\Functions.cpp" />
     <ClCompile Include="Code\Lib\GuiLib\GuiLib.cpp" />
     <ClCompile Include="Code\Lib\Json\JsonFunc.cpp" />
     <ClCompile Include="Code\Lib\OtherFunc\OtherFunc.cpp" />
     <ClCompile Include="Code\Lib\ProgramSettings.cpp" />
+    <ClCompile Include="Code\Lib\String\String.cpp" />
     <ClCompile Include="Code\Main.cpp" />
+    <ClCompile Include="Code\Object Database\Blueprint\Blueprint.cpp" />
     <ClCompile Include="Code\Object Database\Keyword Replacer\KeywordReplacer.cpp" />
     <ClCompile Include="Code\Object Database\Language Database\LanguageDatabase.cpp" />
     <ClCompile Include="Code\Object Database\Mod Data\ModData.cpp" />
@@ -65,14 +66,16 @@
     <ClInclude Include="Code\Gui\SettingsGUI.h">
       <FileType>CppForm</FileType>
     </ClInclude>
-    <ClInclude Include="Code\Lib\Bit\Bit.h" />
+    <ClInclude Include="Code\Lib\Bit.h" />
     <ClInclude Include="Code\Lib\BuildVersion.h" />
+    <ClInclude Include="Code\Lib\ConvData\ConvData.h" />
     <ClInclude Include="Code\Lib\File\FileFunc.h" />
-    <ClInclude Include="Code\Lib\Functions\Functions.h" />
     <ClInclude Include="Code\Lib\GuiLib\GuiLib.h" />
     <ClInclude Include="Code\Lib\Json\JsonFunc.h" />
     <ClInclude Include="Code\Lib\OtherFunc\OtherFunc.h" />
     <ClInclude Include="Code\Lib\ProgramSettings.h" />
+    <ClInclude Include="Code\Lib\String\String.h" />
+    <ClInclude Include="Code\Object Database\Blueprint\Blueprint.h" />
     <ClInclude Include="Code\Object Database\Keyword Replacer\KeywordReplacer.h" />
     <ClInclude Include="Code\Object Database\Language Database\LanguageDatabase.h" />
     <ClInclude Include="Code\Object Database\Mod Data\ModData.h" />
@@ -181,6 +184,8 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(SolutionDir)\Dependencies\Assimp\Include;$(SolutionDir)\Dependencies\glm;$(SolutionDir)\Dependencies\Json;$(SolutionDir)\Code;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <Optimization>Disabled</Optimization>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <AdditionalDependencies>assimp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -196,6 +201,8 @@
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(SolutionDir)\Dependencies\Assimp\Include;$(SolutionDir)\Dependencies\glm;$(SolutionDir)\Dependencies\Json;$(SolutionDir)\Code;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <Optimization>Disabled</Optimization>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <AdditionalDependencies>assimp64.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -212,6 +219,8 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(SolutionDir)\Dependencies\Assimp\Include;$(SolutionDir)\Dependencies\glm;$(SolutionDir)\Dependencies\Json;$(SolutionDir)\Code;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <AdditionalDependencies>assimp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -227,6 +236,8 @@
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(SolutionDir)\Dependencies\Assimp\Include;$(SolutionDir)\Dependencies\glm;$(SolutionDir)\Dependencies\Json;$(SolutionDir)\Code;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <AdditionalDependencies>assimp64.lib;%(AdditionalDependencies)</AdditionalDependencies>

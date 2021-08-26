@@ -4,8 +4,8 @@
 #include "Object Database/ObjectDatabase.h"
 #include "Object Database/Keyword Replacer/KeywordReplacer.h"
 
-#include "Lib/OtherFunc/OtherFunc.h"
-#include "Lib/Functions/Functions.h"
+#include "Lib/String/String.h"
+#include "Lib/ConvData/ConvData.h"
 #include "Lib/File/FileFunc.h"
 #include "Lib/ProgramSettings.h"
 
@@ -14,53 +14,60 @@
 #include "DebugCon.h"
 
 namespace fs = std::filesystem;
+typedef SMBC::DatabaseLoader _DatabaseLoader;
 
-glm::vec3 SMBC::DatabaseLoader::LoadBlockCollision(const nlohmann::json& collision) {
-	glm::vec3 _Collision(1.0f);
+glm::vec3 _DatabaseLoader::LoadBlockCollision(const nlohmann::json& collision) {
+	glm::vec3 out_coll(1.0f);
 
 	bool isBoxCol = collision.contains("box");
 	bool isHullCol = collision.contains("hull");
-
 	if (isBoxCol || isHullCol) {
-		std::string colKey = (isBoxCol ? "box" : "hull");
-		const auto& _Coll = collision.at(colKey);
+		const auto& b_Col = collision.at(isBoxCol ? "box" : "hull");
 
-		if (_Coll.is_object()) {
-			const auto& _XPos = SMBC::Json::Get(_Coll, "x");
-			const auto& _YPos = SMBC::Json::Get(_Coll, "y");
-			const auto& _ZPos = SMBC::Json::Get(_Coll, "z");
+		if (b_Col.is_object()) {
+			const auto& xPos = SMBC::Json::Get(b_Col, "x");
+			const auto& yPos = SMBC::Json::Get(b_Col, "y");
+			const auto& zPos = SMBC::Json::Get(b_Col, "z");
 
-			if (_XPos.is_number() && _YPos.is_number() && _ZPos.is_number())
-				_Collision = glm::vec3(_XPos.get<float>(), _YPos.get<float>(), _ZPos.get<float>());
+			if (xPos.is_number() && yPos.is_number() && zPos.is_number())
+				out_coll = glm::vec3(xPos.get<float>(), yPos.get<float>(), zPos.get<float>());
 		}
 	}
 	else {
-		const auto& _CylCol = SMBC::Json::Get(collision, "cylinder");
-		if (_CylCol.is_object()) {
-			const auto& _Diameter = SMBC::Json::Get(_CylCol, "diameter");
-			const auto& _Depth = SMBC::Json::Get(_CylCol, "depth");
-			const auto& _Axis = SMBC::Json::Get(_CylCol, "axis");
+		const auto& cyl_col = SMBC::Json::Get(collision, "cylinder");
+		if (cyl_col.is_object()) {
+			const auto& c_Diameter = SMBC::Json::Get(cyl_col, "diameter");
+			const auto& c_Depth = SMBC::Json::Get(cyl_col, "depth");
 
-			std::string _AxisString = (_Axis.is_string() ? _Axis.get<std::string>() : "z");
+			if (c_Diameter.is_number() && c_Depth.is_number()) {
+				float f_Diameter = c_Diameter.get<float>();
+				float f_Depth = c_Depth.get<float>();
 
-			if (_Diameter.is_number() && _Depth.is_number()) {
-				float _FDiameter = _Diameter.get<float>();
-				float _FDepth = _Depth.get<float>();
+				const auto& c_Axis = SMBC::Json::Get(cyl_col, "axis");
+				std::string c_AxisStr = (c_Axis.is_string() ? c_Axis.get<std::string>() : "z");
 
-				if (_AxisString == "x" || _AxisString == "X")
-					_Collision = glm::vec3(_FDepth, _FDiameter, _FDiameter);
-				else if (_AxisString == "y" || _AxisString == "Y")
-					_Collision = glm::vec3(_FDiameter, _FDepth, _FDiameter);
-				else if (_AxisString == "z" || _AxisString == "Z")
-					_Collision = glm::vec3(_FDiameter, _FDiameter, _FDepth);
+				if (c_AxisStr == "x" || c_AxisStr == "X")
+					out_coll = glm::vec3(f_Depth, f_Diameter, f_Diameter);
+				else if (c_AxisStr == "y" || c_AxisStr == "Y")
+					out_coll = glm::vec3(f_Diameter, f_Depth, f_Diameter);
+				else if (c_AxisStr == "z" || c_AxisStr == "Z")
+					out_coll = glm::vec3(f_Diameter, f_Diameter, f_Depth);
+			}
+		}
+		else {
+			const auto& sphere_col = SMBC::Json::Get(collision, "sphere");
+			if (sphere_col.is_object()) {
+				const auto& s_Diameter = SMBC::Json::Get(sphere_col, "diameter");
+				if (s_Diameter.is_number())
+					out_coll = glm::vec3(s_Diameter.get<float>());
 			}
 		}
 	}
 
-	return _Collision;
+	return out_coll;
 }
 
-void SMBC::DatabaseLoader::GetTextureArray(
+void _DatabaseLoader::GetTextureArray(
 	const nlohmann::json& textureList,
 	std::wstring& dif,
 	std::wstring& asg,
@@ -72,7 +79,7 @@ void SMBC::DatabaseLoader::GetTextureArray(
 	for (size_t a = 0; a < arr_size; a++) {
 		auto& texObj = textureList[a];
 
-		std::wstring texStr = (texObj.is_string() ? SMBC::Other::Utf8ToWide(texObj.get<std::string>()) : L"");
+		std::wstring texStr = (texObj.is_string() ? SMBC::String::ToWide(texObj.get<std::string>()) : L"");
 		switch (a) {
 		case 0: dif = texStr; break;
 		case 1: asg = texStr; break;
@@ -81,7 +88,68 @@ void SMBC::DatabaseLoader::GetTextureArray(
 	}
 }
 
-void SMBC::DatabaseLoader::GetRenderableData(
+void _DatabaseLoader::LoadSubMeshTextures(
+	const nlohmann::json& subMesh,
+	const std::wstring& texKey,
+	SMBC::Texture::Texture& texture
+) {
+	const auto& t_List = SMBC::Json::Get(subMesh, "textureList");
+	if (!t_List.is_array()) return;
+
+	std::wstring t_Dif, t_Asg, t_Nor;
+	SMBC::DatabaseLoader::GetTextureArray(t_List, t_Dif, t_Asg, t_Nor);
+
+	SMBC::Texture::TextureList _NewList(t_Dif, t_Asg, t_Nor);
+	_NewList.ReplaceTextureKeys();
+
+	texture.AddTexture(texKey, _NewList);
+}
+
+bool _DatabaseLoader::TryLoadSubMeshList(
+	const nlohmann::json& lod,
+	SMBC::Texture::Texture& texture
+) {
+	const auto& SubMeshList = SMBC::Json::Get(lod, "subMeshList");
+	if (!SubMeshList.is_array()) return false;
+
+	SMBC::Texture::Texture _Output(SMBC::Texture::TextureType::SubMeshList);
+
+	uint32_t _idx = 0;
+	for (const auto& SubMesh : SubMeshList) {
+		if (!SubMesh.is_object()) continue;
+
+		const auto& idx_obj = SMBC::Json::Get(SubMesh, "idx");
+		uint32_t m_Idx = (idx_obj.is_number() ? idx_obj.get<int>() : _idx);
+
+		SMBC::DatabaseLoader::LoadSubMeshTextures(SubMesh, std::to_wstring(m_Idx), _Output);
+		_idx++;
+	}
+
+	texture = _Output;
+	return true;
+}
+
+bool _DatabaseLoader::TryLoadSubMeshMap(
+	const nlohmann::json& lod,
+	SMBC::Texture::Texture& texture
+) {
+	const auto& SubMeshMap = SMBC::Json::Get(lod, "subMeshMap");
+	if (!SubMeshMap.is_object()) return false;
+
+	SMBC::Texture::Texture _Output(SMBC::Texture::TextureType::SubMeshMap);
+
+	for (const auto& SubMesh : SubMeshMap.items()) {
+		if (!SubMesh.value().is_object()) continue;
+
+		std::wstring _WstrKey = SMBC::String::ToWide(SubMesh.key());
+		SMBC::DatabaseLoader::LoadSubMeshTextures(SubMesh.value(), _WstrKey, _Output);
+	}
+
+	texture = _Output;
+	return true;
+}
+
+void _DatabaseLoader::GetRenderableData(
 	const nlohmann::json& renderable,
 	SMBC::Texture::Texture& texture,
 	std::wstring& model_path
@@ -94,177 +162,121 @@ void SMBC::DatabaseLoader::GetRenderableData(
 
 	const auto& _Mesh = SMBC::Json::Get(_LodItem, "mesh");
 	if (!_Mesh.is_string()) return;
-	std::wstring _WstrMesh = SMBC::PathReplacer::ReplaceKey(SMBC::Other::Utf8ToWide(_Mesh.get<std::string>()));
+	std::wstring _WstrMesh = SMBC::PathReplacer::ReplaceKey(SMBC::String::ToWide(_Mesh.get<std::string>()));
 
 	if (_WstrMesh.empty()) return;
 	model_path = _WstrMesh;
 
-	const auto& SubMeshList = SMBC::Json::Get(_LodItem, "subMeshList");
-	if (SubMeshList.is_array()) {
-		SMBC::Texture::Texture _Output(SMBC::Texture::TextureType::SubMeshList);
-
-		uint32_t _idx = 0;
-		for (auto& SubMesh : SubMeshList) {
-			if (!SubMesh.is_object()) continue;
-
-			const auto& _TextureList = SMBC::Json::Get(SubMesh, "textureList");
-			if (!_TextureList.is_array()) continue;
-
-			const auto& idx_obj = SMBC::Json::Get(SubMesh, "idx");
-			uint32_t _mesh_idx = (idx_obj.is_number() ? idx_obj.get<int>() : _idx);
-
-			std::wstring _DifTex, _AsgTex, _NorTex;
-			SMBC::DatabaseLoader::GetTextureArray(_TextureList, _DifTex, _AsgTex, _NorTex);
-
-			SMBC::Texture::TextureList _NewList(_DifTex, _AsgTex, _NorTex, std::to_wstring(_mesh_idx));
-			_NewList.ReplaceTextureKeys();
-
-			_Output.AddTexture(_NewList);
-			_idx++;
-		}
-
-		texture = _Output;
-	}
-	else {
-		const auto& SubMeshMap = SMBC::Json::Get(_LodItem, "subMeshMap");
-		if (SubMeshMap.is_object()) {
-			SMBC::Texture::Texture _Output(SMBC::Texture::TextureType::SubMeshMap);
-
-			for (auto& SubMesh : SubMeshMap.items()) {
-				if (!SubMesh.value().is_object()) continue;
-
-				const auto& _TextureList = SMBC::Json::Get(SubMesh.value(), "textureList");
-				if (!_TextureList.is_array()) continue;
-
-				std::wstring _DifTex, _AsgTex, _NorTex;
-				SMBC::DatabaseLoader::GetTextureArray(_TextureList, _DifTex, _AsgTex, _NorTex);
-
-				std::wstring _WstrKey = SMBC::Other::Utf8ToWide(SubMesh.key());
-				SMBC::Texture::TextureList _NewList(_DifTex, _AsgTex, _NorTex, _WstrKey);
-				_NewList.ReplaceTextureKeys();
-
-				_Output.AddTexture(_NewList);
-			}
-
-			texture = _Output;
-		}
-	}
-}
-
-void SMBC::DatabaseLoader::LoadObjectFile(
-	SMBC::ModData* mod,
-	const std::wstring& path,
-	SMBC::LangDB& translations
-) {
-	nlohmann::json _ObjectFile;
-
-	if (!SMBC::Json::ParseJson(path, _ObjectFile))
+	if (SMBC::DatabaseLoader::TryLoadSubMeshList(_LodItem, texture))
 		return;
 
-	const auto& _BlockList = SMBC::Json::Get(_ObjectFile, "blockList");
-	if (_BlockList.is_array()) {
-		SMBC::BPConvData::ProgressBarMax += (int32_t)_BlockList.size();
-		for (auto& _Block : _BlockList) {
-			const auto& _Uuid = SMBC::Json::Get(_Block, "uuid");
+	if (SMBC::DatabaseLoader::TryLoadSubMeshMap(_LodItem, texture))
+		return;
+}
 
-			if (!_Uuid.is_string()) continue;
-			std::wstring _WstrUuid = SMBC::Other::Utf8ToWide(_Uuid.get<std::string>());
-			if (mod->UuidExists(_WstrUuid)) continue;
+void _DatabaseLoader::LoadRenderableObject(
+	SMBC::ModData*& mod,
+	const nlohmann::json& r_Object,
+	const std::wstring& uuid,
+	const std::wstring& name,
+	const glm::vec3& bounds
+) {
+	std::wstring _Mesh = L"";
+	SMBC::Texture::Texture _TextureList(SMBC::Texture::TextureType::None);
 
-			const std::wstring& _BlockName = translations.GetTranslation(_WstrUuid);
+	SMBC::DatabaseLoader::GetRenderableData(r_Object, _TextureList, _Mesh);
+	if (_Mesh.empty() || _TextureList.TexType == SMBC::Texture::TextureType::None) return;
 
-			const auto& _Dif = SMBC::Json::Get(_Block, "dif");
-			const auto& _Asg = SMBC::Json::Get(_Block, "asg");
-			const auto& _Nor = SMBC::Json::Get(_Block, "nor");
-			const auto& _Tiling = SMBC::Json::Get(_Block, "tiling");
+	SMBC::ObjectData* _ObjData = new SMBC::ObjectData(uuid, _Mesh, name, _TextureList, bounds);
 
-			SMBC::Texture::TextureList _TexList;
+	mod->AddPart(_ObjData);
 
-			_TexList.dif = (_Dif.is_string() ? SMBC::Other::Utf8ToWide(_Dif.get<std::string>()) : L"");
-			_TexList.asg = (_Asg.is_string() ? SMBC::Other::Utf8ToWide(_Asg.get<std::string>()) : L"");
-			_TexList.nor = (_Nor.is_string() ? SMBC::Other::Utf8ToWide(_Nor.get<std::string>()) : L"");
-			_TexList.ReplaceTextureKeys();
+	SMBC::ConvData::ProgressValue++;
+}
 
-			int _TilingValue = (_Tiling.is_number() ? _Tiling.get<int>() : 4);
-			if (_TilingValue > 16 || _TilingValue <= 0) _TilingValue = 4;
+void _DatabaseLoader::LoadBlockList(const nlohmann::json& f_Json, SMBC::ModData*& mod) {
+	const auto& b_List = SMBC::Json::Get(f_Json, "blockList");
+	if (!b_List.is_array()) return;
 
-			SMBC::BlockData* _BlockData = new SMBC::BlockData(
-				_TexList,
-				_WstrUuid,
-				_BlockName + (L" (" + translations._Environment + L": " + _WstrUuid + L")"),
-				_TilingValue
-			);
-			mod->AddBlockToDatabase(_BlockData);
+	SMBC::ConvData::ProgressMax += b_List.size();
+	for (auto& _Block : b_List) {
+		const auto& _Uuid = SMBC::Json::Get(_Block, "uuid");
+		if (!_Uuid.is_string()) continue;
 
-			SMBC::BPConvData::ProgressBarValue++;
-		}
+		std::wstring _WstrUuid = SMBC::String::ToWide(_Uuid.get<std::string>());
+		const std::wstring& _BlockName = mod->LanguageDB.GetTranslation(_WstrUuid);
+
+		const auto& _Dif = SMBC::Json::Get(_Block, "dif");
+		const auto& _Asg = SMBC::Json::Get(_Block, "asg");
+		const auto& _Nor = SMBC::Json::Get(_Block, "nor");
+		const auto& _Tiling = SMBC::Json::Get(_Block, "tiling");
+
+		SMBC::Texture::TextureList _TexList;
+
+		_TexList.dif = (_Dif.is_string() ? SMBC::String::ToWide(_Dif.get<std::string>()) : L"");
+		_TexList.asg = (_Asg.is_string() ? SMBC::String::ToWide(_Asg.get<std::string>()) : L"");
+		_TexList.nor = (_Nor.is_string() ? SMBC::String::ToWide(_Nor.get<std::string>()) : L"");
+		_TexList.ReplaceTextureKeys();
+
+		int _TilingValue = (_Tiling.is_number() ? _Tiling.get<int>() : 4);
+		if (_TilingValue > 16 || _TilingValue <= 0) _TilingValue = 4;
+
+		SMBC::BlockData* _BlockData = new SMBC::BlockData(
+			_TexList,
+			_WstrUuid,
+			_BlockName + (L" (" + mod->LanguageDB.Environment + L": " + _WstrUuid + L")"),
+			_TilingValue
+		);
+
+		mod->AddBlock(_BlockData);
+
+		SMBC::ConvData::ProgressValue++;
 	}
+}
 
+void _DatabaseLoader::LoadPartList(const nlohmann::json& f_Json, SMBC::ModData*& mod) {
+	const auto& p_List = SMBC::Json::Get(f_Json, "partList");
+	if (!p_List.is_array()) return;
+	
+	SMBC::ConvData::ProgressMax += p_List.size();
+	for (auto& _Part : p_List) {
+		const auto& _Uuid = SMBC::Json::Get(_Part, "uuid");
+		if (!_Uuid.is_string()) continue;
 
-	const auto& _PartList = SMBC::Json::Get(_ObjectFile, "partList");
-	if (_PartList.is_array()) {
-		SMBC::BPConvData::ProgressBarMax += (int32_t)_PartList.size();
-		for (auto& _Part : _PartList) {
-			const auto& _Uuid = SMBC::Json::Get(_Part, "uuid");
-			if (!_Uuid.is_string()) continue;
+		std::wstring _WstrUuid = SMBC::String::ToWide(_Uuid.get<std::string>());
+		if (mod->UuidExists(_WstrUuid)) continue;
 
-			std::wstring _WstrUuid = SMBC::Other::Utf8ToWide(_Uuid.get<std::string>());
-			if (mod->UuidExists(_WstrUuid)) continue;
+		const std::wstring& _ObjName = mod->LanguageDB.GetTranslation(_WstrUuid);
+		const std::wstring& f_ObjName = _ObjName + (L" (" + mod->LanguageDB.Environment + L": " + _WstrUuid + L")");
 
-			const std::wstring& _ObjName = translations.GetTranslation(_WstrUuid);
+		glm::vec3 _ObjectBounds = SMBC::DatabaseLoader::LoadBlockCollision(_Part);
+		const auto& _Renderable = SMBC::Json::Get(_Part, "renderable");
 
-			glm::vec3 _ObjectBounds = SMBC::DatabaseLoader::LoadBlockCollision(_Part);
-			const auto& _Renderable = SMBC::Json::Get(_Part, "renderable");
+		if (_Renderable.is_object()) {
+			SMBC::DatabaseLoader::LoadRenderableObject(mod, _Renderable, _WstrUuid, f_ObjName, _ObjectBounds);
+		}
+		else if (_Renderable.is_string()) {
+			std::wstring _RenderableWstr = SMBC::String::ToWide(_Renderable.get<std::string>());
+			_RenderableWstr = SMBC::PathReplacer::ReplaceKey(_RenderableWstr);
 
-			if (_Renderable.is_object()) {
-				std::wstring _Mesh = L"";
-				SMBC::Texture::Texture _TextureList(SMBC::Texture::TextureType::None);
+			nlohmann::json _RendFile;
+			if (!SMBC::Json::ParseJson(_RenderableWstr, _RendFile))
+				continue;
 
-				SMBC::DatabaseLoader::GetRenderableData(_Renderable, _TextureList, _Mesh);
-				if (_Mesh.empty() || _TextureList.TexType == SMBC::Texture::TextureType::None) continue;
-
-				SMBC::ObjectData* _ObjData = new SMBC::ObjectData(
-					_WstrUuid,
-					_Mesh,
-					_ObjName + (L" (" + translations._Environment + L": " + _WstrUuid + L")"),
-					_TextureList,
-					_ObjectBounds
-				);
-				mod->AddPartToDatabase(_ObjData);
-
-				SMBC::BPConvData::ProgressBarValue++;
-			}
-			else if (_Renderable.is_string()) {
-				std::wstring _RenderableWstr = SMBC::Other::Utf8ToWide(_Renderable.get<std::string>());
-				_RenderableWstr = SMBC::PathReplacer::ReplaceKey(_RenderableWstr);
-
-				nlohmann::json _RendFile;
-				if (!SMBC::Json::ParseJson(_RenderableWstr, _RendFile))
-					continue;
-
-				std::wstring _Mesh = L"";
-				SMBC::Texture::Texture _TextureList(SMBC::Texture::TextureType::None);
-
-				SMBC::DatabaseLoader::GetRenderableData(_RendFile, _TextureList, _Mesh);
-				if (_Mesh.empty() || _TextureList.TexType == SMBC::Texture::TextureType::None) continue;
-
-				SMBC::ObjectData* _ObjData = new SMBC::ObjectData(
-					_WstrUuid,
-					_Mesh,
-					_ObjName + (L" (" + translations._Environment + L": " + _WstrUuid + L")"),
-					_TextureList,
-					_ObjectBounds
-				);
-
-				mod->AddPartToDatabase(_ObjData);
-
-				SMBC::BPConvData::ProgressBarValue++;
-			}
+			SMBC::DatabaseLoader::LoadRenderableObject(mod, _RendFile, _WstrUuid, f_ObjName, _ObjectBounds);
 		}
 	}
 }
 
-void SMBC::DatabaseLoader::LoadGameDatabase() {
+void _DatabaseLoader::LoadObjectFile(SMBC::ModData* mod, const std::wstring& path) {
+	nlohmann::json _ObjectFile;
+	if (!SMBC::Json::ParseJson(path, _ObjectFile)) return;
+
+	SMBC::DatabaseLoader::LoadBlockList(_ObjectFile, mod);
+	SMBC::DatabaseLoader::LoadPartList(_ObjectFile, mod);
+}
+
+void _DatabaseLoader::LoadGameDatabase() {
 	SMBC::ModData* _VanillaParts = new SMBC::ModData(
 		L"VANILLA GAME",
 		L"",
@@ -275,7 +287,7 @@ void SMBC::DatabaseLoader::LoadGameDatabase() {
 		_VanillaParts->LoadTranslations(path);
 
 	for (std::wstring& data_path : SMBC::Settings::SMDirDatabase) {
-		if (!SMBC::File::FileExists(data_path)) continue;
+		if (!SMBC::File::Exists(data_path)) continue;
 
 		fs::directory_entry CurPath(data_path);
 		if (CurPath.is_directory()) {
@@ -283,11 +295,11 @@ void SMBC::DatabaseLoader::LoadGameDatabase() {
 			for (auto& dir : _DifIter) {
 				if (!dir.is_regular_file()) continue;
 
-				SMBC::DatabaseLoader::LoadObjectFile(_VanillaParts, dir.path().wstring(), _VanillaParts->LanguageDB);
+				SMBC::DatabaseLoader::LoadObjectFile(_VanillaParts, dir.path().wstring());
 			}
 		}
 		else if (CurPath.is_regular_file())
-			SMBC::DatabaseLoader::LoadObjectFile(_VanillaParts, CurPath.path().wstring(), _VanillaParts->LanguageDB);
+			SMBC::DatabaseLoader::LoadObjectFile(_VanillaParts, CurPath.path().wstring());
 	}
 
 	SMBC::ObjectDatabase::ModDB.insert(std::make_pair(
@@ -296,11 +308,11 @@ void SMBC::DatabaseLoader::LoadGameDatabase() {
 	));
 }
 
-void SMBC::DatabaseLoader::LoadModDatabase() {
+void _DatabaseLoader::LoadModDatabase() {
 	if (SMBC::Settings::ModFolders.empty()) return;
 
 	for (std::wstring& _ModDirectory : SMBC::Settings::ModFolders) {
-		if (!SMBC::File::FileExists(_ModDirectory)) continue;
+		if (!SMBC::File::Exists(_ModDirectory)) continue;
 
 		fs::directory_iterator _DirIter(_ModDirectory, fs::directory_options::skip_permission_denied);
 		for (auto& dir : _DirIter) {

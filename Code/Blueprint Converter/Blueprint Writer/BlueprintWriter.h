@@ -3,8 +3,11 @@
 #include <vector>
 #include <glm.hpp>
 #include <gtc/matrix_transform.hpp>
+
 #include "Blueprint Converter/BlueprintConverter.h"
 #include "Blueprint Converter/Cache Manager/CacheManager.h"
+
+#include "Lib/ConvData/ConvData.h"
 
 namespace SMBC {
 	struct ObjectCollection {
@@ -56,10 +59,10 @@ namespace SMBC {
 		void LoadBlueprintBlocks(SMBC::ObjectCollection& collection);
 		void LoadBlueprintParts(SMBC::ObjectCollection& collection);
 
-		int WriteBlueprintToFile(const long& objectCount);
+		SMBC::Error WriteBlueprintToFile(const unsigned long long& objectCount);
 
 	public:
-		int LoadBlueprintData(const std::wstring& blueprint_path);
-		int ConvertAndWrite();
+		SMBC::Error LoadBlueprintData(const std::wstring& blueprint_path);
+		SMBC::Error ConvertAndWrite();
 	};
 }

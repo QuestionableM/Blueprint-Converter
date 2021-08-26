@@ -13,11 +13,11 @@ SMBC::ObjectData::ObjectData(
 	SMBC::Texture::Texture& obj_textures,
 	const glm::vec3& obj_bounds
 ) {
-	this->_obj_path = obj_path;
-	this->_obj_uuid = obj_uuid;
-	this->_obj_name = obj_name;
-	this->obj_textures = obj_textures;
-	this->_obj_bounds = obj_bounds;
+	this->path = obj_path;
+	this->uuid = obj_uuid;
+	this->name = obj_name;
+	this->texList = obj_textures;
+	this->bounds = obj_bounds;
 }
 
 SMBC::BlockData::BlockData(
@@ -26,10 +26,10 @@ SMBC::BlockData::BlockData(
 	const std::wstring& name,
 	const int& tiling
 ) {
-	this->_block_tex = tex_list;
-	this->_obj_uuid = uuid;
-	this->_obj_name = name;
-	this->_tiling = tiling;
+	this->texList = tex_list;
+	this->uuid = uuid;
+	this->name = name;
+	this->tiling = tiling;
 }
 
 void SMBC::ModData::LoadTranslations(const std::wstring& path) {
@@ -38,7 +38,7 @@ void SMBC::ModData::LoadTranslations(const std::wstring& path) {
 	std::wstring _LangFile = _Path + L"/inventoryDescriptions.json";
 	std::wstring _OtherLangFile = _Path + L"/InventoryItemDescriptions.json";
 
-	std::wstring _FinalPath = (SMBC::File::FileExists(_LangFile) ? _LangFile : SMBC::File::FileExists(_OtherLangFile) ? _OtherLangFile : L"");
+	std::wstring _FinalPath = (SMBC::File::Exists(_LangFile) ? _LangFile : SMBC::File::Exists(_OtherLangFile) ? _OtherLangFile : L"");
 
 	this->LanguageDB.LoadLanguageFile(_FinalPath);
 }
@@ -46,13 +46,13 @@ void SMBC::ModData::LoadTranslations(const std::wstring& path) {
 void SMBC::ModData::LoadObjects() {
 	std::wstring _ObjDirectory = this->path + L"/Objects/Database/ShapeSets";
 
-	if (!SMBC::File::FileExists(_ObjDirectory)) return;
+	if (!SMBC::File::Exists(_ObjDirectory)) return;
 
 	fs::recursive_directory_iterator RecDirIter(_ObjDirectory, fs::directory_options::skip_permission_denied);
 	for (auto& m_dir : RecDirIter) {
 		if (!m_dir.is_regular_file() || !m_dir.path().has_extension() || m_dir.path().extension() != ".json") continue;
 
-		SMBC::DatabaseLoader::LoadObjectFile(this, m_dir.path().wstring(), this->LanguageDB);
+		SMBC::DatabaseLoader::LoadObjectFile(this, m_dir.path().wstring());
 	}
 }
 
@@ -63,14 +63,14 @@ bool SMBC::ModData::UuidExists(const std::wstring& uuid) {
 	return false;
 }
 
-void SMBC::ModData::AddBlockToDatabase(SMBC::BlockData*& block) {
-	if (this->BlockDB.find(block->_obj_uuid) == this->BlockDB.end())
-		this->BlockDB.insert(std::make_pair(block->_obj_uuid, block));
+void SMBC::ModData::AddBlock(SMBC::BlockData*& block) {
+	if (this->BlockDB.find(block->uuid) == this->BlockDB.end())
+		this->BlockDB.insert(std::make_pair(block->uuid, block));
 }
 
-void SMBC::ModData::AddPartToDatabase(SMBC::ObjectData*& part) {
-	if (this->ObjectDB.find(part->_obj_uuid) == this->ObjectDB.end())
-		this->ObjectDB.insert(std::make_pair(part->_obj_uuid, part));
+void SMBC::ModData::AddPart(SMBC::ObjectData*& part) {
+	if (this->ObjectDB.find(part->uuid) == this->ObjectDB.end())
+		this->ObjectDB.insert(std::make_pair(part->uuid, part));
 }
 
 SMBC::ModData::ModData(
@@ -81,7 +81,7 @@ SMBC::ModData::ModData(
 	this->name = name;
 	this->workshop_id = workshop_id;
 	this->path = path;
-	this->LanguageDB._Environment = name;
+	this->LanguageDB.Environment = name;
 }
 
 SMBC::ModData::~ModData() {

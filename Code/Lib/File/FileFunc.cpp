@@ -21,7 +21,7 @@ bool _File::IsBadPath(const std::wstring& path) {
 	return false;
 }
 
-bool _File::FileExists(const std::wstring& path) {
+bool _File::Exists(const std::wstring& path) {
 	try {
 		bool _Exists = fs::exists(path);
 		return _Exists;
@@ -67,4 +67,11 @@ bool _File::GetCanonicalPath(std::wstring& path) {
 	catch (...) {}
 
 	return false;
+}
+
+std::wstring _File::GetCanonicalPathW(const std::wstring& path) {
+	WCHAR path_buffer[MAX_PATH];
+	DWORD str_len = GetFullPathNameW(path.c_str(), MAX_PATH, path_buffer, NULL);
+
+	return std::wstring(path_buffer);
 }
