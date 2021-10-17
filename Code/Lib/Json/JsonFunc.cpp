@@ -55,6 +55,12 @@ namespace SMBC
 
 				return nlohmann::json::parse(_RawJson, nullptr, true, true);
 			}
+			#ifdef _DEBUG
+			else
+			{
+				DebugErrorL("Couldn't open the specified file: ", path);
+			}
+			#endif
 		}
 	#ifdef _DEBUG
 		catch (nlohmann::json::parse_error& err)

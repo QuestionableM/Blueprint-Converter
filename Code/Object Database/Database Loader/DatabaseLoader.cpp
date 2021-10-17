@@ -65,15 +65,9 @@ namespace SMBC
 		}
 	}
 
-	void DatabaseLoader::FullCleanup()
-	{
-		Mod::ClearMods();
-		PathReplacer::ClearData();
-	}
-
 	void DatabaseLoader::LoadDatabase()
 	{
-		DatabaseLoader::FullCleanup();
+		Mod::ClearMods();
 
 		ConvData::SetState(State::ReadingDatabase);
 

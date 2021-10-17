@@ -9,7 +9,6 @@ namespace SMBC {
 	class DatabaseLoader {
 		static void LoadGameDatabase();
 		static void LoadModDatabase();
-		static void FullCleanup();
 	public:
 		static void LoadDatabase();
 	};

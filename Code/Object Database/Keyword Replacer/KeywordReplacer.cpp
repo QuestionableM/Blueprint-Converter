@@ -6,8 +6,6 @@
 
 #include <cwctype>
 
-#include "DebugCon.h"
-
 namespace SMBC
 {
 	std::unordered_map<std::wstring, std::wstring> PathReplacer::PathReplacements = {};
@@ -15,7 +13,7 @@ namespace SMBC
 
 	bool PathReplacer::ReplaceKeyInternal(std::wstring& path)
 	{
-		for (auto& k_ReplData : PathReplacer::KeyReplacements)
+		for (const auto& k_ReplData : PathReplacer::KeyReplacements)
 			if (path.find(k_ReplData.first) != std::wstring::npos)
 			{
 				path = (k_ReplData.second + path.substr(k_ReplData.first.size()));
@@ -121,14 +119,7 @@ namespace SMBC
 
 		const std::wstring content_key = (L"$content_" + uuid.ToWstring());
 		if (KeyReplacements.find(content_key) == KeyReplacements.end())
-		{
-			DebugOutL("Adding a new key: ", content_key);
 			KeyReplacements.insert(std::make_pair(content_key, path));
-		}
-		else
-		{
-			DebugWarningL("SetModData: \"", content_key, "\" already exists!");
-		}
 	}
 
 	void PathReplacer::ReplaceAll(std::wstring& str, const wchar_t& to_replace, const wchar_t& replacer)

@@ -14,7 +14,7 @@ namespace SMBC
 	std::unordered_map<Uuid, ObjectData*> Mod::AllObjects = {};
 	std::unordered_map<Uuid, Mod*>        Mod::Mods       = {};
 
-	bool Mod::GetBlockTextures(const nlohmann::json& block, SMBC::Texture::TextureList& tex)
+	bool Mod::GetBlockTextures(const nlohmann::json& block, Texture::TextureList& tex)
 	{
 		const auto& bDif = Json::Get(block, "dif");
 		const auto& bAsg = Json::Get(block, "asg");
@@ -51,7 +51,7 @@ namespace SMBC
 				continue;
 			}
 
-			SMBC::Texture::TextureList tex_list;
+			Texture::TextureList tex_list;
 			if (!Mod::GetBlockTextures(lBlock, tex_list)) continue;
 
 			int tiling_value = (bTiling.is_number() ? bTiling.get<int>() : 4);
@@ -108,47 +108,50 @@ namespace SMBC
 		tex.TexList.insert(std::make_pair(idx, new_entry));
 	}
 
-	bool Mod::LoadSubMeshes(const nlohmann::json& pLodItem, Texture::Texture& tex)
+	bool Mod::TryLoadSubMeshList(const nlohmann::json& pLodItem, Texture::Texture& tex)
 	{
 		const auto& pMeshList = Json::Get(pLodItem, "subMeshList");
-		if (pMeshList.is_array())
+		if (!pMeshList.is_array()) return false;
+
+		std::size_t _idx = 0;
+		Texture::Texture out_tex(Texture::TextureType::SubMeshList);
+		for (const auto& subMesh : pMeshList)
 		{
-			Texture::Texture out_tex(Texture::TextureType::SubMeshList);
+			if (!subMesh.is_object()) continue;
 
-			std::size_t _idx = 0;
-			for (const auto& subMesh : pMeshList)
-			{
-				if (!subMesh.is_object()) continue;
+			const auto& sIdx = Json::Get(subMesh, "idx");
+			std::size_t cur_idx = (sIdx.is_number() ? sIdx.get<std::size_t>() : _idx);
 
-				const auto& sIdx = Json::Get(subMesh, "idx");
-				std::size_t cur_idx = (sIdx.is_number() ? sIdx.get<std::size_t>() : _idx);
+			Mod::AddSubMesh(subMesh, out_tex, std::to_wstring(cur_idx));
+			_idx++;
+		}
 
-				Mod::AddSubMesh(subMesh, out_tex, std::to_wstring(cur_idx));
-				_idx++;
-			}
+		tex = out_tex;
+		return true;
+	}
 
-			tex = out_tex;
+	bool Mod::TryLoadSubMeshMap(const nlohmann::json& pLodItem, Texture::Texture& tex)
+	{
+		const auto& pMeshMap = Json::Get(pLodItem, "subMeshMap");
+		if (!pMeshMap.is_object()) return false;
+
+		Texture::Texture out_tex(Texture::TextureType::SubMeshMap);
+		for (const auto& subMesh : pMeshMap.items())
+		{
+			if (!subMesh.value().is_object()) continue;
+
+			std::wstring subMeshName = String::ToWide(subMesh.key());
+			Mod::AddSubMesh(subMesh.value(), out_tex, subMeshName);
+		}
+
+		tex = out_tex;
+		return true;
+	}
+
+	bool Mod::LoadSubMeshes(const nlohmann::json& pLodItem, Texture::Texture& tex)
+	{
+		if (Mod::TryLoadSubMeshList(pLodItem, tex) || Mod::TryLoadSubMeshMap(pLodItem, tex))
 			return true;
-		}
-		else
-		{
-			const auto& pMeshMap = Json::Get(pLodItem, "subMeshMap");
-			if (pMeshMap.is_object())
-			{
-				Texture::Texture out_tex(Texture::TextureType::SubMeshMap);
-
-				for (const auto& subMesh : pMeshMap.items())
-				{
-					if (!subMesh.value().is_object()) continue;
-
-					std::wstring subMeshName = String::ToWide(subMesh.key());
-					Mod::AddSubMesh(subMesh.value(), out_tex, subMeshName);
-				}
-
-				tex = out_tex;
-				return true;
-			}
-		}
 
 		return false;
 	}
