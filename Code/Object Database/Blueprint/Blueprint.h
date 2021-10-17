@@ -3,8 +3,10 @@
 #include <vector>
 #include <string>
 
-namespace SMBC {
-	class Blueprint {
+namespace SMBC
+{
+	class Blueprint
+	{
 	public:
 		static std::vector<std::wstring> ImageExtensions;
 		std::wstring Name;

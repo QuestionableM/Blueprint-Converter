@@ -53,9 +53,8 @@ std::wstring SMBC::Settings::PathToSM = L"";
 bool SMBC::Settings::OpenLinksInSteam = false;
 
 void SMBC::Settings::LoadSettingsFile() {
-	nlohmann::json _ConfigFile;
-
-	if (!SMBC::Json::ParseJson(SMBC::Settings::ConfigPath, _ConfigFile))
+	nlohmann::json _ConfigFile = SMBC::Json::LoadParseJson(SMBC::Settings::ConfigPath);
+	if (!_ConfigFile.is_object())
 		return;
 
 	SMBC::Settings::BlueprintFolders.clear();
@@ -65,10 +64,11 @@ void SMBC::Settings::LoadSettingsFile() {
 	SMBC::Settings::OpenLinksInSteam = false;
 	SMBC::PathReplacer::ClearAllData();
 	SMBC::Settings::SMDirDatabase.clear();
-	SMBC::ObjectDatabase::ModDB.clear();
+	SMBC::Mod::ClearMods();
 
 	const auto& _UserSettings = SMBC::Json::Get(_ConfigFile, "UserSettings");
-	if (_UserSettings.is_object()) {
+	if (_UserSettings.is_object())
+	{
 		const auto& _SMPath = SMBC::Json::Get(_UserSettings, "ScrapPath");
 		const auto& _OpenInSteam = SMBC::Json::Get(_UserSettings, "OpenLinksInSteam");
 
@@ -119,8 +119,7 @@ void SMBC::Settings::SaveSettingsFile(
 	const bool mod_list,
 	const bool open_in_steam
 ) {
-	nlohmann::json _JsonOutput;
-	SMBC::Json::ParseJson(SMBC::Settings::ConfigPath, _JsonOutput);
+	nlohmann::json _JsonOutput = SMBC::Json::LoadParseJson(SMBC::Settings::ConfigPath);
 
 	SMBC::File::SafeCreateDir(L"./Resources");
 	std::ofstream _ConfigJson(SMBC::Settings::ConfigPath);

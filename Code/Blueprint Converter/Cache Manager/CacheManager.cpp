@@ -160,7 +160,7 @@ SMBC::CachedPart* _ObjectStorage::LoadPart(
 	const bool& load_normals,
 	const bool& mat_by_color
 ) {
-	std::wstring _UuidStr = part.objPtr->uuid;
+	std::wstring _UuidStr = part.objPtr->Uuid;
 	if (mat_by_color)
 		SMBC::String::Combine(_UuidStr, L" ", part.color);
 
@@ -170,7 +170,7 @@ SMBC::CachedPart* _ObjectStorage::LoadPart(
 	SMBC::CachedPart* newPart = new SMBC::CachedPart();
 	newPart->objPtr = part.objPtr;
 	newPart->color = part.color;
-	newPart->modelPtr = _ModelStorage::LoadModel(newPart->objPtr->path, load_uvs, load_normals);
+	newPart->modelPtr = _ModelStorage::LoadModel(newPart->objPtr->Path, load_uvs, load_normals);
 
 	_ObjectStorage::CachedParts.insert(std::make_pair(_UuidStr, newPart));
 	return newPart;
@@ -218,7 +218,7 @@ void _ObjectStorage::WriteMtlFile(const std::wstring& path, const bool& add_colo
 			bool _Success = false;
 			SMBC::Texture::TextureList _TList;
 
-			SMBC::Texture::Texture& c_Tex = _CPart->objPtr->texList;
+			SMBC::Texture::Texture& c_Tex = _CPart->objPtr->TextureList;
 			switch (c_Tex.TexType) {
 			case SMBC::Texture::TextureType::SubMeshList:
 				_Success = c_Tex.GetTextureByName(std::to_wstring(SMData->SubMeshIndex), _TList);
@@ -260,7 +260,7 @@ void _ObjectStorage::WriteMtlFile(const std::wstring& path, const bool& add_colo
 
 		_mtl_mat.append(_sp_t);
 
-		SMBC::Texture::TextureList& texData = _CBlock->blkPtr->texList;
+		SMBC::Texture::TextureList& texData = _CBlock->blkPtr->TextureList;
 		if (!texData.nor.empty())
 			SMBC::String::Combine(_mtl_mat, "map_Bump ", texData.nor, "\n");
 
@@ -288,10 +288,10 @@ void _ObjectStorage::WriteTexturePaths(const std::wstring& path) {
 	for (const auto& _CMeshData : _ObjectStorage::CachedParts) {
 		const SMBC::CachedPart* _CMesh = _CMeshData.second;
 
-		const SMBC::Texture::Texture& _CurTex = _CMesh->objPtr->texList;
+		const SMBC::Texture::Texture& _CurTex = _CMesh->objPtr->TextureList;
 		if (_CurTex.TexList.size() == 0) continue;
 
-		std::string _MeshNameStr = SMBC::String::ToUtf8(_CMesh->objPtr->name);
+		std::string _MeshNameStr = SMBC::String::ToUtf8(_CMesh->objPtr->Name);
 		_TextureList[_MeshNameStr] = {};
 
 		switch (_CurTex.TexType) {
@@ -332,10 +332,10 @@ void _ObjectStorage::WriteTexturePaths(const std::wstring& path) {
 
 		if (_CBlock->blkPtr == nullptr) continue;
 
-		std::string _MeshNameStr = SMBC::String::ToUtf8(_CBlock->blkPtr->name);
+		std::string _MeshNameStr = SMBC::String::ToUtf8(_CBlock->blkPtr->Name);
 		_TextureList[_MeshNameStr] = {};
 
-		SMBC::Texture::TextureList& curTex = _CBlock->blkPtr->texList;
+		SMBC::Texture::TextureList& curTex = _CBlock->blkPtr->TextureList;
 
 		nlohmann::json _TexObj;
 		if (!curTex.dif.empty()) _TexObj["Dif"] = SMBC::String::ToUtf8(curTex.dif);

@@ -10,7 +10,6 @@
     <ClCompile Include="Code\Gui\Implementation\GeneratorSettings.cpp" />
     <ClCompile Include="Code\Gui\Implementation\MainGUI.cpp" />
     <ClCompile Include="Code\Gui\Implementation\SettingsGUI.cpp" />
-    <ClCompile Include="Code\Object Database\ObjectDatabase.cpp" />
     <ClCompile Include="Code\Object Database\Keyword Replacer\KeywordReplacer.cpp" />
     <ClCompile Include="Code\Object Database\Language Database\LanguageDatabase.cpp" />
     <ClCompile Include="Code\Object Database\Texture Database\TextureDatabase.cpp" />
@@ -26,6 +25,7 @@
     <ClCompile Include="Code\Lib\String\String.cpp" />
     <ClCompile Include="Code\Object Database\Blueprint\Blueprint.cpp" />
     <ClCompile Include="Code\Lib\ConvData\ConvData.cpp" />
+    <ClCompile Include="Code\Object Database\Object Data\ObjectData.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Code\Blueprint Converter\BlueprintConverter.h" />
@@ -36,7 +36,6 @@
     <ClInclude Include="Code\Gui\GeneratorSettings.h" />
     <ClInclude Include="Code\Gui\MainGUI.h" />
     <ClInclude Include="Code\Gui\SettingsGUI.h" />
-    <ClInclude Include="Code\Object Database\ObjectDatabase.h" />
     <ClInclude Include="Code\Object Database\Keyword Replacer\KeywordReplacer.h" />
     <ClInclude Include="Code\Object Database\Language Database\LanguageDatabase.h" />
     <ClInclude Include="Code\Object Database\Texture Database\TextureDatabase.h" />
@@ -54,5 +53,6 @@
     <ClInclude Include="Code\Lib\String\String.h" />
     <ClInclude Include="Code\Object Database\Blueprint\Blueprint.h" />
     <ClInclude Include="Code\Lib\ConvData\ConvData.h" />
+    <ClInclude Include="Code\Object Database\Object Data\ObjectData.h" />
   </ItemGroup>
 </Project>

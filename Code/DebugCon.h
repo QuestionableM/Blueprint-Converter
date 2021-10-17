@@ -4,7 +4,6 @@
 
 #if _DEBUG
 #include <string>
-#endif
 
 namespace SMBC {
 	enum class Color : WORD {
@@ -41,7 +40,6 @@ namespace SMBC {
 		WHITE_BG_INT = BACKGROUND_RED | BACKGROUND_GREEN | BACKGROUND_BLUE | BACKGROUND_INTENSITY
 	};
 
-#if _DEBUG
 	class __ConsoleOutputHandler;
 	class Console {
 		friend __ConsoleOutputHandler;
@@ -97,8 +95,14 @@ namespace SMBC {
 
 #define DebugOut(...) SMBC::Console::Out(__VA_ARGS__)
 #define DebugOutL(...) SMBC::Console::Out(__VA_ARGS__, SMBC::Color::WHITE, "\n")
-#else
-#define DebugOut(...)
-#define DebugOutL(...)
-#endif
+#define DebugWarningL(...) SMBC::Console::Out(SMBC::Color::YELLOW_INT, "WARNING: ", __VA_ARGS__, SMBC::Color::WHITE, "\n")
+#define DebugErrorL(...) SMBC::Console::Out(SMBC::Color::RED_INT, "ERROR: ", __VA_ARGS__, SMBC::Color::WHITE, "\n")
+#define CreateDebugConsole() SMBC::Console::Create(L"SMBC Debug Console")
 }
+#else
+#define DebugOut(...) ((void)0)
+#define DebugOutL(...) ((void)0)
+#define DebugWarningL(...) ((void)0)
+#define DebugErrorL(...) ((void)0)
+#define CreateDebugConsole() ((void)0)
+#endif

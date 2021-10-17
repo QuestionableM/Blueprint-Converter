@@ -6,11 +6,11 @@
 #include "Lib/ProgramSettings.h"
 #include "Lib/String/String.h"
 #include "Object Database/Keyword Replacer/KeywordReplacer.h"
-#include "Object Database/ObjectDatabase.h"
 
 #include <msclr/marshal_cppstd.h>
 
-namespace SMBC {
+namespace SMBC
+{
 	using namespace BlueprintConverter;
 }
 
@@ -19,7 +19,8 @@ typedef SMBC::ModList _ModListGUI;
 static int ProgressCounter = 0;
 static int ProgressMaxCounter = 0;
 
-_ModListGUI::ModList(const SMBC::Blueprint& blueprint) {
+_ModListGUI::ModList(const SMBC::Blueprint& blueprint)
+{
 	this->InitializeComponent();
 
 	ProgressCounter = 0;
@@ -31,7 +32,8 @@ _ModListGUI::ModList(const SMBC::Blueprint& blueprint) {
 	this->ModSearcher_BW->RunWorkerAsync(gcnew System::String(blueprint.Folder.c_str()));
 }
 
-_ModListGUI::~ModList() {
+_ModListGUI::~ModList()
+{
 	this->usedModList->clear();
 	delete this->usedModList;
 
@@ -47,29 +49,33 @@ System::Void _ModListGUI::ModSearcher_BW_DoWork(
 
 	std::wstring BP_Json_path = BP_Path + L"/blueprint.json";
 
-	nlohmann::json bp_json;
-	if (!SMBC::Json::ParseJson(BP_Json_path, bp_json)) {
+	nlohmann::json bp_json = SMBC::Json::LoadParseJson(BP_Json_path);
+	if (!bp_json.is_object())
+	{
 		e->Result = 1;
 		return;
 	}
 
 	const auto& bodies = SMBC::Json::Get(bp_json, "bodies");
-	if (bodies.is_array()) {
+	if (bodies.is_array())
+	{
 		ProgressMaxCounter += (int)bodies.size();
 
-		for (auto& body : bodies) {
+		for (auto& body : bodies)
+		{
 			const auto& childs = SMBC::Json::Get(body, "childs");
 
 			if (!childs.is_array()) continue;
 
-			for (auto& child : childs) {
+			for (auto& child : childs)
+			{
 				ProgressCounter++;
 
 				const auto& uuid = SMBC::Json::Get(child, "shapeId");
 				if (!uuid.is_string()) continue;
 
 				std::wstring UuidWstr = SMBC::String::ToWide(uuid.get<std::string>());
-				SMBC::ModData* _ModPtr = this->FindModByObjUuid(UuidWstr);
+				SMBC::Mod* _ModPtr = this->FindModByObjUuid(UuidWstr);
 
 				this->AddModToList(_ModPtr);
 			}
@@ -77,17 +83,19 @@ System::Void _ModListGUI::ModSearcher_BW_DoWork(
 	}
 
 	const auto& joints = SMBC::Json::Get(bp_json, "joints");
-	if (joints.is_array()) {
+	if (joints.is_array())
+	{
 		ProgressMaxCounter += (int)joints.size();
 
-		for (auto& joint : joints) {
+		for (auto& joint : joints)
+		{
 			ProgressCounter++;
 
 			const auto& uuid = SMBC::Json::Get(joint, "shapeId");
 			if (!uuid.is_string()) continue;
 
 			std::wstring UuidWstr = SMBC::String::ToWide(uuid.get<std::string>());
-			SMBC::ModData* _ModPtr = this->FindModByObjUuid(UuidWstr);
+			SMBC::Mod* _ModPtr = this->FindModByObjUuid(UuidWstr);
 
 			this->AddModToList(_ModPtr);
 		}
@@ -106,7 +114,8 @@ System::Void _ModListGUI::ModSearcher_BW_RunWorkerCompleted(
 	this->ModCount_LBL->Text = gcnew System::String((L"Amount of Mods: " + std::to_wstring(this->usedModList->size())).c_str());
 	this->ObjectCount_LBL->Text = gcnew System::String((L"Amount of Objects: " + std::to_wstring(ProgressCounter)).c_str());
 
-	if (e->Result != nullptr) {
+	if (e->Result != nullptr)
+	{
 		int result_idx = safe_cast<int>(e->Result);
 
 		System::String^ ErrorMsg;
@@ -126,11 +135,12 @@ System::Void _ModListGUI::ModSearcher_BW_RunWorkerCompleted(
 	}
 
 	this->ModList_LB->BeginUpdate();
-	for (SMBC::ModListData& mod_list : *this->usedModList) {
+	for (SMBC::ModListData& mod_list : *this->usedModList)
+	{
 		std::wstring _ModName = L"UNKNOWN_MOD";
 
 		if (mod_list.ptr != nullptr)
-			_ModName = mod_list.ptr->name;
+			_ModName = mod_list.ptr->Name;
 
 		this->ModList_LB->Items->Add(gcnew System::String((_ModName + L" (" + std::to_wstring(mod_list.used_parts) + L")").c_str()));
 	}
@@ -139,7 +149,8 @@ System::Void _ModListGUI::ModSearcher_BW_RunWorkerCompleted(
 	this->ModList_LB->Enabled = true;
 }
 
-System::Void _ModListGUI::GuiUpdater_Tick(System::Object^ sender, System::EventArgs^ e) {
+System::Void _ModListGUI::GuiUpdater_Tick(System::Object^ sender, System::EventArgs^ e)
+{
 	this->ModCount_LBL->Text = gcnew System::String((L"Amount of Mods: " + std::to_wstring(this->usedModList->size())).c_str());
 	this->ObjectCount_LBL->Text = gcnew System::String((L"Amount of Objects: " + std::to_wstring(ProgressCounter)).c_str());
 
@@ -151,20 +162,19 @@ System::Void _ModListGUI::GuiUpdater_Tick(System::Object^ sender, System::EventA
 	this->ModSearchProgress->Value = _ProgressCopy;
 }
 
-SMBC::ModData* _ModListGUI::FindModByObjUuid(const std::wstring& uuid) {
-	for (const auto& mod_data : SMBC::ObjectDatabase::ModDB) {
-		SMBC::ModData* mod = mod_data.second;
-
-		if (mod->ObjectDB.find(uuid) != mod->ObjectDB.end()) return mod;
-		if (mod->BlockDB.find(uuid) != mod->BlockDB.end()) return mod;
-	}
+SMBC::Mod* _ModListGUI::FindModByObjUuid(const std::wstring& uuid)
+{
+	const SMBC::ObjectData* cur_object = SMBC::Mod::GetObject(uuid);
+	if (!cur_object) return nullptr;
 	
-	return nullptr;
+	return cur_object->ModPtr;
 }
 
-void _ModListGUI::AddModToList(SMBC::ModData* ModData) {
+void _ModListGUI::AddModToList(SMBC::Mod* ModData)
+{
 	for (SMBC::ModListData& list_data : *this->usedModList)
-		if (list_data.ptr == ModData) {
+		if (list_data.ptr == ModData)
+		{
 			list_data.used_parts++;
 			return;
 		}
@@ -176,10 +186,12 @@ System::Void _ModListGUI::ModList_FormClosing(
 	System::Object^ sender,
 	System::Windows::Forms::FormClosingEventArgs^ e
 ) {
-	if (this->ModSearcher_BW->IsBusy) e->Cancel = true;
+	if (this->ModSearcher_BW->IsBusy)
+		e->Cancel = true;
 }
 
-System::Void _ModListGUI::ModList_LB_SelectedIndexChanged(System::Object^ sender, System::EventArgs^ e) {
+System::Void _ModListGUI::ModList_LB_SelectedIndexChanged(System::Object^ sender, System::EventArgs^ e)
+{
 	int sel_idx = this->ModList_LB->SelectedIndex;
 	if (this->selected_mod == sel_idx) return;
 	this->selected_mod = sel_idx;
@@ -187,48 +199,54 @@ System::Void _ModListGUI::ModList_LB_SelectedIndexChanged(System::Object^ sender
 	bool _WorkshopIdExists = false;
 	bool _PathExists = false;
 
-	SMBC::ModData* CurMod = this->GetCurrentMod();
-	if (CurMod != nullptr) {
-		_WorkshopIdExists = !CurMod->workshop_id.empty();
-		_PathExists = !CurMod->path.empty();
+	SMBC::Mod* CurMod = this->GetCurrentMod();
+	if (CurMod != nullptr)
+	{
+		_WorkshopIdExists = !CurMod->WorkshopId.empty();
+		_PathExists = !CurMod->Path.empty();
 	}
 
 	this->OpenInWorkshop_BTN->Enabled = _WorkshopIdExists;
 	this->OpenInFileExplorer_BTN->Enabled = _PathExists;
 }
 
-System::Void _ModListGUI::OpenInWorkshop_BTN_Click(System::Object^ sender, System::EventArgs^ e) {
-	SMBC::ModData* CurMod = this->GetCurrentMod();
+System::Void _ModListGUI::OpenInWorkshop_BTN_Click(System::Object^ sender, System::EventArgs^ e)
+{
+	SMBC::Mod* CurMod = this->GetCurrentMod();
 	if (CurMod == nullptr) return;
 
-	if (CurMod->workshop_id.empty()) {
+	if (CurMod->WorkshopId.empty())
+	{
 		SMBC::Gui::Error("Error", "Couldn't open the workshop link to the specified blueprint!");
 		return;
 	}
 
 	std::wstring _WorkshopLink;
 	if (SMBC::Settings::OpenLinksInSteam) _WorkshopLink.append(L"steam://openurl/");
-	SMBC::String::Combine(_WorkshopLink, L"https://steamcommunity.com/sharedfiles/filedetails/?id=", CurMod->workshop_id);
+	SMBC::String::Combine(_WorkshopLink, L"https://steamcommunity.com/sharedfiles/filedetails/?id=", CurMod->WorkshopId);
 
 	System::Diagnostics::Process::Start(gcnew System::String(_WorkshopLink.c_str()));
 }
 
-System::Void _ModListGUI::OpenInFileExplorer_BTN_Click(System::Object^ sender, System::EventArgs^ e) {
-	SMBC::ModData* CurMod = this->GetCurrentMod();
+System::Void _ModListGUI::OpenInFileExplorer_BTN_Click(System::Object^ sender, System::EventArgs^ e)
+{
+	SMBC::Mod* CurMod = this->GetCurrentMod();
 	if (CurMod == nullptr) return;
 
-	if (!SMBC::File::Exists(CurMod->path)) {
+	if (!SMBC::File::Exists(CurMod->Path))
+	{
 		SMBC::Gui::Error(L"Internal Error", L"The path to specified mod directory doesn't exist!");
 		return;
 	}
 
-	std::wstring path_cpy = CurMod->path;
+	std::wstring path_cpy = CurMod->Path;
 	SMBC::PathReplacer::ReplaceAll(path_cpy, L'/', L'\\');
 
 	SMBC::Gui::OpenFolderInExplorer(path_cpy);
 }
 
-SMBC::ModData* _ModListGUI::GetCurrentMod() {
+SMBC::Mod* _ModListGUI::GetCurrentMod()
+{
 	int _index = this->ModList_LB->SelectedIndex;
 	if (_index <= -1) return nullptr;
 

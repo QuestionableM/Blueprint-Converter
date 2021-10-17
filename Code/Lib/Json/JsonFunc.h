@@ -7,7 +7,7 @@
 namespace SMBC {
 	namespace Json {
 		std::string ReadWholeFile(std::ifstream& input);
-		bool ParseJson(const std::wstring& path, nlohmann::json& obj, const bool _stringify = false);
+		nlohmann::json LoadParseJson(const std::wstring& path, const bool& _stringify = false);
 
 		const static nlohmann::json NullObject = nlohmann::json();
 		const nlohmann::json& Get(const nlohmann::json& json, const std::string& key);

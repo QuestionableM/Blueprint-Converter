@@ -33,14 +33,14 @@ namespace SMBC {
 	};
 
 	struct CachedPart {
-		SMBC::ObjectData* objPtr = nullptr;
+		SMBC::PartData* objPtr = nullptr;
 		SMBC::Model* modelPtr = nullptr;
 
 		std::wstring color;
 	};
 
 	struct SM_Part {
-		SMBC::ObjectData* objPtr = nullptr;
+		SMBC::PartData* objPtr = nullptr;
 		SMBC::Model* modelPtr = nullptr;
 
 		std::wstring color;

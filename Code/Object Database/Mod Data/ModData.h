@@ -2,71 +2,50 @@
 
 #include "Object Database/Texture Database/TextureDatabase.h"
 #include "Object Database/Language Database/LanguageDatabase.h"
+#include "Object Database/Object Data/ObjectData.h"
 
+#include <unordered_map>
 #include <string>
 #include <glm.hpp>
 
-#include <unordered_map>
-
-namespace SMBC {
-	struct ObjectData {
-		std::wstring uuid;
-		std::wstring name;
-		std::wstring path;
-		SMBC::Texture::Texture texList;
-		glm::vec3 bounds;
-
-		ObjectData(
-			const std::wstring& obj_uuid,
-			const std::wstring& obj_path,
-			const std::wstring& obj_name,
-			SMBC::Texture::Texture& obj_textures,
-			const glm::vec3& obj_bounds
-		);
-
-		ObjectData() = default;
-	};
-
-	struct BlockData {
-		SMBC::Texture::TextureList texList;
-		std::wstring uuid;
-		std::wstring name;
-		int tiling;
-
-		BlockData(
-			const SMBC::Texture::TextureList& tex_list,
-			const std::wstring& uuid,
-			const std::wstring& name,
-			const int& tiling
-		);
-
-		BlockData() = default;
-	};
-
-	class ModData {
+namespace SMBC
+{
+	class Mod
+	{
+		static std::unordered_map<std::wstring, ObjectData*> AllObjects;
+		static std::unordered_map<std::wstring, Mod*> Mods;
 	public:
-		std::unordered_map<std::wstring, ObjectData*> ObjectDB;
-		std::unordered_map<std::wstring, BlockData*> BlockDB;
+		std::unordered_map<std::wstring, ObjectData*> Objects;
 		SMBC::LangDB LanguageDB;
 
-		std::wstring name;
-		std::wstring workshop_id;
-		std::wstring path;
+		std::wstring Name;
+		std::wstring WorkshopId;
+		std::wstring Path;
+		std::wstring Uuid;
 
 		void LoadTranslations(const std::wstring& path = L"");
 		void LoadObjects();
 
 		bool UuidExists(const std::wstring& uuid);
-		void AddBlock(SMBC::BlockData*& block);
-		void AddPart(SMBC::ObjectData*& part);
+		void AddObject(ObjectData* object);
 
-		ModData(
+		static std::size_t GetObjectCount();
+		static std::size_t GetModCount();
+		static void ClearMods();
+
+		static const ObjectData* GetObject(const std::wstring& uuid);
+		static const PartData* GetPart(const std::wstring& uuid);
+		static const BlockData* GetBlock(const std::wstring& uuid);
+
+		static Mod* CreateModFromDirectory(const std::wstring& dir);
+		static Mod* CreateMod(
+			const std::wstring& uuid,
 			const std::wstring& name,
 			const std::wstring& workshop_id,
-			const std::wstring& path
+			const std::wstring& dir
 		);
 
-		ModData() = default;
-		~ModData();
+		Mod() = default;
+		~Mod();
 	};
 }

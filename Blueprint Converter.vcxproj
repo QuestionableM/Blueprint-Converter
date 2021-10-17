@@ -42,7 +42,7 @@
     <ClCompile Include="Code\Object Database\Language Database\LanguageDatabase.cpp" />
     <ClCompile Include="Code\Object Database\Mod Data\ModData.cpp" />
     <ClCompile Include="Code\Object Database\Database Loader\DatabaseLoader.cpp" />
-    <ClCompile Include="Code\Object Database\ObjectDatabase.cpp" />
+    <ClCompile Include="Code\Object Database\Object Data\ObjectData.cpp" />
     <ClCompile Include="Code\Object Database\Texture Database\TextureDatabase.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -80,7 +80,7 @@
     <ClInclude Include="Code\Object Database\Language Database\LanguageDatabase.h" />
     <ClInclude Include="Code\Object Database\Mod Data\ModData.h" />
     <ClInclude Include="Code\Object Database\Database Loader\DatabaseLoader.h" />
-    <ClInclude Include="Code\Object Database\ObjectDatabase.h" />
+    <ClInclude Include="Code\Object Database\Object Data\ObjectData.h" />
     <ClInclude Include="Code\Object Database\Texture Database\TextureDatabase.h" />
   </ItemGroup>
   <ItemGroup>

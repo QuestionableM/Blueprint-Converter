@@ -11,17 +11,20 @@ typedef SMBC::Blueprint _Blueprint;
 
 std::vector<std::wstring> _Blueprint::ImageExtensions = { L".jpg", L".png", L".bmp" };
 
-bool _Blueprint::IsSupportedExtension(const std::wstring& _ext) {
+bool _Blueprint::IsSupportedExtension(const std::wstring& _ext)
+{
 	for (std::wstring& _Ext : SMBC::Blueprint::ImageExtensions)
 		if (_Ext == _ext) return true;
 
 	return false;
 }
 
-std::wstring _Blueprint::FixBlueprintName(const std::wstring& name) {
+std::wstring _Blueprint::FixBlueprintName(const std::wstring& name)
+{
 	std::wstring _Output = L"";
 
-	for (const wchar_t& _Letter : name) {
+	for (const wchar_t& _Letter : name)
+	{
 		if (SMBC::Other::IsLetterAllowed(_Letter))
 			_Output += _Letter;
 	}
@@ -29,11 +32,13 @@ std::wstring _Blueprint::FixBlueprintName(const std::wstring& name) {
 	return _Output;
 }
 
-std::wstring _Blueprint::FindBlueprintImage() {
+std::wstring _Blueprint::FindBlueprintImage()
+{
 	if (!SMBC::File::Exists(this->Folder)) return L"";
 
 	fs::directory_iterator _Iter(this->Folder, fs::directory_options::skip_permission_denied);
-	for (auto& Image : _Iter) {
+	for (auto& Image : _Iter)
+	{
 		const fs::path& _img_p = Image.path();
 
 		if (
@@ -45,7 +50,8 @@ std::wstring _Blueprint::FindBlueprintImage() {
 	return L"";
 }
 
-bool _Blueprint::BlueprintExists() {
+bool _Blueprint::BlueprintExists()
+{
 	bool _FolderExists = SMBC::File::Exists(this->Folder);
 	bool _PathExists = SMBC::File::Exists(this->Path);
 

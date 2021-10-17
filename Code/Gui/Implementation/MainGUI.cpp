@@ -18,6 +18,8 @@
 #include "Lib/String/String.h"
 #include "Lib/ProgramSettings.h"
 
+#include "Object Database/Database Loader/DatabaseLoader.h"
+
 namespace SMBC {
 	using namespace BlueprintConverter;
 };
@@ -78,9 +80,9 @@ System::Void _MainGUI::Start_BTN_Click(System::Object^ sender, System::EventArgs
 	if (_DirEntr.is_directory()) {
 		std::wstring _BPFileDesc = (_BlueprintPath + L"/description.json");
 
-		nlohmann::json _DescrJson;
-
-		if (!SMBC::Json::ParseJson(_BPFileDesc, _DescrJson, true)) {
+		nlohmann::json _DescrJson = SMBC::Json::LoadParseJson(_BPFileDesc);
+		if (!_DescrJson.is_object())
+		{
 			SMBC::Gui::Warning("Parse Error", "Couldn't parse \"description.json\"");
 			return;
 		}
@@ -217,14 +219,14 @@ System::Void _MainGUI::ObjectGenerator_RunWorkerCompleted(System::Object^ sender
 }
 
 System::Void _MainGUI::DatabaseLoader_DoWork(System::Object^ sender, System::ComponentModel::DoWorkEventArgs^ e) {
-	SMBC::ObjectDatabase::ReloadDatabase();
+	SMBC::DatabaseLoader::LoadDatabase();
 }
 
 System::Void _MainGUI::DatabaseLoader_RunWorkerCompleted(System::Object^ sender, System::ComponentModel::RunWorkerCompletedEventArgs^ e) {
 	SMBC::ConvData::SetState(SMBC::State::None);
 	this->GuiUpdater->Stop();
 	this->ActionProgress->Value = 0;
-	this->ActionLabel->Text = gcnew System::String((L"Successfully loaded " + std::to_wstring(SMBC::ObjectDatabase::CountLoadedObjects()) + L" objects from " + std::to_wstring(SMBC::ObjectDatabase::ModDB.size()) + L" mods").c_str());
+	this->ActionLabel->Text = gcnew System::String((L"Successfully loaded " + std::to_wstring(SMBC::Mod::GetObjectCount()) + L" objects from " + std::to_wstring(SMBC::Mod::GetModCount()) + L" mods").c_str());
 	this->ChangeGUIState(this->LoadedBP, true, true);
 }
 
@@ -237,9 +239,9 @@ System::Void _MainGUI::BlueprintLoader_DoWork(System::Object^ sender, System::Co
 			if (!Folder.is_directory()) continue;
 
 			std::wstring BlueprintJson = (Folder.path().wstring() + L"/description.json");
-			nlohmann::json _BlueprintDesc;
 
-			if (!SMBC::Json::ParseJson(BlueprintJson, _BlueprintDesc, true))
+			nlohmann::json _BlueprintDesc = SMBC::Json::LoadParseJson(BlueprintJson, true);
+			if (!_BlueprintDesc.is_object())
 				continue;
 
 			std::wstring _BPName = SMBC::Json::GetWstr(_BlueprintDesc, "name");

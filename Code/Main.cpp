@@ -12,19 +12,9 @@ namespace SMBC {
 
 #include "Lib/File/FileFunc.h"
 
-int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
-#if _DEBUG
-	if (!SMBC::Console::Create(L"Blueprint Converter Debug Console")) {
-		System::Windows::Forms::MessageBox::Show(
-			"Couldn't start the console!",
-			"Fatal Error",
-			System::Windows::Forms::MessageBoxButtons::OK,
-			System::Windows::Forms::MessageBoxIcon::Error
-		);
-
-		return -1;
-	}
-#endif
+int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
+{
+	CreateDebugConsole();
 
 	std::setlocale(LC_CTYPE, "en_US.UTF-8");
 	CoUninitialize();

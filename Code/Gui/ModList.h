@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Object Database/ObjectDatabase.h"
+#include "Object Database/Mod Data/ModData.h"
 #include "Object Database/Blueprint/Blueprint.h"
 
 namespace BlueprintConverter {
@@ -12,7 +12,7 @@ namespace BlueprintConverter {
 	using namespace System::Drawing;
 
 	struct ModListData {
-		SMBC::ModData* ptr = nullptr;
+		SMBC::Mod* ptr = nullptr;
 		unsigned long long used_parts = 0;
 	};
 
@@ -193,13 +193,13 @@ namespace BlueprintConverter {
 		System::Void ModSearcher_BW_RunWorkerCompleted(System::Object^ sender, System::ComponentModel::RunWorkerCompletedEventArgs^ e);
 		System::Void GuiUpdater_Tick(System::Object^ sender, System::EventArgs^ e);
 
-		SMBC::ModData* FindModByObjUuid(const std::wstring& uuid);
+		SMBC::Mod* FindModByObjUuid(const std::wstring& uuid);
 
-		void AddModToList(SMBC::ModData* ModPtr);
+		void AddModToList(SMBC::Mod* ModPtr);
 		System::Void ModList_FormClosing(System::Object^ sender, System::Windows::Forms::FormClosingEventArgs^ e);
 		System::Void ModList_LB_SelectedIndexChanged(System::Object^ sender, System::EventArgs^ e);
 		System::Void OpenInWorkshop_BTN_Click(System::Object^ sender, System::EventArgs^ e);
 		System::Void OpenInFileExplorer_BTN_Click(System::Object^ sender, System::EventArgs^ e);
-		SMBC::ModData* GetCurrentMod();
+		SMBC::Mod* GetCurrentMod();
 	};
 }

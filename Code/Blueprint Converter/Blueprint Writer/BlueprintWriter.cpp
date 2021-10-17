@@ -8,8 +8,6 @@
 #include "Lib/File/FileFunc.h"
 #include "Lib/Json/JsonFunc.h"
 
-#include "Object Database/ObjectDatabase.h"
-
 namespace fs = std::filesystem;
 
 bool SMBC::ObjectCollection::is_empty() {
@@ -39,7 +37,7 @@ std::size_t _ConvertedModel::HasUuidCollection(const std::wstring& uuid, const s
 				return a;
 
 		for (SMBC::SM_Part& curPart : objCol.PartList)
-			if (curPart.objPtr->uuid == uuid && ((useColor && curPart.color == color) || !useColor))
+			if (curPart.objPtr->Uuid == uuid && ((useColor && curPart.color == color) || !useColor))
 				return a;
 	}
 
@@ -101,7 +99,7 @@ void _ConvertedModel::LoadBlueprintBlocks(SMBC::ObjectCollection& collection) {
 		SMBC::CubeMesh _Cube(
 			block.bounds / 2.0f,
 			block.position,
-			(block.blkPtr != nullptr) ? block.blkPtr->tiling : 4
+			(block.blkPtr != nullptr) ? block.blkPtr->Tiling : 4
 		);
 
 		for (glm::vec3& vert : _Cube.Vertices) {
@@ -195,7 +193,7 @@ SMBC::Error _ConvertedModel::WriteBlueprintToFile(const unsigned long long& obje
 			SMBC::CubeMesh _Cube(
 				curBlock.bounds / 2.0f,
 				curBlock.position,
-				(curBlock.blkPtr != nullptr) ? curBlock.blkPtr->tiling : 4
+				(curBlock.blkPtr != nullptr) ? curBlock.blkPtr->Tiling : 4
 			);
 
 			for (glm::vec3& vert : _Cube.Vertices) {
@@ -318,7 +316,7 @@ SMBC::Error _ConvertedModel::WriteBlueprintToFile(const unsigned long long& obje
 
 				if (conv_data.apply_texture) {
 					std::string _mat_name = "usemtl ";
-					SMBC::String::Combine(_mat_name, curPart.objPtr->uuid);
+					SMBC::String::Combine(_mat_name, curPart.objPtr->Uuid);
 
 					if (conv_data.mat_by_color)
 						SMBC::String::Combine(_mat_name, " ", curPart.color);
@@ -370,9 +368,9 @@ SMBC::Error _ConvertedModel::WriteBlueprintToFile(const unsigned long long& obje
 }
 
 SMBC::Error _ConvertedModel::LoadBlueprintData(const std::wstring& blueprint_path) {
-	nlohmann::json _BlueprintJson;
+	nlohmann::json _BlueprintJson = SMBC::Json::LoadParseJson(blueprint_path);
 
-	if (!SMBC::Json::ParseJson(blueprint_path, _BlueprintJson))
+	if (!_BlueprintJson.is_object())
 		return SMBC::Error::File;
 
 	if (!_BlueprintJson.contains("bodies") && !_BlueprintJson.contains("joints"))
@@ -427,11 +425,11 @@ SMBC::Error _ConvertedModel::LoadBlueprintData(const std::wstring& blueprint_pat
 					if (!(_BoundX.is_number() && _BoundY.is_number() && _BoundZ.is_number())) continue;
 					glm::vec3 _BoundsVec(_BoundX.get<float>(), _BoundY.get<float>(), _BoundZ.get<float>());
 
-					SMBC::BlockData* _BlockD = SMBC::ObjectDatabase::GetBlock(_UuidWstr);
+					const SMBC::BlockData* _BlockD = SMBC::Mod::GetBlock(_UuidWstr);
 					bool blockExists = (_BlockD != nullptr);
 
 					SMBC::SM_Block _Block;
-					_Block.blkPtr = _BlockD;
+					_Block.blkPtr = (SMBC::BlockData*)_BlockD;
 					_Block.bounds = _BoundsVec;
 					_Block.color = _ColorWstr;
 					_Block.position = _PosVec;
@@ -451,13 +449,13 @@ SMBC::Error _ConvertedModel::LoadBlueprintData(const std::wstring& blueprint_pat
 					SMBC::ConvData::ProgressValue++;
 				}
 				else {
-					SMBC::ObjectData* _ObjData = SMBC::ObjectDatabase::GetPart(_UuidWstr);
-					if (_ObjData == nullptr || _ObjData->path.empty()) continue;
+					const SMBC::PartData* part_data = SMBC::Mod::GetPart(_UuidWstr);
+					if (part_data == nullptr) continue;
 
 					SMBC::SM_Part _Part;
-					_Part.objPtr = _ObjData;
+					_Part.objPtr = (SMBC::PartData*)part_data;
 					_Part.color = _ColorWstr;
-					_Part.bounds = _Part.objPtr->bounds;
+					_Part.bounds = _Part.objPtr->Bounds;
 					_Part.position = _PosVec;
 					_Part.xAxis = _XAxis.get<int>();
 					_Part.zAxis = _ZAxis.get<int>();
@@ -467,7 +465,7 @@ SMBC::Error _ConvertedModel::LoadBlueprintData(const std::wstring& blueprint_pat
 
 					std::size_t _localColIdx = collectionIdx;
 					if (_uuid_separation)
-						_localColIdx = this->HasUuidCollection(_Part.objPtr->uuid, _Part.color, _uuidColor_separation);
+						_localColIdx = this->HasUuidCollection(_Part.objPtr->Uuid, _Part.color, _uuidColor_separation);
 
 					this->ObjCollection[_localColIdx].PartList.push_back(_Part);
 
@@ -501,13 +499,13 @@ SMBC::Error _ConvertedModel::LoadBlueprintData(const std::wstring& blueprint_pat
 
 			std::wstring _UuidWstr = SMBC::String::ToWide(_ShapeId.get<std::string>());
 
-			SMBC::ObjectData* _jnt_data = SMBC::ObjectDatabase::GetPart(_UuidWstr);
-			if (_jnt_data == nullptr || _jnt_data->path.empty()) continue;
+			const SMBC::PartData* _jnt_data = SMBC::Mod::GetPart(_UuidWstr);
+			if (_jnt_data == nullptr || _jnt_data->Path.empty()) continue;
 
 			SMBC::SM_Part _jnt;
-			_jnt.objPtr = _jnt_data;
+			_jnt.objPtr = (SMBC::PartData*)_jnt_data;
 			_jnt.color = (_Color.is_string() ? SMBC::String::ToWide(_Color.get<std::string>()) : L"000000");
-			_jnt.bounds = _jnt.objPtr->bounds;
+			_jnt.bounds = _jnt.objPtr->Bounds;
 			_jnt.position = _JointPos;
 			_jnt.xAxis = _XAxis.get<int>();
 			_jnt.zAxis = _ZAxis.get<int>();
@@ -516,7 +514,7 @@ SMBC::Error _ConvertedModel::LoadBlueprintData(const std::wstring& blueprint_pat
 			_jnt._index = (_ChildA.is_number() ? _ChildA.get<int>() : -1);
 
 			if (_uuid_separation) {
-				std::size_t col_idx = this->HasUuidCollection(_jnt.objPtr->uuid, _jnt.color, _uuidColor_separation);
+				std::size_t col_idx = this->HasUuidCollection(_jnt.objPtr->Uuid, _jnt.color, _uuidColor_separation);
 
 				this->ObjCollection[col_idx].PartList.push_back(_jnt);
 			}

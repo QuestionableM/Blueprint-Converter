@@ -12,7 +12,7 @@ namespace SMBC {
 		LangDB(const std::wstring& environment);
 		LangDB() = default;
 
-		void clear_database();
+		void ClearDatabase();
 
 		void LoadLanguageFile(const std::wstring& path);
 		bool UuidExists(const std::wstring& uuid);
