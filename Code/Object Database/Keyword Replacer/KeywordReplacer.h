@@ -3,12 +3,12 @@
 #include <string>
 #include <unordered_map>
 
+#include "Lib/Uuid/Uuid.h"
+
 namespace SMBC {
 	class PathReplacer {
 		static std::unordered_map<std::wstring, std::wstring> PathReplacements;
 		static std::unordered_map<std::wstring, std::wstring> KeyReplacements;
-		static std::wstring _ModDataReplacement;
-		static std::wstring _ContentDataReplacement;
 
 		static bool ReplaceKeyInternal(std::wstring& path);
 	public:
@@ -20,9 +20,9 @@ namespace SMBC {
 		static void CreateKey(std::wstring& key, std::wstring& value);
 
 		static void Add(const std::wstring& key, const std::wstring& value);
-		static void ClearAllData();
+		static void ClearData();
 
-		static void SetModData(const std::wstring& path, const std::wstring& uuid);
+		static void SetModData(const std::wstring& path, const SMBC::Uuid& uuid);
 
 		static void ReplaceAll(std::wstring& wstr, const wchar_t& to_replace, const wchar_t& replacer);
 

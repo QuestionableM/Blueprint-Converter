@@ -25,7 +25,8 @@ _ModListGUI::ModList(const SMBC::Blueprint& blueprint)
 
 	ProgressCounter = 0;
 	ProgressMaxCounter = 0;
-	this->usedModList = new std::vector<SMBC::ModListData>();
+	this->UsedModData = new std::unordered_map<SMBC::Uuid, SMBC::ModListData*>();
+	this->UsedModVector = new std::vector<SMBC::ModListData*>();
 	this->BPName_LBL->Text = gcnew System::String((L"Blueprint Name: " + blueprint.Name).c_str());
 
 	this->GuiUpdater->Start();
@@ -34,8 +35,10 @@ _ModListGUI::ModList(const SMBC::Blueprint& blueprint)
 
 _ModListGUI::~ModList()
 {
-	this->usedModList->clear();
-	delete this->usedModList;
+	this->UsedModVector->clear();
+	this->UsedModData->clear();
+	delete this->UsedModData;
+	delete this->UsedModVector;
 
 	if (components) delete components;
 }
@@ -74,8 +77,8 @@ System::Void _ModListGUI::ModSearcher_BW_DoWork(
 				const auto& uuid = SMBC::Json::Get(child, "shapeId");
 				if (!uuid.is_string()) continue;
 
-				std::wstring UuidWstr = SMBC::String::ToWide(uuid.get<std::string>());
-				SMBC::Mod* _ModPtr = this->FindModByObjUuid(UuidWstr);
+				SMBC::Uuid uuid_obj(uuid.get<std::string>());
+				SMBC::Mod* _ModPtr = this->FindModByObjUuid(uuid_obj);
 
 				this->AddModToList(_ModPtr);
 			}
@@ -93,9 +96,9 @@ System::Void _ModListGUI::ModSearcher_BW_DoWork(
 
 			const auto& uuid = SMBC::Json::Get(joint, "shapeId");
 			if (!uuid.is_string()) continue;
-
-			std::wstring UuidWstr = SMBC::String::ToWide(uuid.get<std::string>());
-			SMBC::Mod* _ModPtr = this->FindModByObjUuid(UuidWstr);
+			
+			SMBC::Uuid uuid_obj(uuid.get<std::string>());
+			SMBC::Mod* _ModPtr = this->FindModByObjUuid(uuid_obj);
 
 			this->AddModToList(_ModPtr);
 		}
@@ -111,7 +114,7 @@ System::Void _ModListGUI::ModSearcher_BW_RunWorkerCompleted(
 	this->ModSearchProgress->Maximum = ProgressMaxCounter;
 	this->ModSearchProgress->Value = (this->ModSearchProgress->Maximum < ProgressCounter) ? this->ModSearchProgress->Maximum : ProgressCounter;
 
-	this->ModCount_LBL->Text = gcnew System::String((L"Amount of Mods: " + std::to_wstring(this->usedModList->size())).c_str());
+	this->ModCount_LBL->Text = gcnew System::String((L"Amount of Mods: " + std::to_wstring(this->UsedModData->size())).c_str());
 	this->ObjectCount_LBL->Text = gcnew System::String((L"Amount of Objects: " + std::to_wstring(ProgressCounter)).c_str());
 
 	if (e->Result != nullptr)
@@ -135,14 +138,16 @@ System::Void _ModListGUI::ModSearcher_BW_RunWorkerCompleted(
 	}
 
 	this->ModList_LB->BeginUpdate();
-	for (SMBC::ModListData& mod_list : *this->usedModList)
+	for (const auto& mod_item : *this->UsedModData)
 	{
+		const SMBC::ModListData* mod_list = mod_item.second;
+
 		std::wstring _ModName = L"UNKNOWN_MOD";
 
-		if (mod_list.ptr != nullptr)
-			_ModName = mod_list.ptr->Name;
+		if (mod_list->ptr != nullptr)
+			_ModName = mod_list->ptr->Name;
 
-		this->ModList_LB->Items->Add(gcnew System::String((_ModName + L" (" + std::to_wstring(mod_list.used_parts) + L")").c_str()));
+		this->ModList_LB->Items->Add(gcnew System::String((_ModName + L" (" + std::to_wstring(mod_list->used_parts) + L")").c_str()));
 	}
 	this->ModList_LB->EndUpdate();
 
@@ -151,7 +156,7 @@ System::Void _ModListGUI::ModSearcher_BW_RunWorkerCompleted(
 
 System::Void _ModListGUI::GuiUpdater_Tick(System::Object^ sender, System::EventArgs^ e)
 {
-	this->ModCount_LBL->Text = gcnew System::String((L"Amount of Mods: " + std::to_wstring(this->usedModList->size())).c_str());
+	this->ModCount_LBL->Text = gcnew System::String((L"Amount of Mods: " + std::to_wstring(this->UsedModData->size())).c_str());
 	this->ObjectCount_LBL->Text = gcnew System::String((L"Amount of Objects: " + std::to_wstring(ProgressCounter)).c_str());
 
 	int _ProgressCopy = ProgressCounter;
@@ -162,7 +167,7 @@ System::Void _ModListGUI::GuiUpdater_Tick(System::Object^ sender, System::EventA
 	this->ModSearchProgress->Value = _ProgressCopy;
 }
 
-SMBC::Mod* _ModListGUI::FindModByObjUuid(const std::wstring& uuid)
+SMBC::Mod* _ModListGUI::FindModByObjUuid(const SMBC::Uuid& uuid)
 {
 	const SMBC::ObjectData* cur_object = SMBC::Mod::GetObject(uuid);
 	if (!cur_object) return nullptr;
@@ -172,14 +177,20 @@ SMBC::Mod* _ModListGUI::FindModByObjUuid(const std::wstring& uuid)
 
 void _ModListGUI::AddModToList(SMBC::Mod* ModData)
 {
-	for (SMBC::ModListData& list_data : *this->usedModList)
-		if (list_data.ptr == ModData)
-		{
-			list_data.used_parts++;
-			return;
-		}
+	if (this->UsedModData->find(ModData->Uuid) != this->UsedModData->end())
+	{
+		SMBC::ModListData*& lData_Ptr = this->UsedModData->at(ModData->Uuid);
+		lData_Ptr->used_parts++;
 
-	this->usedModList->push_back({ModData, 1});
+		return;
+	}
+
+	SMBC::ModListData* new_listData = new SMBC::ModListData();
+	new_listData->ptr = ModData;
+	new_listData->used_parts = 1;
+
+	this->UsedModData->insert(std::make_pair(ModData->Uuid, new_listData));
+	this->UsedModVector->push_back(new_listData);
 }
 
 System::Void _ModListGUI::ModList_FormClosing(
@@ -250,7 +261,7 @@ SMBC::Mod* _ModListGUI::GetCurrentMod()
 	int _index = this->ModList_LB->SelectedIndex;
 	if (_index <= -1) return nullptr;
 
-	SMBC::ModListData& _ModList = this->usedModList->at(_index);
+	SMBC::ModListData*& _ModList = this->UsedModVector->at(_index);
 
-	return _ModList.ptr;
+	return _ModList->ptr;
 }

@@ -58,7 +58,7 @@ namespace SMBC {
 		glm::vec3 bounds;
 		int xAxis;
 		int zAxis;
-		std::wstring uuid;
+		SMBC::Uuid uuid;
 		std::wstring color;
 		long _index;
 	};

@@ -139,7 +139,7 @@ std::unordered_map<std::wstring, SMBC::CachedBlock*> _ObjectStorage::CachedBlock
 std::unordered_map<std::wstring, SMBC::CachedPart*> _ObjectStorage::CachedParts = {};
 
 SMBC::CachedBlock* _ObjectStorage::LoadBlock(SMBC::SM_Block& block, const bool& mat_by_color) {
-	std::wstring _UuidStr = block.uuid;
+	std::wstring _UuidStr = block.uuid.ToWstring();
 	if (mat_by_color)
 		SMBC::String::Combine(_UuidStr, L" ", block.color);
 
@@ -160,7 +160,7 @@ SMBC::CachedPart* _ObjectStorage::LoadPart(
 	const bool& load_normals,
 	const bool& mat_by_color
 ) {
-	std::wstring _UuidStr = part.objPtr->Uuid;
+	std::wstring _UuidStr = part.objPtr->Uuid.ToWstring();
 	if (mat_by_color)
 		SMBC::String::Combine(_UuidStr, L" ", part.color);
 

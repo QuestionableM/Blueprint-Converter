@@ -1,4 +1,4 @@
-#include "Object Database/ObjectDatabase.h"
+#include "LanguageDatabase.h"
 #include "Object Database/Keyword Replacer/KeywordReplacer.h"
 
 #include "Lib/Json/JsonFunc.h"
@@ -29,24 +29,24 @@ namespace SMBC
 			const auto& _Title = Json::Get(trans.value(), "title");
 			if (!_Title.is_string()) continue;
 
-			std::wstring _WstrTitle = SMBC::String::ToWide(_Title.get<std::string>());
-			SMBC::PathReplacer::RemoveNewLineCharacters(_WstrTitle);
+			std::wstring _WstrTitle = String::ToWide(_Title.get<std::string>());
+			PathReplacer::RemoveNewLineCharacters(_WstrTitle);
 
 			this->AddTranslation(
-				SMBC::String::ToWide(trans.key()),
+				Uuid(trans.key()),
 				_WstrTitle
 			);
 		}
 	}
 
-	void LangDB::AddTranslation(const std::wstring& uuid, const std::wstring& trans)
+	void LangDB::AddTranslation(const Uuid& uuid, const std::wstring& trans)
 	{
 		if (this->Translations.find(uuid) == this->Translations.end())
 			this->Translations.insert(std::make_pair(uuid, trans));
 	}
 
 	static const std::wstring BlockNotFoundString = L"BLOCK NOT FOUND";
-	const std::wstring& LangDB::GetTranslation(const std::wstring& uuid)
+	const std::wstring& LangDB::GetTranslation(const Uuid& uuid)
 	{
 		if (this->Translations.find(uuid) != this->Translations.end())
 			return this->Translations.at(uuid);

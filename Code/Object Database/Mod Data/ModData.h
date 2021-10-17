@@ -3,6 +3,7 @@
 #include "Object Database/Texture Database/TextureDatabase.h"
 #include "Object Database/Language Database/LanguageDatabase.h"
 #include "Object Database/Object Data/ObjectData.h"
+#include "Lib/Uuid/Uuid.h"
 
 #include <unordered_map>
 #include <string>
@@ -13,16 +14,16 @@ namespace SMBC
 {
 	class Mod
 	{
-		static std::unordered_map<std::wstring, ObjectData*> AllObjects;
-		static std::unordered_map<std::wstring, Mod*> Mods;
+		static std::unordered_map<Uuid, ObjectData*> AllObjects;
+		static std::unordered_map<Uuid, Mod*> Mods;
 	public:
-		std::unordered_map<std::wstring, ObjectData*> Objects;
+		std::unordered_map<Uuid, ObjectData*> Objects;
 		LangDB LanguageDB;
 
 		std::wstring Name;
 		std::wstring WorkshopId;
 		std::wstring Path;
-		std::wstring Uuid;
+		Uuid Uuid;
 
 	private:
 		static bool GetBlockTextures(const nlohmann::json& block, Texture::TextureList& tex);
@@ -42,20 +43,19 @@ namespace SMBC
 		void LoadObjectsFromDirectory(const std::wstring& dir);
 		void LoadTranslations(const std::wstring& path = L"");
 
-		bool UuidExists(const std::wstring& uuid);
 		void AddObject(ObjectData* object);
 
 		static std::size_t GetObjectCount();
 		static std::size_t GetModCount();
 		static void ClearMods();
 
-		static const ObjectData* GetObject(const std::wstring& uuid);
-		static const PartData* GetPart(const std::wstring& uuid);
-		static const BlockData* GetBlock(const std::wstring& uuid);
+		static const ObjectData* GetObject(const SMBC::Uuid& uuid);
+		static const PartData* GetPart(const SMBC::Uuid& uuid);
+		static const BlockData* GetBlock(const SMBC::Uuid& uuid);
 
 		static Mod* CreateModFromDirectory(const std::wstring& dir);
 		static Mod* CreateMod(
-			const std::wstring& uuid,
+			const SMBC::Uuid& uuid,
 			const std::wstring& name,
 			const std::wstring& workshop_id,
 			const std::wstring& dir

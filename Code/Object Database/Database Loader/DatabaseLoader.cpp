@@ -19,7 +19,7 @@ namespace SMBC
 	void DatabaseLoader::LoadGameDatabase()
 	{
 		Mod* _VanillaParts = Mod::CreateMod(
-			L"00000000-0000-0000-0000-000000000000",
+			SMBC::Uuid("00000000-0000-0000-0000-000000000000"),
 			L"VANILLA GAME",
 			L"",
 			Settings::PathToSM
@@ -65,9 +65,15 @@ namespace SMBC
 		}
 	}
 
-	void DatabaseLoader::LoadDatabase()
+	void DatabaseLoader::FullCleanup()
 	{
 		Mod::ClearMods();
+		PathReplacer::ClearData();
+	}
+
+	void DatabaseLoader::LoadDatabase()
+	{
+		DatabaseLoader::FullCleanup();
 
 		ConvData::SetState(State::ReadingDatabase);
 

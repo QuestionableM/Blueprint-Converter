@@ -4,6 +4,7 @@
 #include <glm.hpp>
 
 #include "Object Database/Texture Database/TextureDatabase.h"
+#include "Lib/Uuid/Uuid.h"
 
 namespace SMBC
 {
@@ -18,7 +19,7 @@ namespace SMBC
 	protected:
 		ObjectType Type = ObjectType::None;
 	public:
-		std::wstring Uuid;
+		Uuid Uuid;
 		std::wstring Name;
 		Mod* ModPtr;
 
@@ -33,7 +34,7 @@ namespace SMBC
 		int Tiling;
 
 		BlockData(
-			const std::wstring& uuid,
+			const SMBC::Uuid& uuid,
 			const std::wstring& name,
 			SMBC::Texture::TextureList& textures,
 			const int& tiling
@@ -48,7 +49,7 @@ namespace SMBC
 		glm::vec3 Bounds;
 
 		PartData(
-			const std::wstring& uuid,
+			const SMBC::Uuid& uuid,
 			const std::wstring& path,
 			const std::wstring& name,
 			SMBC::Texture::Texture& textures,

@@ -21,7 +21,8 @@ namespace BlueprintConverter {
 	public:
 		int selected_mod = -1;
 		ModList(const SMBC::Blueprint& blueprint);
-		std::vector<ModListData>* usedModList = nullptr;
+		std::unordered_map<SMBC::Uuid, ModListData*>* UsedModData = nullptr;
+		std::vector<ModListData*>* UsedModVector = nullptr;
 
 	protected:
 		~ModList();
@@ -193,7 +194,7 @@ namespace BlueprintConverter {
 		System::Void ModSearcher_BW_RunWorkerCompleted(System::Object^ sender, System::ComponentModel::RunWorkerCompletedEventArgs^ e);
 		System::Void GuiUpdater_Tick(System::Object^ sender, System::EventArgs^ e);
 
-		SMBC::Mod* FindModByObjUuid(const std::wstring& uuid);
+		SMBC::Mod* FindModByObjUuid(const SMBC::Uuid& uuid);
 
 		void AddModToList(SMBC::Mod* ModPtr);
 		System::Void ModList_FormClosing(System::Object^ sender, System::Windows::Forms::FormClosingEventArgs^ e);

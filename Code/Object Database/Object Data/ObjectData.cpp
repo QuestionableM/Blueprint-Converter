@@ -19,7 +19,7 @@ namespace SMBC
 	}
 
 	BlockData::BlockData(
-		const std::wstring& uuid,
+		const SMBC::Uuid& uuid,
 		const std::wstring& name,
 		SMBC::Texture::TextureList& textures,
 		const int& tiling
@@ -33,7 +33,7 @@ namespace SMBC
 	}
 
 	PartData::PartData(
-		const std::wstring& uuid,
+		const SMBC::Uuid& uuid,
 		const std::wstring& path,
 		const std::wstring& name,
 		SMBC::Texture::Texture& textures,

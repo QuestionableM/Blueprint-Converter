@@ -44,6 +44,7 @@
     <ClCompile Include="Code\Object Database\Database Loader\DatabaseLoader.cpp" />
     <ClCompile Include="Code\Object Database\Object Data\ObjectData.cpp" />
     <ClCompile Include="Code\Object Database\Texture Database\TextureDatabase.cpp" />
+    <ClCompile Include="Code\Lib\Uuid\Uuid.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Code\Blueprint Converter\Blueprint Writer\BlueprintWriter.h" />
@@ -82,6 +83,7 @@
     <ClInclude Include="Code\Object Database\Database Loader\DatabaseLoader.h" />
     <ClInclude Include="Code\Object Database\Object Data\ObjectData.h" />
     <ClInclude Include="Code\Object Database\Texture Database\TextureDatabase.h" />
+    <ClInclude Include="Code\Lib\Uuid\Uuid.h" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

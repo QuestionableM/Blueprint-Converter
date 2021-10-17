@@ -11,8 +11,8 @@ namespace fs = std::filesystem;
 
 namespace SMBC
 {
-	std::unordered_map<std::wstring, ObjectData*> Mod::AllObjects = {};
-	std::unordered_map<std::wstring, Mod*>        Mod::Mods       = {};
+	std::unordered_map<Uuid, ObjectData*> Mod::AllObjects = {};
+	std::unordered_map<Uuid, Mod*>        Mod::Mods       = {};
 
 	bool Mod::GetBlockTextures(const nlohmann::json& block, SMBC::Texture::TextureList& tex)
 	{
@@ -43,11 +43,11 @@ namespace SMBC
 
 			if (!bUuid.is_string()) continue;
 
-			const std::wstring bUuidWstr = String::ToWide(bUuid.get<std::string>());
+			SMBC::Uuid uuid_obj(bUuid.get<std::string>());
 
-			if (AllObjects.find(bUuidWstr) != AllObjects.end())
+			if (AllObjects.find(uuid_obj) != AllObjects.end())
 			{
-				DebugWarningL("An object with this uuid already exists! (", bUuidWstr, ")");
+				DebugWarningL("An object with this uuid already exists! (", uuid_obj.ToString(), ")");
 				continue;
 			}
 
@@ -57,9 +57,9 @@ namespace SMBC
 			int tiling_value = (bTiling.is_number() ? bTiling.get<int>() : 4);
 			if (tiling_value > 16 || tiling_value <= 0) tiling_value = 4;
 
-			const std::wstring& bNameWstr = this->LanguageDB.GetTranslation(bUuidWstr);
+			const std::wstring& bNameWstr = this->LanguageDB.GetTranslation(uuid_obj);
 
-			BlockData* new_blk = new BlockData(bUuidWstr, bNameWstr, tex_list, tiling_value);
+			BlockData* new_blk = new BlockData(uuid_obj, bNameWstr, tex_list, tiling_value);
 			new_blk->ModPtr = this;
 
 			const auto new_pair = std::make_pair(new_blk->Uuid, new_blk);
@@ -268,11 +268,11 @@ namespace SMBC
 
 			if (!pUuid.is_string()) continue;
 
-			const std::wstring pUuidWstr = String::ToWide(pUuid.get<std::string>());
+			SMBC::Uuid uuid_obj(pUuid.get<std::string>());
 
-			if (AllObjects.find(pUuidWstr) != AllObjects.end())
+			if (AllObjects.find(uuid_obj) != AllObjects.end())
 			{
-				DebugWarningL("An object with this uuid already exists! (", pUuidWstr, ")");
+				DebugWarningL("An object with this uuid already exists! (", uuid_obj.ToString(), ")");
 				continue;
 			}
 
@@ -281,10 +281,10 @@ namespace SMBC
 			if (!Mod::GetRenderableData(lPart, tex_data, mesh_path))
 				continue;
 
-			const std::wstring& pNameWstr = this->LanguageDB.GetTranslation(pUuidWstr);
+			const std::wstring& pNameWstr = this->LanguageDB.GetTranslation(uuid_obj);
 			const glm::vec3 pBounds = Mod::LoadPartCollision(lPart);
 
-			PartData* new_part = new PartData(pUuidWstr, mesh_path, pNameWstr, tex_data, pBounds);
+			PartData* new_part = new PartData(uuid_obj, mesh_path, pNameWstr, tex_data, pBounds);
 			new_part->ModPtr = this;
 
 			const auto new_pair = std::make_pair(new_part->Uuid, new_part);
@@ -340,11 +340,6 @@ namespace SMBC
 		this->LanguageDB.LoadLanguageFile(_FinalPath);
 	}
 
-	bool Mod::UuidExists(const std::wstring& uuid)
-	{
-		return (AllObjects.find(uuid) != AllObjects.end());
-	}
-
 	void Mod::AddObject(ObjectData* object)
 	{
 		if (AllObjects.find(object->Uuid) != AllObjects.end())
@@ -372,9 +367,10 @@ namespace SMBC
 			delete mod.second;
 
 		Mods.clear();
+		AllObjects.clear();
 	}
 
-	const ObjectData* Mod::GetObject(const std::wstring& uuid)
+	const ObjectData* Mod::GetObject(const SMBC::Uuid& uuid)
 	{
 		if (AllObjects.find(uuid) == AllObjects.end())
 			return nullptr;
@@ -382,14 +378,14 @@ namespace SMBC
 		return AllObjects.at(uuid);
 	}
 
-	const PartData* Mod::GetPart(const std::wstring& uuid)
+	const PartData* Mod::GetPart(const SMBC::Uuid& uuid)
 	{
 		const ObjectData* current_obj = GetObject(uuid);
 
 		return (current_obj != nullptr) ? current_obj->ToPart() : nullptr;
 	}
 
-	const BlockData* Mod::GetBlock(const std::wstring& uuid)
+	const BlockData* Mod::GetBlock(const SMBC::Uuid& uuid)
 	{
 		const ObjectData* current_obj = GetObject(uuid);
 		
@@ -416,7 +412,7 @@ namespace SMBC
 		long long mFileId = mFileIdStr.is_number() ? mFileIdStr.get<long long>() : 0ll;
 
 		return Mod::CreateMod(
-			String::ToWide(mUuid.get<std::string>()),
+			SMBC::Uuid(mUuid.get<std::string>()),
 			String::ToWide(mName.get<std::string>()),
 			(mFileId > 0) ? std::to_wstring(mFileId) : L"",
 			dir
@@ -424,14 +420,14 @@ namespace SMBC
 	}
 
 	Mod* Mod::CreateMod(
-		const std::wstring& uuid,
+		const SMBC::Uuid& uuid,
 		const std::wstring& name,
 		const std::wstring& workshop_id,
 		const std::wstring& dir
 	) {
 		if (Mods.find(uuid) != Mods.end())
 		{
-			DebugErrorL("The specified uuid is already used by the other mod: ", Mods.at(uuid)->Name, " (", uuid, ")");
+			DebugErrorL("The specified uuid is already used by the other mod: ", Mods.at(uuid)->Name, " (", uuid.ToString(), ")");
 			return nullptr;
 		}
 

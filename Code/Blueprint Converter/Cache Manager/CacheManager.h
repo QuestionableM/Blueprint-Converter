@@ -4,6 +4,7 @@
 
 #include "Object Database/Texture Database/TextureDatabase.h"
 #include "Blueprint Converter/Object Definitions/ObjectDefinitions.h"
+#include "Lib/Uuid/Uuid.h"
 
 #include <unordered_map>
 

@@ -33,7 +33,7 @@ namespace SMBC {
 
 		bool IsLastCollectionEmpty();
 		std::size_t CreateNewCollection();
-		std::size_t HasUuidCollection(const std::wstring& uuid, const std::wstring& color, const bool& useColor);
+		std::size_t HasUuidCollection(const SMBC::Uuid& uuid, const std::wstring& color, const bool& useColor);
 		bool AddJointToChildShape(SMBC::SM_Part& joint);
 		bool HasStuffToConvert();
 

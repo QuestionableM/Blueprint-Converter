@@ -28,7 +28,7 @@ std::size_t _ConvertedModel::CreateNewCollection() {
 	return this->ObjCollection.size() - 1;
 }
 
-std::size_t _ConvertedModel::HasUuidCollection(const std::wstring& uuid, const std::wstring& color, const bool& useColor) {
+std::size_t _ConvertedModel::HasUuidCollection(const SMBC::Uuid& uuid, const std::wstring& color, const bool& useColor) {
 	for (std::size_t a = 0u; a < this->ObjCollection.size(); a++) {
 		SMBC::ObjectCollection& objCol = this->ObjCollection[a];
 
@@ -229,7 +229,7 @@ SMBC::Error _ConvertedModel::WriteBlueprintToFile(const unsigned long long& obje
 
 			if (conv_data.apply_texture) {
 				std::string _mat_name = "usemtl ";
-				SMBC::String::Combine(_mat_name, curBlock.uuid);
+				SMBC::String::Combine(_mat_name, curBlock.uuid.ToString());
 
 				if (conv_data.mat_by_color)
 					SMBC::String::Combine(_mat_name, " ", curBlock.color);
@@ -316,7 +316,7 @@ SMBC::Error _ConvertedModel::WriteBlueprintToFile(const unsigned long long& obje
 
 				if (conv_data.apply_texture) {
 					std::string _mat_name = "usemtl ";
-					SMBC::String::Combine(_mat_name, curPart.objPtr->Uuid);
+					SMBC::String::Combine(_mat_name, curPart.objPtr->Uuid.ToString());
 
 					if (conv_data.mat_by_color)
 						SMBC::String::Combine(_mat_name, " ", curPart.color);
@@ -414,7 +414,7 @@ SMBC::Error _ConvertedModel::LoadBlueprintData(const std::wstring& blueprint_pat
 				if (!(_PosX.is_number() && _PosY.is_number() && _PosZ.is_number())) continue;
 				glm::vec3 _PosVec(_PosX.get<float>(), _PosY.get<float>(), _PosZ.get<float>());
 
-				std::wstring _UuidWstr = SMBC::String::ToWide(_ShapeId.get<std::string>());
+				SMBC::Uuid uuid_obj(_ShapeId.get<std::string>());
 				std::wstring _ColorWstr = (_Color.is_string() ? SMBC::String::ToWide(_Color.get<std::string>()) : L"000000");
 
 				if (_Bounds.is_object()) {
@@ -425,7 +425,7 @@ SMBC::Error _ConvertedModel::LoadBlueprintData(const std::wstring& blueprint_pat
 					if (!(_BoundX.is_number() && _BoundY.is_number() && _BoundZ.is_number())) continue;
 					glm::vec3 _BoundsVec(_BoundX.get<float>(), _BoundY.get<float>(), _BoundZ.get<float>());
 
-					const SMBC::BlockData* _BlockD = SMBC::Mod::GetBlock(_UuidWstr);
+					const SMBC::BlockData* _BlockD = SMBC::Mod::GetBlock(uuid_obj);
 					bool blockExists = (_BlockD != nullptr);
 
 					SMBC::SM_Block _Block;
@@ -433,7 +433,7 @@ SMBC::Error _ConvertedModel::LoadBlueprintData(const std::wstring& blueprint_pat
 					_Block.bounds = _BoundsVec;
 					_Block.color = _ColorWstr;
 					_Block.position = _PosVec;
-					_Block.uuid = _UuidWstr;
+					_Block.uuid = uuid_obj;
 					_Block.xAxis = _XAxis.get<int>();
 					_Block.zAxis = _ZAxis.get<int>();
 					_Block._index = _ObjectIndexValue;
@@ -449,7 +449,7 @@ SMBC::Error _ConvertedModel::LoadBlueprintData(const std::wstring& blueprint_pat
 					SMBC::ConvData::ProgressValue++;
 				}
 				else {
-					const SMBC::PartData* part_data = SMBC::Mod::GetPart(_UuidWstr);
+					const SMBC::PartData* part_data = SMBC::Mod::GetPart(uuid_obj);
 					if (part_data == nullptr) continue;
 
 					SMBC::SM_Part _Part;
@@ -497,9 +497,9 @@ SMBC::Error _ConvertedModel::LoadBlueprintData(const std::wstring& blueprint_pat
 			if (!(_PosX.is_number() && _PosY.is_number() && _PosZ.is_number())) continue;
 			glm::vec3 _JointPos(_PosX.get<float>(), _PosY.get<float>(), _PosZ.get<float>());
 
-			std::wstring _UuidWstr = SMBC::String::ToWide(_ShapeId.get<std::string>());
+			SMBC::Uuid uuid_obj(_ShapeId.get<std::string>());
 
-			const SMBC::PartData* _jnt_data = SMBC::Mod::GetPart(_UuidWstr);
+			const SMBC::PartData* _jnt_data = SMBC::Mod::GetPart(uuid_obj);
 			if (_jnt_data == nullptr || _jnt_data->Path.empty()) continue;
 
 			SMBC::SM_Part _jnt;
