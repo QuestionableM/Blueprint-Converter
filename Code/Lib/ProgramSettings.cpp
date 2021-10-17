@@ -3,7 +3,7 @@
 #include "Lib/String/String.h"
 #include "Lib/File/FileFunc.h"
 #include "Object Database/Keyword Replacer/KeywordReplacer.h"
-#include "Object Database/ObjectDatabase.h"
+#include "Object Database/Mod Data/ModData.h"
 
 #include <filesystem>
 #include <msclr/marshal_cppstd.h>

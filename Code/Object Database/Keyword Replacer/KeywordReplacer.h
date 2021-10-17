@@ -25,7 +25,9 @@ namespace SMBC {
 		static void SetModData(const std::wstring& path, const std::wstring& uuid);
 
 		static void ReplaceAll(std::wstring& wstr, const wchar_t& to_replace, const wchar_t& replacer);
+
 		static std::wstring ReplaceKey(const std::wstring& str);
+
 		static void RemoveNewLineCharacters(std::wstring& str);
 	};
 }
