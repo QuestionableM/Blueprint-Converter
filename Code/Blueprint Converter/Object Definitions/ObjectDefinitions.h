@@ -5,7 +5,8 @@
 #include "Object Database/Mod Data/ModData.h"
 
 namespace SMBC {
-	struct SubMeshData {
+	struct SubMeshData
+	{
 		std::wstring MaterialName;
 		int SubMeshIndex;
 
@@ -14,7 +15,8 @@ namespace SMBC {
 		bool is_empty();
 	};
 
-	struct Model {
+	struct Model
+	{
 		std::vector<glm::vec3> vertices;
 		std::vector<glm::vec3> normals;
 		std::vector<glm::vec2> uvs;
@@ -27,43 +29,46 @@ namespace SMBC {
 		~Model();
 	};
 
-	struct CachedBlock {
-		SMBC::BlockData* blkPtr = nullptr;
-		std::wstring color;
+	struct OffsetData;
+
+	struct Object
+	{
+		SMBC::Uuid Uuid;
+		std::wstring Color;
+		int xAxis;
+		int zAxis;
+		glm::vec3 Position;
+		glm::vec3 Bounds;
+		std::size_t _index;
+
+		virtual ObjectType Type() const = 0;
+		virtual void CalcCenterPoint(OffsetData& data) const = 0;
+		virtual void WriteToFile(std::ofstream& out, OffsetData& data, const std::size_t& idx, const glm::vec3& offsetVec) const = 0;
+	protected:
+		static const glm::mat4 RotationMatrix;
 	};
 
-	struct CachedPart {
+	struct Part : public Object
+	{
 		SMBC::PartData* objPtr = nullptr;
 		SMBC::Model* modelPtr = nullptr;
 
-		std::wstring color;
+		ObjectType Type() const override;
+		void CalcCenterPoint(OffsetData& data) const override;
+		void WriteToFile(std::ofstream& out, OffsetData& data, const std::size_t& idx, const glm::vec3& offsetVec) const override;
 	};
 
-	struct SM_Part {
-		SMBC::PartData* objPtr = nullptr;
-		SMBC::Model* modelPtr = nullptr;
-
-		std::wstring color;
-		glm::vec3 position;
-		glm::vec3 bounds;
-		int xAxis;
-		int zAxis;
-		int _index;
-	};
-
-	struct SM_Block {
+	struct Block : public Object
+	{
 		SMBC::BlockData* blkPtr = nullptr;
 
-		glm::vec3 position;
-		glm::vec3 bounds;
-		int xAxis;
-		int zAxis;
-		SMBC::Uuid uuid;
-		std::wstring color;
-		long _index;
+		ObjectType Type() const override;
+		void CalcCenterPoint(OffsetData& data) const override;
+		void WriteToFile(std::ofstream& out, OffsetData& data, const std::size_t& idx, const glm::vec3& offsetVec) const override;
 	};
 
-	struct CubeMesh {
+	struct CubeMesh
+	{
 		std::vector<glm::vec3> Vertices;
 		std::vector<glm::vec2> TexturePoints = {
 			{0.0f, 1.0f}, {1.0f, 0.0f},

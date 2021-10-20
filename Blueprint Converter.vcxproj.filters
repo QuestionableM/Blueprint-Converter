@@ -27,6 +27,8 @@
     <ClCompile Include="Code\Lib\ConvData\ConvData.cpp" />
     <ClCompile Include="Code\Object Database\Object Data\ObjectData.cpp" />
     <ClCompile Include="Code\Lib\Uuid\Uuid.cpp" />
+    <ClCompile Include="Code\Blueprint Converter\Cache Manager\Cache Object\CacheObject.cpp" />
+    <ClCompile Include="Code\Blueprint Converter\Convert Settings\ConvertSettings.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Code\Blueprint Converter\BlueprintConverter.h" />
@@ -56,5 +58,7 @@
     <ClInclude Include="Code\Lib\ConvData\ConvData.h" />
     <ClInclude Include="Code\Object Database\Object Data\ObjectData.h" />
     <ClInclude Include="Code\Lib\Uuid\Uuid.h" />
+    <ClInclude Include="Code\Blueprint Converter\Cache Manager\Cache Object\CacheObject.h" />
+    <ClInclude Include="Code\Blueprint Converter\Convert Settings\ConvertSettings.h" />
   </ItemGroup>
 </Project>

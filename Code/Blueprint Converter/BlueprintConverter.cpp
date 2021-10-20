@@ -1,5 +1,6 @@
 #include "BlueprintConverter.h"
 #include "Blueprint Converter/Blueprint Writer/BlueprintWriter.h"
+#include "Blueprint Converter/Convert Settings/ConvertSettings.h"
 
 #include <gtc/matrix_transform.hpp>
 
@@ -141,15 +142,14 @@ SMBC::Error SMBC::BPFunction::ConvertBlueprintToObj(
 	const bool& export_normals,
 	const bool& mat_by_color
 ) {
-	SMBC::ConvertedModel::ConvertedModelData conv_data;
-	conv_data.apply_texture = apply_textures;
-	conv_data.export_normals = export_normals;
-	conv_data.export_uvs = export_uvs;
-	conv_data.separation_method = separation_method;
-	conv_data.tex_list = texture_list;
-	conv_data.mat_by_color = mat_by_color;
+	ConvertSettings::ApplyTextures	  = apply_textures;
+	ConvertSettings::ExportNormals	  = export_normals;
+	ConvertSettings::ExportUvs		  = export_uvs;
+	ConvertSettings::SeparationMethod = separation_method;
+	ConvertSettings::TextureList	  = texture_list;
+	ConvertSettings::MatByColor		  = mat_by_color;
 
-	SMBC::ConvertedModel _ConvModel(conv_data);
+	SMBC::ConvertedModel _ConvModel;
 	_ConvModel.ModelName = blueprint_name;
 
 	SMBC::ConvData::SetState(SMBC::State::ReadingJson);

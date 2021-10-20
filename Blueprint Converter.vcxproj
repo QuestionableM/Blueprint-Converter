@@ -21,7 +21,9 @@
   <ItemGroup>
     <ClCompile Include="Code\Blueprint Converter\Blueprint Writer\BlueprintWriter.cpp" />
     <ClCompile Include="Code\Blueprint Converter\BlueprintConverter.cpp" />
+    <ClCompile Include="Code\Blueprint Converter\Cache Manager\Cache Object\CacheObject.cpp" />
     <ClCompile Include="Code\Blueprint Converter\Cache Manager\CacheManager.cpp" />
+    <ClCompile Include="Code\Blueprint Converter\Convert Settings\ConvertSettings.cpp" />
     <ClCompile Include="Code\Blueprint Converter\Object Definitions\ObjectDefinitions.cpp" />
     <ClCompile Include="Code\DebugCon.cpp" />
     <ClCompile Include="Code\Gui\Implementation\GeneratorSettings.cpp" />
@@ -49,7 +51,9 @@
   <ItemGroup>
     <ClInclude Include="Code\Blueprint Converter\Blueprint Writer\BlueprintWriter.h" />
     <ClInclude Include="Code\Blueprint Converter\BlueprintConverter.h" />
+    <ClInclude Include="Code\Blueprint Converter\Cache Manager\Cache Object\CacheObject.h" />
     <ClInclude Include="Code\Blueprint Converter\Cache Manager\CacheManager.h" />
+    <ClInclude Include="Code\Blueprint Converter\Convert Settings\ConvertSettings.h" />
     <ClInclude Include="Code\Blueprint Converter\Object Definitions\ObjectDefinitions.h" />
     <ClInclude Include="Code\DebugCon.h" />
     <ClInclude Include="Code\Gui\About.h">

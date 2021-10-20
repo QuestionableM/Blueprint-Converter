@@ -384,15 +384,17 @@ namespace SMBC
 	const PartData* Mod::GetPart(const SMBC::Uuid& uuid)
 	{
 		const ObjectData* current_obj = GetObject(uuid);
+		if (!current_obj) return nullptr;
 
-		return (current_obj != nullptr) ? current_obj->ToPart() : nullptr;
+		return ObjectData::ToPart((ObjectData*)current_obj);
 	}
 
 	const BlockData* Mod::GetBlock(const SMBC::Uuid& uuid)
 	{
 		const ObjectData* current_obj = GetObject(uuid);
+		if (!current_obj) return nullptr;
 		
-		return (current_obj != nullptr) ? current_obj->ToBlock() : nullptr;
+		return ObjectData::ToBlock((ObjectData*)current_obj);
 	}
 
 	Mod* Mod::CreateModFromDirectory(const std::wstring& dir)
@@ -430,7 +432,7 @@ namespace SMBC
 	) {
 		if (Mods.find(uuid) != Mods.end())
 		{
-			DebugErrorL("The specified uuid is already used by the other mod: ", Mods.at(uuid)->Name, " (", uuid.ToString(), ")");
+			DebugErrorL("The specified uuid is already in use by the other mod: ", Mods.at(uuid)->Name, " (", uuid.ToString(), ")");
 			return nullptr;
 		}
 

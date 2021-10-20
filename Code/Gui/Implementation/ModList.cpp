@@ -14,12 +14,12 @@ namespace SMBC
 	using namespace BlueprintConverter;
 }
 
-typedef SMBC::ModList _ModListGUI;
+typedef SMBC::ModList _ModList;
 
 static int ProgressCounter = 0;
 static int ProgressMaxCounter = 0;
 
-_ModListGUI::ModList(const SMBC::Blueprint& blueprint)
+_ModList::ModList(const SMBC::Blueprint& blueprint)
 {
 	this->InitializeComponent();
 
@@ -33,7 +33,7 @@ _ModListGUI::ModList(const SMBC::Blueprint& blueprint)
 	this->ModSearcher_BW->RunWorkerAsync(gcnew System::String(blueprint.Folder.c_str()));
 }
 
-_ModListGUI::~ModList()
+_ModList::~ModList()
 {
 	this->UsedModVector->clear();
 	this->UsedModData->clear();
@@ -43,10 +43,8 @@ _ModListGUI::~ModList()
 	if (components) delete components;
 }
 
-System::Void _ModListGUI::ModSearcher_BW_DoWork(
-	System::Object^ sender,
-	System::ComponentModel::DoWorkEventArgs^ e
-) {
+void _ModList::ModSearcher_BW_DoWork(System::Object^ sender, System::ComponentModel::DoWorkEventArgs^ e)
+{
 	System::String^ BP_PathS = safe_cast<System::String^>(e->Argument);
 	std::wstring BP_Path = msclr::interop::marshal_as<std::wstring>(BP_PathS);
 
@@ -105,7 +103,7 @@ System::Void _ModListGUI::ModSearcher_BW_DoWork(
 	}
 }
 
-System::Void _ModListGUI::ModSearcher_BW_RunWorkerCompleted(
+void _ModList::ModSearcher_BW_RunWorkerCompleted(
 	System::Object^ sender,
 	System::ComponentModel::RunWorkerCompletedEventArgs^ e
 ) {
@@ -123,7 +121,8 @@ System::Void _ModListGUI::ModSearcher_BW_RunWorkerCompleted(
 
 		System::String^ ErrorMsg;
 
-		switch (result_idx) {
+		switch (result_idx)
+		{
 		case 1:
 			ErrorMsg = L"Couldn't parse the specified blueprint file!";
 			break;
@@ -154,7 +153,7 @@ System::Void _ModListGUI::ModSearcher_BW_RunWorkerCompleted(
 	this->ModList_LB->Enabled = true;
 }
 
-System::Void _ModListGUI::GuiUpdater_Tick(System::Object^ sender, System::EventArgs^ e)
+void _ModList::GuiUpdater_Tick(System::Object^ sender, System::EventArgs^ e)
 {
 	this->ModCount_LBL->Text = gcnew System::String((L"Amount of Mods: " + std::to_wstring(this->UsedModData->size())).c_str());
 	this->ObjectCount_LBL->Text = gcnew System::String((L"Amount of Objects: " + std::to_wstring(ProgressCounter)).c_str());
@@ -167,7 +166,7 @@ System::Void _ModListGUI::GuiUpdater_Tick(System::Object^ sender, System::EventA
 	this->ModSearchProgress->Value = _ProgressCopy;
 }
 
-SMBC::Mod* _ModListGUI::FindModByObjUuid(const SMBC::Uuid& uuid)
+SMBC::Mod* _ModList::FindModByObjUuid(const SMBC::Uuid& uuid)
 {
 	const SMBC::ObjectData* cur_object = SMBC::Mod::GetObject(uuid);
 	if (!cur_object) return nullptr;
@@ -175,7 +174,7 @@ SMBC::Mod* _ModListGUI::FindModByObjUuid(const SMBC::Uuid& uuid)
 	return cur_object->ModPtr;
 }
 
-void _ModListGUI::AddModToList(SMBC::Mod* ModData)
+void _ModList::AddModToList(SMBC::Mod* ModData)
 {
 	if (this->UsedModData->find(ModData->Uuid) != this->UsedModData->end())
 	{
@@ -193,15 +192,13 @@ void _ModListGUI::AddModToList(SMBC::Mod* ModData)
 	this->UsedModVector->push_back(new_listData);
 }
 
-System::Void _ModListGUI::ModList_FormClosing(
-	System::Object^ sender,
-	System::Windows::Forms::FormClosingEventArgs^ e
-) {
+void _ModList::ModList_FormClosing(System::Object^ sender, System::Windows::Forms::FormClosingEventArgs^ e)
+{
 	if (this->ModSearcher_BW->IsBusy)
 		e->Cancel = true;
 }
 
-System::Void _ModListGUI::ModList_LB_SelectedIndexChanged(System::Object^ sender, System::EventArgs^ e)
+void _ModList::ModList_LB_SelectedIndexChanged(System::Object^ sender, System::EventArgs^ e)
 {
 	int sel_idx = this->ModList_LB->SelectedIndex;
 	if (this->selected_mod == sel_idx) return;
@@ -221,7 +218,7 @@ System::Void _ModListGUI::ModList_LB_SelectedIndexChanged(System::Object^ sender
 	this->OpenInFileExplorer_BTN->Enabled = _PathExists;
 }
 
-System::Void _ModListGUI::OpenInWorkshop_BTN_Click(System::Object^ sender, System::EventArgs^ e)
+void _ModList::OpenInWorkshop_BTN_Click(System::Object^ sender, System::EventArgs^ e)
 {
 	SMBC::Mod* CurMod = this->GetCurrentMod();
 	if (CurMod == nullptr) return;
@@ -239,7 +236,7 @@ System::Void _ModListGUI::OpenInWorkshop_BTN_Click(System::Object^ sender, Syste
 	System::Diagnostics::Process::Start(gcnew System::String(_WorkshopLink.c_str()));
 }
 
-System::Void _ModListGUI::OpenInFileExplorer_BTN_Click(System::Object^ sender, System::EventArgs^ e)
+void _ModList::OpenInFileExplorer_BTN_Click(System::Object^ sender, System::EventArgs^ e)
 {
 	SMBC::Mod* CurMod = this->GetCurrentMod();
 	if (CurMod == nullptr) return;
@@ -256,7 +253,7 @@ System::Void _ModListGUI::OpenInFileExplorer_BTN_Click(System::Object^ sender, S
 	SMBC::Gui::OpenFolderInExplorer(path_cpy);
 }
 
-SMBC::Mod* _ModListGUI::GetCurrentMod()
+SMBC::Mod* _ModList::GetCurrentMod()
 {
 	int _index = this->ModList_LB->SelectedIndex;
 	if (_index <= -1) return nullptr;

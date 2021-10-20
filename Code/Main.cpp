@@ -6,11 +6,10 @@
 
 #include "DebugCon.h"
 
-namespace SMBC {
+namespace SMBC
+{
 	using namespace BlueprintConverter;
 }
-
-#include "Lib/File/FileFunc.h"
 
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {

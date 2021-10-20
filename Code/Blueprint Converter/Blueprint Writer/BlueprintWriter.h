@@ -9,57 +9,48 @@
 
 #include "Lib/ConvData/ConvData.h"
 
-namespace SMBC {
-	struct ObjectCollection {
-		std::vector<SMBC::SM_Part> PartList;
-		std::vector<SMBC::SM_Block> BlockList;
+namespace SMBC
+{
+	struct ObjectCollection
+	{
+		std::vector<SMBC::Object*> ObjectList = {};
 
-		bool is_empty();
+		bool IsEmpty();
 	};
 
-	struct ConvertedModel {
-		struct ConvertedModelData {
-			bool tex_list;
-			bool apply_texture;
-			bool export_uvs;
-			bool export_normals;
-			bool mat_by_color;
+	struct OffsetData
+	{
+		std::size_t Vertex = 0ll;
+		std::size_t Normal = 0ll;
+		std::size_t Texture = 0ll;
 
-			int separation_method;
-		};
+		glm::vec3 pt_sum = { 0.0f, 0.0f, 0.0f };
+		std::size_t point_count = 0;
 
+		void UpdateValues(const glm::vec3& val);
+	};
+
+	struct ConvertedModel
+	{
 		std::wstring ModelName;
 		std::vector<SMBC::ObjectCollection> ObjCollection;
 
 		bool IsLastCollectionEmpty();
 		std::size_t CreateNewCollection();
 		std::size_t HasUuidCollection(const SMBC::Uuid& uuid, const std::wstring& color, const bool& useColor);
-		bool AddJointToChildShape(SMBC::SM_Part& joint);
+		bool AddJointToChildShape(SMBC::Part& joint);
 		bool HasStuffToConvert();
 
-		ConvertedModel(SMBC::ConvertedModel::ConvertedModelData& cm_data);
+		ConvertedModel() = default;
 
 	private:
-		ConvertedModelData conv_data;
-
-		struct OffsetData {
-			long long Vertex = 0ll;
-			long long Normal = 0ll;
-			long long Texture = 0ll;
-
-			glm::vec3 pt_sum = { 0.0f, 0.0f, 0.0f };
-			long long point_count = 0;
-
-			void UpdateValues(const glm::vec3& val);
-		};
-
 		OffsetData offsetData;
 		const glm::mat4 rotMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 
-		void LoadBlueprintBlocks(SMBC::ObjectCollection& collection);
-		void LoadBlueprintParts(SMBC::ObjectCollection& collection);
+		std::size_t CountTotalObjectAmount();
+		void LoadCollections(const std::size_t& total_obj_count);
 
-		SMBC::Error WriteBlueprintToFile(const unsigned long long& objectCount);
+		SMBC::Error WriteBlueprintToFile(const std::size_t& objectCount);
 
 	public:
 		SMBC::Error LoadBlueprintData(const std::wstring& blueprint_path);

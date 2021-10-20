@@ -7,69 +7,71 @@
 #include <cwctype>
 
 namespace fs = std::filesystem;
-typedef SMBC::Blueprint _Blueprint;
 
-std::vector<std::wstring> _Blueprint::ImageExtensions = { L".jpg", L".png", L".bmp" };
-
-bool _Blueprint::IsSupportedExtension(const std::wstring& _ext)
+namespace SMBC
 {
-	for (std::wstring& _Ext : SMBC::Blueprint::ImageExtensions)
-		if (_Ext == _ext) return true;
+	std::vector<std::wstring> Blueprint::ImageExtensions = { L".jpg", L".png", L".bmp" };
 
-	return false;
-}
-
-std::wstring _Blueprint::FixBlueprintName(const std::wstring& name)
-{
-	std::wstring _Output = L"";
-
-	for (const wchar_t& _Letter : name)
+	bool Blueprint::IsSupportedExtension(const std::wstring& _ext)
 	{
-		if (SMBC::Other::IsLetterAllowed(_Letter))
-			_Output += _Letter;
+		for (std::wstring& _Ext : SMBC::Blueprint::ImageExtensions)
+			if (_Ext == _ext) return true;
+
+		return false;
 	}
 
-	return _Output;
-}
-
-std::wstring _Blueprint::FindBlueprintImage()
-{
-	if (!SMBC::File::Exists(this->Folder)) return L"";
-
-	fs::directory_iterator _Iter(this->Folder, fs::directory_options::skip_permission_denied);
-	for (auto& Image : _Iter)
+	std::wstring Blueprint::FixBlueprintName(const std::wstring& name)
 	{
-		const fs::path& _img_p = Image.path();
+		std::wstring _Output = L"";
 
-		if (
-			Image.is_regular_file() && _img_p.has_extension() &&
-			this->IsSupportedExtension(_img_p.extension().wstring())
-		) return _img_p.wstring();
+		for (const wchar_t& _Letter : name)
+		{
+			if (SMBC::Other::IsLetterAllowed(_Letter))
+				_Output += _Letter;
+		}
+
+		return _Output;
 	}
 
-	return L"";
-}
+	std::wstring Blueprint::FindBlueprintImage()
+	{
+		if (!SMBC::File::Exists(this->Folder)) return L"";
 
-bool _Blueprint::BlueprintExists()
-{
-	bool _FolderExists = SMBC::File::Exists(this->Folder);
-	bool _PathExists = SMBC::File::Exists(this->Path);
+		fs::directory_iterator _Iter(this->Folder, fs::directory_options::skip_permission_denied);
+		for (auto& Image : _Iter)
+		{
+			const fs::path& _img_p = Image.path();
 
-	return (_FolderExists && _PathExists);
-}
+			if (
+				Image.is_regular_file() && _img_p.has_extension() &&
+				this->IsSupportedExtension(_img_p.extension().wstring())
+			) return _img_p.wstring();
+		}
 
-_Blueprint::Blueprint(
-	const std::wstring& name,
-	const std::wstring& path,
-	const std::wstring& folder,
-	const std::wstring& workshop_id
-) {
-	this->Name = name;
-	this->Path = path;
-	this->Folder = folder;
-	this->WorkshopId = workshop_id;
+		return L"";
+	}
 
-	this->LowerName = this->Name;
-	for (wchar_t& curChar : this->LowerName)
-		curChar = std::towlower(curChar);
+	bool Blueprint::BlueprintExists()
+	{
+		bool _FolderExists = SMBC::File::Exists(this->Folder);
+		bool _PathExists = SMBC::File::Exists(this->Path);
+
+		return (_FolderExists && _PathExists);
+	}
+
+	Blueprint::Blueprint(
+		const std::wstring& name,
+		const std::wstring& path,
+		const std::wstring& folder,
+		const std::wstring& workshop_id
+	) {
+		this->Name = name;
+		this->Path = path;
+		this->Folder = folder;
+		this->WorkshopId = workshop_id;
+
+		this->LowerName = this->Name;
+		for (wchar_t& curChar : this->LowerName)
+			curChar = std::towlower(curChar);
+	}
 }

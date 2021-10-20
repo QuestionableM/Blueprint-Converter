@@ -2,20 +2,25 @@
 
 namespace SMBC
 {
-	const BlockData* ObjectData::ToBlock() const
+	const BlockData* ObjectData::ToBlock(ObjectData* data_ptr)
 	{
-		if (this->Type != ObjectType::Block)
+		if (data_ptr->Type() != ObjectType::Block)
 			return nullptr;
 
-		return static_cast<const BlockData*>(this);
+		return static_cast<const BlockData*>(data_ptr);
 	}
 
-	const PartData* ObjectData::ToPart() const
+	const PartData* ObjectData::ToPart(ObjectData* data_ptr)
 	{
-		if (this->Type != ObjectType::Part)
+		if (data_ptr->Type() != ObjectType::Part)
 			return nullptr;
 
-		return static_cast<const PartData*>(this);
+		return static_cast<const PartData*>(data_ptr);
+	}
+
+	ObjectType BlockData::Type()
+	{
+		return ObjectType::Block;
 	}
 
 	BlockData::BlockData(
@@ -28,8 +33,11 @@ namespace SMBC
 		this->Name = name;
 		this->Tiling = tiling;
 		this->TextureList = textures;
+	}
 
-		this->Type = ObjectType::Block;
+	ObjectType PartData::Type()
+	{
+		return ObjectType::Part;
 	}
 
 	PartData::PartData(
@@ -44,7 +52,5 @@ namespace SMBC
 		this->Name = name;
 		this->TextureList = textures;
 		this->Bounds = bounds;
-
-		this->Type = ObjectType::Part;
 	}
 }

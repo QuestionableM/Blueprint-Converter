@@ -20,7 +20,7 @@ namespace SMBC {
 			TextureList() = default;
 
 			void ReplaceTextureKeys();
-			bool HasTextures();
+			bool HasTextures() const;
 		};
 
 		class Texture {
@@ -32,7 +32,7 @@ namespace SMBC {
 			Texture() = default;
 
 			void AddTexture(const std::wstring& name, const SMBC::Texture::TextureList& tex_list);
-			bool GetTextureByName(const std::wstring& name, SMBC::Texture::TextureList& tex_list);
+			bool GetTextureByName(const std::wstring& name, SMBC::Texture::TextureList& tex_list) const;
 		};
 	}
 }

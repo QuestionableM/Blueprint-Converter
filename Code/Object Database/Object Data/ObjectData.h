@@ -8,7 +8,7 @@
 
 namespace SMBC
 {
-	enum class ObjectType { None, Block, Part };
+	enum class ObjectType { Block, Part };
 	
 	class BlockData;
 	class PartData;
@@ -16,15 +16,15 @@ namespace SMBC
 
 	class ObjectData
 	{
-	protected:
-		ObjectType Type = ObjectType::None;
 	public:
 		Uuid Uuid;
 		std::wstring Name;
 		Mod* ModPtr;
 
-		const BlockData* ToBlock() const;
-		const PartData*  ToPart()  const;
+		virtual ObjectType Type() = 0;
+
+		static const BlockData* ToBlock(ObjectData* data_ptr);
+		static const PartData*  ToPart(ObjectData* data_ptr);
 	};
 
 	class BlockData : public ObjectData
@@ -32,6 +32,8 @@ namespace SMBC
 	public:
 		SMBC::Texture::TextureList TextureList;
 		int Tiling;
+
+		ObjectType Type() override;
 
 		BlockData(
 			const SMBC::Uuid& uuid,
@@ -47,6 +49,8 @@ namespace SMBC
 		SMBC::Texture::Texture TextureList;
 		std::wstring Path;
 		glm::vec3 Bounds;
+
+		ObjectType Type() override;
 
 		PartData(
 			const SMBC::Uuid& uuid,

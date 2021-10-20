@@ -4,12 +4,14 @@
 
 #include "Object Database/Texture Database/TextureDatabase.h"
 #include "Blueprint Converter/Object Definitions/ObjectDefinitions.h"
-#include "Lib/Uuid/Uuid.h"
+#include "Blueprint Converter/Cache Manager/Cache Object/CacheObject.h"
 
 #include <unordered_map>
 
-namespace SMBC {
-	class ModelStorage {
+namespace SMBC
+{
+	class ModelStorage
+	{
 		static std::unordered_map<std::wstring, SMBC::Model*> CachedModels;
 		static Assimp::Importer Importer;
 
@@ -23,20 +25,14 @@ namespace SMBC {
 		static void ClearStorage();
 	};
 
-	class ObjectStorage {
-		static std::unordered_map<std::wstring, SMBC::CachedBlock*> CachedBlocks;
-		static std::unordered_map<std::wstring, SMBC::CachedPart*> CachedParts;
+	class ObjectStorage
+	{
+		static std::unordered_map<std::wstring, SMBC::CachedObject*> CachedObjects;
 
 	public:
-		static SMBC::CachedBlock* LoadBlock(SMBC::SM_Block& block, const bool& mat_by_color);
-		static SMBC::CachedPart* LoadPart(
-			SMBC::SM_Part& part,
-			const bool& load_uvs,
-			const bool& load_normals,
-			const bool& mat_by_color
-		);
+		static SMBC::CachedObject* LoadObject(SMBC::Object* object);
 
-		static void WriteMtlFile(const std::wstring& path, const bool& add_colors);
+		static void WriteMtlFile(const std::wstring& path);
 		static void WriteTexturePaths(const std::wstring& path);
 
 		static void ClearStorage();

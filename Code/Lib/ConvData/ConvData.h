@@ -3,8 +3,10 @@
 #include <vector>
 #include <string>
 
-namespace SMBC {
-	enum class State : long {
+namespace SMBC
+{
+	enum class State : long
+	{
 		None =				-1,
 		ReadingJson =		0,
 		GettingObjects =	1,
@@ -14,7 +16,8 @@ namespace SMBC {
 		WritingObjects =	5
 	};
 
-	enum class Error : int {
+	enum class Error : int
+	{
 		None =			0,
 		File =			1,
 		Write =			2,
@@ -26,13 +29,14 @@ namespace SMBC {
 	};
 
 	//Blueprint Conversion Data
-	class ConvData {
+	class ConvData
+	{
 	public:
 		static State State;
-		static unsigned long long ProgressMax;
-		static unsigned long long ProgressValue;
+		static std::size_t ProgressMax;
+		static std::size_t ProgressValue;
 
-		static void SetState(const SMBC::State& state, const unsigned long long& MaxValue = 0ull);
+		static void SetState(const SMBC::State& state, const std::size_t& MaxValue = 0);
 	};
 
 	const static std::vector<std::wstring> ActionTable = {
