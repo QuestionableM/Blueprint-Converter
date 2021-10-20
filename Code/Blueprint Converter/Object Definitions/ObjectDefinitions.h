@@ -46,6 +46,12 @@ namespace SMBC {
 		virtual void WriteToFile(std::ofstream& out, OffsetData& data, const std::size_t& idx, const glm::vec3& offsetVec) const = 0;
 	protected:
 		static const glm::mat4 RotationMatrix;
+
+		void WriteVertices(const std::vector<glm::vec3>& vertices, std::ofstream& out, const glm::vec3& offsetVec) const;
+		static void WriteUvs(const std::vector<glm::vec2>& uvs, std::ofstream& out);
+		void WriteNormals(const std::vector<glm::vec3>& normals, std::ofstream& out) const;
+		void WriteTextures(std::ofstream& out, const std::size_t& sub_data_idx, const bool& write_sub_idx) const;
+		static void WriteIndices(const std::vector<std::vector<std::vector<long long>>>& data_idx, OffsetData& oData, std::ofstream& out);
 	};
 
 	struct Part : public Object
@@ -108,7 +114,7 @@ namespace SMBC {
 			{1.0, 0.0, 0.0}, {0.0, 0.0, 1.0},
 			{0.0, -1.0, 0.0}, {0.0, 1.0, 0.0}
 		};
-		std::vector<std::vector<std::vector<uint32_t>>> DataIndexes = {
+		std::vector<std::vector<std::vector<long long>>> DataIndexes = {
 			{{0, 0, 0}, {1, 1, 0}, {2, 2, 0}},
 			{{3, 3, 1}, {4, 4, 1}, {1, 5, 1}},
 			{{5, 6, 2}, {6, 7, 2}, {4, 8, 2}},

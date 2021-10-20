@@ -2,7 +2,6 @@
 #include "Blueprint Converter/Cache Manager/CacheManager.h"
 #include "Blueprint Converter/Convert Settings/ConvertSettings.h"
 #include "Lib/String/String.h"
-#include "DebugCon.h"
 
 namespace SMBC
 {
@@ -38,7 +37,6 @@ namespace SMBC
 
 		std::string _mtl_mat = "newmtl ";
 		String::Combine(_mtl_mat, name, "\n", _fp_t);
-		DebugOutL("CachedBlocK: ", name);
 
 		if (ConvertSettings::MatByColor)
 			String::Combine(_mtl_mat, String::HexToFloatW(this->color), "\n");
