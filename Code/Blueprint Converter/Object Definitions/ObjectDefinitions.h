@@ -12,7 +12,7 @@ namespace SMBC {
 
 		std::vector<std::vector<std::vector<long long>>> DataIdx;
 
-		bool is_empty();
+		bool IsEmpty();
 	};
 
 	struct Model
@@ -24,7 +24,7 @@ namespace SMBC {
 
 		std::wstring meshPath;
 
-		bool is_empty();
+		bool IsEmpty();
 
 		~Model();
 	};
@@ -52,6 +52,7 @@ namespace SMBC {
 		void WriteNormals(const std::vector<glm::vec3>& normals, std::ofstream& out) const;
 		void WriteTextures(std::ofstream& out, const std::size_t& sub_data_idx, const bool& write_sub_idx) const;
 		static void WriteIndices(const std::vector<std::vector<std::vector<long long>>>& data_idx, OffsetData& oData, std::ofstream& out);
+		static void WriteObjectSeparator(std::ofstream& out, const std::string& name, const std::size_t& idx);
 	};
 
 	struct Part : public Object

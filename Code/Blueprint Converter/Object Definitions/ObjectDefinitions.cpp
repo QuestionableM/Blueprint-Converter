@@ -7,12 +7,12 @@
 
 namespace SMBC
 {
-	bool SubMeshData::is_empty()
+	bool SubMeshData::IsEmpty()
 	{
 		return (this->DataIdx.size() <= 0);
 	}
 
-	bool Model::is_empty()
+	bool Model::IsEmpty()
 	{
 		return (this->subMeshData.size() <= 0 || (this->vertices.size() <= 0 && this->uvs.size() <= 0 && this->normals.size() <= 0));
 	}
@@ -115,6 +115,16 @@ namespace SMBC
 		}
 	}
 
+	void Object::WriteObjectSeparator(std::ofstream& out, const std::string& name, const std::size_t& idx)
+	{
+		if (ConvertSettings::SeparationMethod != Sep_Blocks) return;
+
+		std::string obj_label = "o ";
+		String::Combine(obj_label, name, "_", idx, "\n");
+
+		out.write(obj_label.c_str(), obj_label.size());
+	}
+
 	ObjectType Part::Type() const
 	{
 		return ObjectType::Part;
@@ -137,13 +147,7 @@ namespace SMBC
 	{
 		if (!modelPtr) return;
 
-		if (ConvertSettings::SeparationMethod == Sep_Blocks)
-		{
-			std::string obj_label = "o ";
-			String::Combine(obj_label, "Part_", idx, "\n");
-
-			out.write(obj_label.c_str(), obj_label.size());
-		}
+		this->WriteObjectSeparator(out, "Part", idx);
 
 		this->WriteVertices(modelPtr->vertices, out, offsetVec);
 		this->WriteUvs(modelPtr->uvs, out);
@@ -184,13 +188,7 @@ namespace SMBC
 
 	void Block::WriteToFile(std::ofstream& out, OffsetData& data, const std::size_t& idx, const glm::vec3& offsetVec) const
 	{
-		if (ConvertSettings::SeparationMethod == Sep_Blocks)
-		{
-			std::string obj_label = "o ";
-			String::Combine(obj_label, "Block_", idx, "\n");
-
-			out.write(obj_label.c_str(), obj_label.size());
-		}
+		this->WriteObjectSeparator(out, "Block", idx);
 
 		const int cBounds = (blkPtr != nullptr) ? blkPtr->Tiling : 4;
 		SMBC::CubeMesh cCube(this->Bounds / 2.0f, this->Position, cBounds);

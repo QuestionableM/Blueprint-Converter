@@ -149,13 +149,14 @@ namespace SMBC
 
 		const int sep_method = ConvertSettings::SeparationMethod;
 		bool _uuid_separation = (sep_method == Sep_Uuid || sep_method == Sep_UuidAndColor);
+		bool _joint_sep = (sep_method == Sep_Joints);
 
 		SMBC::ConvData::SetState(SMBC::State::WritingObjects, objectCount);
 		for (std::size_t colIdx = 0; colIdx < this->ObjCollection.size(); colIdx++)
 		{
 			SMBC::ObjectCollection& curCol = this->ObjCollection[colIdx];
 
-			if (sep_method == SMBC::Sep_Joints || _uuid_separation)
+			if (_joint_sep || _uuid_separation)
 			{
 				std::string obj_label = "o ";
 				SMBC::String::Combine(obj_label, "Collection_", colIdx + 1, "\n");

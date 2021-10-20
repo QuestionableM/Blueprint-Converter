@@ -23,8 +23,6 @@ namespace SMBC
 
 	std::wstring CachedBlock::GetName() const
 	{
-		if (!blkPtr) return L"NO_NAME";
-
 		return blkPtr->Name;
 	}
 
@@ -59,15 +57,11 @@ namespace SMBC
 
 	nlohmann::json CachedBlock::WriteTexturePaths() const
 	{
-		if (!blkPtr) return nlohmann::json::object();
-
 		return ConstructTexObject(blkPtr->TextureList);
 	}
 
 	bool CachedBlock::IsValid() const
 	{
-		if (!blkPtr) return false;
-
 		return blkPtr->TextureList.HasTextures();
 	}
 
@@ -79,8 +73,6 @@ namespace SMBC
 
 	std::wstring CachedPart::GetName() const
 	{
-		if (!objPtr) return L"NO_NAME";
-
 		return objPtr->Name;
 	}
 
@@ -141,7 +133,12 @@ namespace SMBC
 		{
 		case Texture::TextureType::SubMeshList:
 			for (const auto& t_ListData : cur_tex.TexList)
-				output_json.push_back(ConstructTexObject(t_ListData.second));
+			{
+				const Texture::TextureList& tex_list = t_ListData.second;
+				if (!tex_list.HasTextures()) continue;
+
+				output_json.push_back(ConstructTexObject(tex_list));
+			}
 
 			break;
 		case Texture::TextureType::SubMeshMap:
@@ -162,8 +159,6 @@ namespace SMBC
 
 	bool CachedPart::IsValid() const
 	{
-		if (!objPtr) return false;
-
 		for (const auto& tex_l : objPtr->TextureList.TexList)
 		{
 			const Texture::TextureList& tex_list = tex_l.second;
