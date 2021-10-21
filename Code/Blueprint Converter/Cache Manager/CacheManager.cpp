@@ -140,7 +140,27 @@ namespace SMBC
 
 	std::unordered_map<std::wstring, CachedObject*> ObjectStorage::CachedObjects = {};
 
-	CachedObject* ObjectStorage::LoadObject(Object* object)
+	CachedObject* ObjectStorage::LoadCachedBlock(SMBC::Block* block)
+	{
+		CachedBlock* new_block = new CachedBlock();
+		new_block->blkPtr = block->blkPtr;
+		new_block->color  = block->Color;
+
+		return new_block;
+	}
+
+	CachedObject* ObjectStorage::LoadCachedPart(SMBC::Part* part)
+	{
+		CachedPart* new_part = new CachedPart();
+		new_part->objPtr = part->objPtr;
+		new_part->color = part->Color;
+		new_part->modelPtr = ModelStorage::LoadModel(new_part->objPtr->Path, ConvertSettings::ExportUvs, ConvertSettings::ExportNormals);
+		part->modelPtr = new_part->modelPtr;
+
+		return new_part;
+	}
+
+	void ObjectStorage::LoadObject(Object* object)
 	{
 		std::wstring cUuidStr = object->Uuid.ToWstring();
 		if (ConvertSettings::MatByColor)
@@ -149,35 +169,24 @@ namespace SMBC
 		if (CachedObjects.find(cUuidStr) != CachedObjects.end())
 		{
 			CachedObject* cObject = CachedObjects.at(cUuidStr);
+			object->SetModelPtr((SMBC::Model*)cObject->GetModelPtr());
 
-			if (object->Type() == ObjectType::Part && cObject->Type() == CachedObjectType::Part)
-				static_cast<Part*>(object)->modelPtr = static_cast<CachedPart*>(cObject)->modelPtr;
-
-			return cObject;
+			return;
 		}
-
-		if (object->Type() == ObjectType::Block)
+		else
 		{
-			Block* block_ptr = static_cast<Block*>(object);
+			CachedObject* new_object = nullptr;
+			if (object->Type() == ObjectType::Block)
+			{
+				new_object = ObjectStorage::LoadCachedBlock(static_cast<Block*>(object));
+			}
+			else
+			{
+				new_object = ObjectStorage::LoadCachedPart(static_cast<Part*>(object));
+			}
 
-			CachedBlock* new_block = new CachedBlock();
-			new_block->blkPtr = block_ptr->blkPtr;
-			new_block->color  = block_ptr->Color;
-
-			CachedObjects.insert(std::make_pair(cUuidStr, new_block));
-			return new_block;
+			CachedObjects.insert(std::make_pair(cUuidStr, new_object));
 		}
-
-		Part* part_ptr = static_cast<Part*>(object);
-
-		CachedPart* new_part = new CachedPart();
-		new_part->objPtr = part_ptr->objPtr;
-		new_part->color  = part_ptr->Color;
-		new_part->modelPtr = ModelStorage::LoadModel(new_part->objPtr->Path, ConvertSettings::ExportUvs, ConvertSettings::ExportNormals);
-		part_ptr->modelPtr = new_part->modelPtr;
-
-		CachedObjects.insert(std::make_pair(cUuidStr, new_part));
-		return new_part;
 	}
 
 	void ObjectStorage::WriteMtlFile(const std::wstring& path)

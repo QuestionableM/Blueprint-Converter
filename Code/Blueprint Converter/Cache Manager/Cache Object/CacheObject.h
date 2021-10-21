@@ -22,6 +22,7 @@ namespace SMBC
 		virtual void WriteMtlData(const std::wstring& name, std::ofstream& out) const = 0;
 		virtual nlohmann::json WriteTexturePaths() const = 0;
 		virtual bool IsValid() const = 0;
+		virtual const Model* GetModelPtr() const = 0;
 	};
 
 	struct CachedBlock : public CachedObject
@@ -33,6 +34,7 @@ namespace SMBC
 		void WriteMtlData(const std::wstring& name, std::ofstream& out) const override;
 		nlohmann::json WriteTexturePaths() const override;
 		bool IsValid() const override;
+		const Model* GetModelPtr() const override;
 	};
 
 	struct CachedPart : public CachedObject
@@ -45,5 +47,6 @@ namespace SMBC
 		void WriteMtlData(const std::wstring& name, std::ofstream& out) const override;
 		nlohmann::json WriteTexturePaths() const override;
 		bool IsValid() const override;
+		const Model* GetModelPtr() const override;
 	};
 }

@@ -29,8 +29,10 @@ namespace SMBC
 	{
 		static std::unordered_map<std::wstring, SMBC::CachedObject*> CachedObjects;
 
+		static CachedObject* LoadCachedBlock(SMBC::Block* block);
+		static CachedObject* LoadCachedPart(SMBC::Part* part);
 	public:
-		static SMBC::CachedObject* LoadObject(SMBC::Object* object);
+		static void LoadObject(SMBC::Object* object);
 
 		static void WriteMtlFile(const std::wstring& path);
 		static void WriteTexturePaths(const std::wstring& path);

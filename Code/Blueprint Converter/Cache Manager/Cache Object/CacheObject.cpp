@@ -65,6 +65,11 @@ namespace SMBC
 		return blkPtr->TextureList.HasTextures();
 	}
 
+	const Model* CachedBlock::GetModelPtr() const
+	{
+		return nullptr;
+	}
+
 
 	CachedObjectType CachedPart::Type() const
 	{
@@ -168,5 +173,10 @@ namespace SMBC
 		}
 
 		return false;
+	}
+
+	const Model* CachedPart::GetModelPtr() const
+	{
+		return this->modelPtr;
 	}
 }

@@ -44,6 +44,7 @@ namespace SMBC {
 		virtual ObjectType Type() const = 0;
 		virtual void CalcCenterPoint(OffsetData& data) const = 0;
 		virtual void WriteToFile(std::ofstream& out, OffsetData& data, const std::size_t& idx, const glm::vec3& offsetVec) const = 0;
+		virtual void SetModelPtr(Model* model_ptr) = 0;
 	protected:
 		static const glm::mat4 RotationMatrix;
 
@@ -63,6 +64,7 @@ namespace SMBC {
 		ObjectType Type() const override;
 		void CalcCenterPoint(OffsetData& data) const override;
 		void WriteToFile(std::ofstream& out, OffsetData& data, const std::size_t& idx, const glm::vec3& offsetVec) const override;
+		void SetModelPtr(Model* model_ptr) override;
 	};
 
 	struct Block : public Object
@@ -72,6 +74,7 @@ namespace SMBC {
 		ObjectType Type() const override;
 		void CalcCenterPoint(OffsetData& data) const override;
 		void WriteToFile(std::ofstream& out, OffsetData& data, const std::size_t& idx, const glm::vec3& offsetVec) const override;
+		void SetModelPtr(Model* model_ptr) override;
 	};
 
 	struct CubeMesh

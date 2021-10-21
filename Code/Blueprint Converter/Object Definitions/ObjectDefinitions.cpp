@@ -166,6 +166,11 @@ namespace SMBC
 		data.Normal  += modelPtr->normals.size();
 	}
 
+	void Part::SetModelPtr(Model* model_ptr)
+	{
+		this->modelPtr = model_ptr;
+	}
+
 	ObjectType Block::Type() const
 	{
 		return ObjectType::Block;
@@ -204,6 +209,8 @@ namespace SMBC
 		data.Texture += cCube.TexturePoints.size();
 		data.Normal  += cCube.Normals.size();
 	}
+
+	void Block::SetModelPtr(Model* model_ptr) {}
 
 	CubeMesh::CubeMesh(const glm::vec3& bounds, const glm::vec3& pos, const int& tiling)
 	{
