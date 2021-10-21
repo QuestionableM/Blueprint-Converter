@@ -33,12 +33,9 @@ namespace SMBC
 	struct ConvertedModel
 	{
 		std::wstring ModelName;
-		std::vector<SMBC::ObjectCollection> ObjCollection;
+		std::vector<SMBC::ObjectCollection*> ObjCollection = {};
+		std::unordered_map<std::wstring, SMBC::ObjectCollection*> ObjCollectionMap = {};
 
-		bool IsLastCollectionEmpty();
-		std::size_t CreateNewCollection();
-		std::size_t HasUuidCollection(const SMBC::Uuid& uuid, const std::wstring& color, const bool& useColor);
-		bool AddJointToChildShape(SMBC::Part& joint);
 		bool HasStuffToConvert();
 
 		ConvertedModel() = default;
@@ -50,8 +47,29 @@ namespace SMBC
 		std::size_t CountTotalObjectAmount();
 		void LoadCollections(const std::size_t& total_obj_count);
 
+		void OpenWriter(const std::wstring& path, std::ofstream& out);
+		void CreateAndOpenWriter(std::ofstream& out);
+		void WriteMtlHeader(std::ofstream& out);
+		void WriteCollectionHeader(std::ofstream& out, const std::size_t& idx, const bool& should_write);
+		void WriteCollectionToFile(std::ofstream& out, const std::vector<SMBC::Object*>& obj_vec, const glm::vec3& offsetVec);
 		SMBC::Error WriteBlueprintToFile(const std::size_t& objectCount);
 
+		static nlohmann::json ReadAndCheckBlueprintFile(const std::wstring& path);
+		static void Bind_NoSeparation(ConvertedModel& cModel, SMBC::Object* object, const bool& is_joint);
+		static void Bind_SeparateJoints(ConvertedModel& cModel, SMBC::Object* object, const bool& is_joint);
+		static void Bind_SeparateUuid(ConvertedModel& cModel, SMBC::Object* object, const bool& is_joint);
+		static void Bind_SeparateUuidAndColor(ConvertedModel& cModel, SMBC::Object* object, const bool& is_joint);
+
+		void CreateAndAddObjectToCollection(const std::wstring& col_name, SMBC::Object* object);
+		void LoadBlueprintBodies(const nlohmann::json& bpJson);
+		void LoadBlueprintJoints(const nlohmann::json& bpJson);
+
+		std::size_t collectionIdx = 0;
+		std::size_t objectIndexValue = 0;
+
+		void (*CollectionBindFunction)(ConvertedModel&, SMBC::Object*, const bool&) = nullptr;
+
+		void SelectCollectionBinding();
 	public:
 		SMBC::Error LoadBlueprintData(const std::wstring& blueprint_path);
 		SMBC::Error ConvertAndWrite();

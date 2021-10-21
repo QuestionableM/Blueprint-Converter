@@ -24,55 +24,12 @@ namespace SMBC
 		return (ObjectList.size() == 0);
 	}
 
-	bool ConvertedModel::IsLastCollectionEmpty()
-	{
-		if (this->ObjCollection.size() > 0)
-			return this->ObjCollection[this->ObjCollection.size() - 1].IsEmpty();
-
-		return false;
-	}
-
-	std::size_t ConvertedModel::CreateNewCollection()
-	{
-		this->ObjCollection.push_back(SMBC::ObjectCollection());
-		return this->ObjCollection.size() - 1;
-	}
-
-	std::size_t ConvertedModel::HasUuidCollection(const SMBC::Uuid& uuid, const std::wstring& color, const bool& useColor)
-	{
-		for (std::size_t a = 0u; a < this->ObjCollection.size(); a++)
-		{
-			SMBC::ObjectCollection& objCol = this->ObjCollection[a];
-
-			for (SMBC::Object*& cur_obj : objCol.ObjectList)
-				if (cur_obj->Uuid == uuid && ((useColor && cur_obj->Color == color)) || !useColor)
-					return a;
-		}
-
-		return this->CreateNewCollection();
-	}
-
-	bool ConvertedModel::AddJointToChildShape(SMBC::Part& joint)
-	{
-		for (SMBC::ObjectCollection& col : this->ObjCollection)
-			for (SMBC::Object*& cur_obj : col.ObjectList)
-			{
-				if (cur_obj->_index != joint._index) continue;
-				
-				//CHANGE THAT SHIT LATER
-				col.ObjectList.push_back(&joint);
-				return true;
-			}
-
-		return false;
-	}
-
 	bool ConvertedModel::HasStuffToConvert()
 	{
 		std::size_t _StuffCounter = 0;
-		for (SMBC::ObjectCollection& _CurCol : this->ObjCollection)
+		for (const SMBC::ObjectCollection* _CurCol : this->ObjCollection)
 		{
-			_StuffCounter += _CurCol.ObjectList.size();
+			_StuffCounter += _CurCol->ObjectList.size();
 
 			if (_StuffCounter > 0) return true;
 		}
@@ -90,8 +47,8 @@ namespace SMBC
 	{
 		std::size_t obj_amount = 0;
 
-		for (const ObjectCollection& cur_col : this->ObjCollection)
-			obj_amount += cur_col.ObjectList.size();
+		for (const ObjectCollection* cur_col : this->ObjCollection)
+			obj_amount += cur_col->ObjectList.size();
 
 		return obj_amount;
 	}
@@ -99,8 +56,8 @@ namespace SMBC
 	void ConvertedModel::LoadCollections(const std::size_t& total_obj_count)
 	{
 		ConvData::SetState(State::ReadingObjects, total_obj_count);
-		for (ObjectCollection& cur_col : this->ObjCollection)
-			for (SMBC::Object*& object : cur_col.ObjectList)
+		for (ObjectCollection*& cur_col : this->ObjCollection)
+			for (SMBC::Object*& object : cur_col->ObjectList)
 			{
 				ObjectStorage::LoadObject(object);
 
@@ -110,249 +67,336 @@ namespace SMBC
 			}
 	}
 
-	Error ConvertedModel::WriteBlueprintToFile(const std::size_t& objectCount)
+	void ConvertedModel::OpenWriter(const std::wstring& path, std::ofstream& out)
+	{
+		if (ConvertSettings::TextureList || ConvertSettings::ApplyTextures)
+		{
+			if (!File::SafeCreateDir(path))
+				throw Error::BPDirCreate;
+			
+			std::wstring _path = path + L"/" + this->ModelName;
+			out.open(_path + L".obj");
+
+			if (ConvertSettings::TextureList) ObjectStorage::WriteTexturePaths(path + L"/Used Textures.json");
+			if (ConvertSettings::ApplyTextures) ObjectStorage::WriteMtlFile(_path + L".mtl");
+		}
+		else
+		{
+			out.open(path + L".obj");
+		}
+
+		if (!out.is_open()) throw Error::Write;
+	}
+
+	void ConvertedModel::CreateAndOpenWriter(std::ofstream& out)
 	{
 		if (!File::SafeCreateDir(L"./Converted Models"))
-			return Error::MainDirCreate;
+			throw Error::MainDirCreate;
 
 		std::wstring _ModelPath = L"./Converted Models/" + this->ModelName;
 
 		if (File::IsBadPath(_ModelPath))
-			return Error::InvalidPath;
+			throw Error::InvalidPath;
 
-		std::ofstream _writer;
-		
-		if (ConvertSettings::TextureList || ConvertSettings::ApplyTextures)
+		this->OpenWriter(_ModelPath, out);
+	}
+
+	void ConvertedModel::WriteMtlHeader(std::ofstream& out)
+	{
+		if (!ConvertSettings::ApplyTextures) return;
+
+		std::string _mtl_lib = "mtllib ";
+		String::Combine(_mtl_lib, this->ModelName, ".mtl\n");
+
+		out.write(_mtl_lib.c_str(), _mtl_lib.size());
+	}
+
+	void ConvertedModel::WriteCollectionHeader(std::ofstream& out, const std::size_t& idx, const bool& should_write)
+	{
+		if (!should_write) return;
+
+		std::string obj_label = "o ";
+		String::Combine(obj_label, "Collection_", idx, "\n");
+
+		out.write(obj_label.c_str(), obj_label.size());
+	}
+
+	void ConvertedModel::WriteCollectionToFile(std::ofstream& out, const std::vector<SMBC::Object*>& obj_vec, const glm::vec3& offsetVec)
+	{
+		for (std::size_t obj_idx = 0; obj_idx < obj_vec.size(); obj_idx++)
 		{
-			if (!File::SafeCreateDir(_ModelPath))
-				return Error::BPDirCreate;
+			const Object* cObject = obj_vec[obj_idx];
+			cObject->WriteToFile(out, offsetData, obj_idx, offsetVec);
 
-			std::wstring _path = _ModelPath + L"/" + this->ModelName;
-			_writer.open(_path + L".obj");
-
-			if (ConvertSettings::TextureList) ObjectStorage::WriteTexturePaths(_ModelPath + L"/Used Textures.json");
-			if (ConvertSettings::ApplyTextures) ObjectStorage::WriteMtlFile(_path + L".mtl");
+			ConvData::ProgressValue++;
 		}
-		else _writer.open(_ModelPath + L".obj");
+	}
 
-		if (!_writer.is_open()) return Error::Write;
-
-		if (ConvertSettings::ApplyTextures)
+	Error ConvertedModel::WriteBlueprintToFile(const std::size_t& objectCount)
+	{
+		try
 		{
-			std::string _mtl_lib = "mtllib ";
-			String::Combine(_mtl_lib, this->ModelName, ".mtl\n");
+			std::ofstream _writer;
+			this->CreateAndOpenWriter(_writer);
+			this->WriteMtlHeader(_writer);
 
-			_writer.write(_mtl_lib.c_str(), _mtl_lib.length());
-		}
+			const glm::vec3 offsetVec = offsetData.pt_sum / (float)offsetData.point_count;
+			const bool write_collection_label = (this->ObjCollection.size() > 1);
 
-		glm::vec3 offsetVec = offsetData.pt_sum / (float)offsetData.point_count;
-
-		const int sep_method = ConvertSettings::SeparationMethod;
-		bool _uuid_separation = (sep_method == Sep_Uuid || sep_method == Sep_UuidAndColor);
-		bool _joint_sep = (sep_method == Sep_Joints);
-
-		SMBC::ConvData::SetState(SMBC::State::WritingObjects, objectCount);
-		for (std::size_t colIdx = 0; colIdx < this->ObjCollection.size(); colIdx++)
-		{
-			SMBC::ObjectCollection& curCol = this->ObjCollection[colIdx];
-
-			if (_joint_sep || _uuid_separation)
+			ConvData::SetState(State::WritingObjects, objectCount);
+			for (std::size_t colIdx = 0; colIdx < this->ObjCollection.size(); colIdx++)
 			{
-				std::string obj_label = "o ";
-				SMBC::String::Combine(obj_label, "Collection_", colIdx + 1, "\n");
+				ObjectCollection*& curCol = this->ObjCollection[colIdx];
 
-				_writer.write(obj_label.c_str(), obj_label.length());
+				this->WriteCollectionHeader(_writer, colIdx + 1, write_collection_label);
+				this->WriteCollectionToFile(_writer, curCol->ObjectList, offsetVec);
 			}
 
-			for (std::size_t obj_idx = 0; obj_idx < curCol.ObjectList.size(); obj_idx++)
-			{
-				const SMBC::Object* cObject = curCol.ObjectList[obj_idx];
-				cObject->WriteToFile(_writer, offsetData, obj_idx, offsetVec);
+			_writer.close();
+		}
+		catch (Error& error_enum)
+		{
+			ObjectStorage::ClearStorage();
+			ModelStorage::ClearStorage();
+			return error_enum;
+		}
 
+		ObjectStorage::ClearStorage();
+		ModelStorage::ClearStorage();
+
+		return Error::None;
+	}
+
+	nlohmann::json ConvertedModel::ReadAndCheckBlueprintFile(const std::wstring& path)
+	{
+		nlohmann::json bpJson = Json::LoadParseJson(path);
+
+		if (!bpJson.is_object())
+			throw Error::File;
+
+		bool has_bodies = (bpJson.find("bodies") != bpJson.end());
+		bool has_joints = (bpJson.find("joints") != bpJson.end());
+
+		if (!has_bodies && !has_joints)
+			throw Error::NoBpData;
+
+		return bpJson;
+	}
+
+	void ConvertedModel::Bind_NoSeparation(ConvertedModel& cModel, SMBC::Object* object, const bool& is_joint)
+	{
+		SMBC::ObjectCollection* cur_collection = nullptr;
+
+		if (cModel.ObjCollection.size() == 0)
+		{
+			cur_collection = new SMBC::ObjectCollection();
+			cModel.ObjCollection.push_back(cur_collection);
+		}
+		else
+		{
+			cur_collection = cModel.ObjCollection[0];
+		}
+
+		cur_collection->ObjectList.push_back(object);
+	}
+
+	void ConvertedModel::Bind_SeparateJoints(ConvertedModel& cModel, SMBC::Object* object, const bool& is_joint)
+	{
+		cModel.CreateAndAddObjectToCollection(is_joint ? L"joints" : L"objects", object);
+	}
+
+	void ConvertedModel::Bind_SeparateUuid(ConvertedModel& cModel, SMBC::Object* object, const bool& is_joint)
+	{
+		cModel.CreateAndAddObjectToCollection(object->Uuid.ToWstring(), object);
+	}
+
+	void ConvertedModel::Bind_SeparateUuidAndColor(ConvertedModel& cModel, SMBC::Object* object, const bool& is_joint)
+	{
+		cModel.CreateAndAddObjectToCollection(object->Uuid.ToWstring() + L" " + object->Color, object);
+	}
+
+	void ConvertedModel::CreateAndAddObjectToCollection(const std::wstring& col_name, SMBC::Object* object)
+	{
+		SMBC::ObjectCollection* cur_collection = nullptr;
+
+		if (ObjCollectionMap.find(col_name) != ObjCollectionMap.end())
+			cur_collection = ObjCollectionMap.at(col_name);
+		else
+		{
+			cur_collection = new SMBC::ObjectCollection();
+			ObjCollectionMap.insert(std::make_pair(col_name, cur_collection));
+			ObjCollection.push_back(cur_collection);
+		}
+
+		cur_collection->ObjectList.push_back(object);
+	}
+
+	void ConvertedModel::LoadBlueprintBodies(const nlohmann::json& bpJson)
+	{
+		const auto& bArray = SMBC::Json::Get(bpJson, "bodies");
+		if (!bArray.is_array()) return;
+
+		bool bSeparateJoints = (ConvertSettings::SeparationMethod == Sep_Joints);
+
+		ConvData::SetState(State::GettingObjects);
+		for (auto& _Body : bArray)
+		{
+			const auto& _Childs = Json::Get(_Body, "childs");
+			if (!_Childs.is_array()) continue;
+
+			ConvData::ProgressMax += _Childs.size();
+			for (auto& _Child : _Childs)
+			{
+				const auto& _ShapeId = Json::Get(_Child, "shapeId");
+				const auto& _Pos = Json::Get(_Child, "pos");
+				const auto& _XAxis = Json::Get(_Child, "xaxis");
+				const auto& _ZAxis = Json::Get(_Child, "zaxis");
+				const auto& _Bounds = Json::Get(_Child, "bounds");
+				const auto& _Color = Json::Get(_Child, "color");
+
+				if (!(_ShapeId.is_string() && _Pos.is_object() && _XAxis.is_number() && _ZAxis.is_number())) continue;
+				const auto& _PosX = Json::Get(_Pos, "x");
+				const auto& _PosY = Json::Get(_Pos, "y");
+				const auto& _PosZ = Json::Get(_Pos, "z");
+
+				if (!(_PosX.is_number() && _PosY.is_number() && _PosZ.is_number())) continue;
+				glm::vec3 _PosVec(_PosX.get<float>(), _PosY.get<float>(), _PosZ.get<float>());
+
+				SMBC::Uuid uuid_obj(_ShapeId.get<std::string>());
+				std::wstring _ColorWstr = (_Color.is_string() ? String::ToWide(_Color.get<std::string>()) : L"000000");
+
+				if (_Bounds.is_object())
+				{
+					const auto& _BoundX = Json::Get(_Bounds, "x");
+					const auto& _BoundY = Json::Get(_Bounds, "y");
+					const auto& _BoundZ = Json::Get(_Bounds, "z");
+
+					if (!(_BoundX.is_number() && _BoundY.is_number() && _BoundZ.is_number())) continue;
+					glm::vec3 _BoundsVec(_BoundX.get<float>(), _BoundY.get<float>(), _BoundZ.get<float>());
+
+					const SMBC::BlockData* _BlockD = Mod::GetBlock(uuid_obj);
+					if (!_BlockD) continue;
+
+					SMBC::Block* _Block = new SMBC::Block();
+					_Block->blkPtr	 = (SMBC::BlockData*)_BlockD;
+					_Block->Bounds	 = _BoundsVec;
+					_Block->Color	 = _ColorWstr;
+					_Block->Position = _PosVec;
+					_Block->Uuid	 = uuid_obj;
+					_Block->xAxis	 = _XAxis.get<int>();
+					_Block->zAxis	 = _ZAxis.get<int>();
+					_Block->_index	 = this->objectIndexValue;
+
+					this->CollectionBindFunction(*this, _Block, false);
+				}
+				else
+				{
+					const SMBC::PartData* part_data = SMBC::Mod::GetPart(uuid_obj);
+					if (!part_data) continue;
+
+					SMBC::Part* _Part = new SMBC::Part();
+					_Part->objPtr	= (SMBC::PartData*)part_data;
+					_Part->Uuid		= _Part->objPtr->Uuid;
+					_Part->Color	= _ColorWstr;
+					_Part->Bounds	= _Part->objPtr->Bounds;
+					_Part->Position = _PosVec;
+					_Part->xAxis	= _XAxis.get<int>();
+					_Part->zAxis	= _ZAxis.get<int>();
+					_Part->_index	= this->objectIndexValue;
+
+					BPFunction::GetPartPosAndBounds(_Part->Position, _Part->Bounds, _Part->xAxis, _Part->zAxis, false);
+
+					this->CollectionBindFunction(*this, _Part, false);
+				}
+
+				this->objectIndexValue++;
 				ConvData::ProgressValue++;
 			}
 		}
+	}
 
-		_writer.close();
+	void ConvertedModel::LoadBlueprintJoints(const nlohmann::json& bpJson)
+	{
+		const auto& jArray = Json::Get(bpJson, "joints");
+		if (!jArray.is_array()) return;
 
-		SMBC::ObjectStorage::ClearStorage();
-		SMBC::ModelStorage::ClearStorage();
+		ConvData::SetState(State::GettingJoints, jArray.size());
+		for (const auto& _Joint : jArray)
+		{
+			const auto& _Position = Json::Get(_Joint, "posA");
+			const auto& _XAxis =	Json::Get(_Joint, "xaxisA");
+			const auto& _ZAxis =	Json::Get(_Joint, "zaxisA");
+			const auto& _ShapeId =	Json::Get(_Joint, "shapeId");
+			const auto& _Color =	Json::Get(_Joint, "color");
+			const auto& _ChildA =	Json::Get(_Joint, "childA");
 
-		return SMBC::Error::None;
+			if (!(_ShapeId.is_string() && _Position.is_object() && _XAxis.is_number() && _ZAxis.is_number())) continue;
+			const auto& _PosX = Json::Get(_Position, "x");
+			const auto& _PosY = Json::Get(_Position, "y");
+			const auto& _PosZ = Json::Get(_Position, "z");
+
+			if (!(_PosX.is_number() && _PosY.is_number() && _PosZ.is_number())) continue;
+			glm::vec3 _JointPos(_PosX.get<float>(), _PosY.get<float>(), _PosZ.get<float>());
+
+			SMBC::Uuid uuid_obj(_ShapeId.get<std::string>());
+
+			const SMBC::PartData* _jnt_data = Mod::GetPart(uuid_obj);
+			if (!_jnt_data) continue;
+
+			SMBC::Part* _jnt = new SMBC::Part();
+			_jnt->Uuid     = _jnt_data->Uuid;
+			_jnt->objPtr   = (SMBC::PartData*)_jnt_data;
+			_jnt->Color    = (_Color.is_string() ? String::ToWide(_Color.get<std::string>()) : L"000000");
+			_jnt->Bounds   = _jnt->objPtr->Bounds;
+			_jnt->Position = _JointPos;
+			_jnt->xAxis    = _XAxis.get<int>();
+			_jnt->zAxis    = _ZAxis.get<int>();
+
+			BPFunction::GetPartPosAndBounds(_jnt->Position, _jnt->Bounds, _jnt->xAxis, _jnt->zAxis, true);
+			_jnt->_index = (_ChildA.is_number() ? _ChildA.get<int>() : -1);
+
+			this->CollectionBindFunction(*this, _jnt, true);
+
+			ConvData::ProgressValue++;
+		}
+	}
+
+	void ConvertedModel::SelectCollectionBinding()
+	{
+		switch (ConvertSettings::SeparationMethod)
+		{
+		case Sep_Joints:
+			CollectionBindFunction = ConvertedModel::Bind_SeparateJoints;
+			break;
+		case Sep_Uuid:
+			CollectionBindFunction = ConvertedModel::Bind_SeparateUuid;
+			break;
+		case Sep_UuidAndColor:
+			CollectionBindFunction = ConvertedModel::Bind_SeparateUuidAndColor;
+			break;
+		default:
+			CollectionBindFunction = ConvertedModel::Bind_NoSeparation;
+			break;
+		}
 	}
 
 	SMBC::Error ConvertedModel::LoadBlueprintData(const std::wstring& blueprint_path)
 	{
-		nlohmann::json _BlueprintJson = SMBC::Json::LoadParseJson(blueprint_path);
-
-		if (!_BlueprintJson.is_object())
-			return SMBC::Error::File;
-
-		if (!_BlueprintJson.contains("bodies") && !_BlueprintJson.contains("joints"))
-			return SMBC::Error::NoBpData;
-
-		const int sep_method = ConvertSettings::SeparationMethod;
-		bool _separate_joints	   = (sep_method == Sep_Joints);
-		bool _uuidColor_separation = (sep_method == Sep_UuidAndColor);
-		bool _uuid_separation	   = (sep_method == Sep_Uuid || _uuidColor_separation);
-
-		std::size_t collectionIdx = 0;
-
-		if (!_separate_joints && !_uuid_separation)
-			collectionIdx = this->CreateNewCollection();
-
-		SMBC::ConvData::SetState(SMBC::State::GettingObjects);
-		const auto& _BodiesArray = SMBC::Json::Get(_BlueprintJson, "bodies");
-		if (_BodiesArray.is_array())
+		try
 		{
-			long _ObjectIndexValue = 0;
+			nlohmann::json bpJson = this->ReadAndCheckBlueprintFile(blueprint_path);
 
-			for (auto& _Body : _BodiesArray)
-			{
-				const auto& _Childs = SMBC::Json::Get(_Body, "childs");
-				if (!_Childs.is_array()) continue;
+			this->collectionIdx	   = 0;
+			this->objectIndexValue = 0;
 
-				if (_separate_joints && !this->IsLastCollectionEmpty())
-					collectionIdx = this->CreateNewCollection();
+			this->SelectCollectionBinding();
 
-				SMBC::ConvData::ProgressMax += _Childs.size();
-				for (auto& _Child : _Childs)
-				{
-					const auto& _ShapeId = SMBC::Json::Get(_Child, "shapeId");
-					const auto& _Pos = SMBC::Json::Get(_Child, "pos");
-					const auto& _XAxis = SMBC::Json::Get(_Child, "xaxis");
-					const auto& _ZAxis = SMBC::Json::Get(_Child, "zaxis");
-					const auto& _Bounds = SMBC::Json::Get(_Child, "bounds");
-					const auto& _Color = SMBC::Json::Get(_Child, "color");
-
-					if (!(_ShapeId.is_string() && _Pos.is_object() && _XAxis.is_number() && _ZAxis.is_number())) continue;
-					const auto& _PosX = SMBC::Json::Get(_Pos, "x");
-					const auto& _PosY = SMBC::Json::Get(_Pos, "y");
-					const auto& _PosZ = SMBC::Json::Get(_Pos, "z");
-
-					if (!(_PosX.is_number() && _PosY.is_number() && _PosZ.is_number())) continue;
-					glm::vec3 _PosVec(_PosX.get<float>(), _PosY.get<float>(), _PosZ.get<float>());
-
-					SMBC::Uuid uuid_obj(_ShapeId.get<std::string>());
-					std::wstring _ColorWstr = (_Color.is_string() ? SMBC::String::ToWide(_Color.get<std::string>()) : L"000000");
-
-					if (_Bounds.is_object())
-					{
-						const auto& _BoundX = SMBC::Json::Get(_Bounds, "x");
-						const auto& _BoundY = SMBC::Json::Get(_Bounds, "y");
-						const auto& _BoundZ = SMBC::Json::Get(_Bounds, "z");
-
-						if (!(_BoundX.is_number() && _BoundY.is_number() && _BoundZ.is_number())) continue;
-						glm::vec3 _BoundsVec(_BoundX.get<float>(), _BoundY.get<float>(), _BoundZ.get<float>());
-
-						const SMBC::BlockData* _BlockD = SMBC::Mod::GetBlock(uuid_obj);
-						bool blockExists = (_BlockD != nullptr);
-
-						SMBC::Block* _Block = new SMBC::Block();
-						_Block->blkPtr = (SMBC::BlockData*)_BlockD;
-						_Block->Bounds = _BoundsVec;
-						_Block->Color = _ColorWstr;
-						_Block->Position = _PosVec;
-						_Block->Uuid = uuid_obj;
-						_Block->xAxis = _XAxis.get<int>();
-						_Block->zAxis = _ZAxis.get<int>();
-						_Block->_index = _ObjectIndexValue;
-
-						//std::size_t _localColIdx = collectionIdx;
-
-						//if (_uuid_separation)
-						//	_localColIdx = this->HasUuidCollection(_Block.Uuid, _Block.Color, _uuidColor_separation);
-
-						//this->ObjCollection[_localColIdx].BlockList.push_back(_Block);
-						this->ObjCollection[collectionIdx].ObjectList.push_back(_Block);
-
-
-						_ObjectIndexValue++;
-						SMBC::ConvData::ProgressValue++;
-					}
-					else
-					{
-						const SMBC::PartData* part_data = SMBC::Mod::GetPart(uuid_obj);
-						if (part_data == nullptr) continue;
-
-						SMBC::Part* _Part = new SMBC::Part();
-						_Part->objPtr = (SMBC::PartData*)part_data;
-						_Part->Uuid = _Part->objPtr->Uuid;
-						_Part->Color = _ColorWstr;
-						_Part->Bounds = _Part->objPtr->Bounds;
-						_Part->Position = _PosVec;
-						_Part->xAxis = _XAxis.get<int>();
-						_Part->zAxis = _ZAxis.get<int>();
-						_Part->_index = _ObjectIndexValue;
-
-						SMBC::BPFunction::GetPartPosAndBounds(_Part->Position, _Part->Bounds, _Part->xAxis, _Part->zAxis, false);
-
-						//std::size_t _localColIdx = collectionIdx;
-						//if (_uuid_separation)
-						//	_localColIdx = this->HasUuidCollection(_Part.objPtr->Uuid, _Part.Color, _uuidColor_separation);
-
-						this->ObjCollection[collectionIdx].ObjectList.push_back(_Part);
-						//this->ObjCollection[_localColIdx].PartList.push_back(_Part);
-
-						_ObjectIndexValue++;
-						SMBC::ConvData::ProgressValue++;
-					}
-				}
-			}
+			this->LoadBlueprintBodies(bpJson);
+			this->LoadBlueprintJoints(bpJson);
 		}
-
-		SMBC::ConvData::SetState(SMBC::State::GettingJoints);
-		const auto& _JointsArray = SMBC::Json::Get(_BlueprintJson, "joints");
-		if (_JointsArray.is_array())
+		catch (Error& error_enum)
 		{
-			SMBC::ConvData::ProgressMax = _JointsArray.size();
-
-			for (auto& _Joint : _JointsArray)
-			{
-				const auto& _Position = SMBC::Json::Get(_Joint, "posA");
-				const auto& _XAxis = SMBC::Json::Get(_Joint, "xaxisA");
-				const auto& _ZAxis = SMBC::Json::Get(_Joint, "zaxisA");
-				const auto& _ShapeId = SMBC::Json::Get(_Joint, "shapeId");
-				const auto& _Color = SMBC::Json::Get(_Joint, "color");
-				const auto& _ChildA = SMBC::Json::Get(_Joint, "childA");
-
-				if (!(_ShapeId.is_string() && _Position.is_object() && _XAxis.is_number() && _ZAxis.is_number())) continue;
-				const auto& _PosX = SMBC::Json::Get(_Joint, "x");
-				const auto& _PosY = SMBC::Json::Get(_Joint, "y");
-				const auto& _PosZ = SMBC::Json::Get(_Joint, "z");
-
-				if (!(_PosX.is_number() && _PosY.is_number() && _PosZ.is_number())) continue;
-				glm::vec3 _JointPos(_PosX.get<float>(), _PosY.get<float>(), _PosZ.get<float>());
-
-				SMBC::Uuid uuid_obj(_ShapeId.get<std::string>());
-
-				const SMBC::PartData* _jnt_data = SMBC::Mod::GetPart(uuid_obj);
-				if (_jnt_data == nullptr || _jnt_data->Path.empty()) continue;
-
-				SMBC::Part* _jnt = new SMBC::Part();
-				_jnt->Uuid = _jnt_data->Uuid;
-				_jnt->objPtr = (SMBC::PartData*)_jnt_data;
-				_jnt->Color = (_Color.is_string() ? SMBC::String::ToWide(_Color.get<std::string>()) : L"000000");
-				_jnt->Bounds = _jnt->objPtr->Bounds;
-				_jnt->Position = _JointPos;
-				_jnt->xAxis = _XAxis.get<int>();
-				_jnt->zAxis = _ZAxis.get<int>();
-
-				SMBC::BPFunction::GetPartPosAndBounds(_jnt->Position, _jnt->Bounds, _jnt->xAxis, _jnt->zAxis, true);
-				_jnt->_index = (_ChildA.is_number() ? _ChildA.get<int>() : -1);
-
-				this->ObjCollection[collectionIdx].ObjectList.push_back(_jnt);
-				//if (_uuid_separation)
-				//{
-				//	std::size_t col_idx = this->HasUuidCollection(_jnt.objPtr->Uuid, _jnt.Color, _uuidColor_separation);
-
-				//	this->ObjCollection[col_idx].PartList.push_back(_jnt);
-				//}
-				//else if (!_separate_joints || !this->AddJointToChildShape(_jnt))
-				//	this->ObjCollection[collectionIdx].PartList.push_back(_jnt);
-
-				SMBC::ConvData::ProgressValue++;
-			}
+			return error_enum;
 		}
 
 		return SMBC::Error::None;
