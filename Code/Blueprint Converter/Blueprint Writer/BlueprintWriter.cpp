@@ -24,6 +24,12 @@ namespace SMBC
 		return (ObjectList.size() == 0);
 	}
 
+	ObjectCollection::~ObjectCollection()
+	{
+		for (SMBC::Object*& cur_object : ObjectList)
+			delete cur_object;
+	}
+
 	bool ConvertedModel::HasStuffToConvert()
 	{
 		std::size_t _StuffCounter = 0;
@@ -35,6 +41,13 @@ namespace SMBC
 		}
 
 		return false;
+	}
+
+	ConvertedModel::~ConvertedModel()
+	{
+		DebugOutL("Removing ", ObjCollection.size(), " collections from memory");
+		for (SMBC::ObjectCollection*& obj : ObjCollection)
+			delete obj;
 	}
 
 	void OffsetData::UpdateValues(const glm::vec3& val)
@@ -386,7 +399,6 @@ namespace SMBC
 		{
 			nlohmann::json bpJson = this->ReadAndCheckBlueprintFile(blueprint_path);
 
-			this->collectionIdx	   = 0;
 			this->objectIndexValue = 0;
 
 			this->SelectCollectionBinding();

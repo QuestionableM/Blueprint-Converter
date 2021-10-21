@@ -16,6 +16,7 @@ namespace SMBC
 		std::vector<SMBC::Object*> ObjectList = {};
 
 		bool IsEmpty();
+		~ObjectCollection();
 	};
 
 	struct OffsetData
@@ -39,6 +40,7 @@ namespace SMBC
 		bool HasStuffToConvert();
 
 		ConvertedModel() = default;
+		~ConvertedModel();
 
 	private:
 		OffsetData offsetData;
@@ -64,7 +66,6 @@ namespace SMBC
 		void LoadBlueprintBodies(const nlohmann::json& bpJson);
 		void LoadBlueprintJoints(const nlohmann::json& bpJson);
 
-		std::size_t collectionIdx = 0;
 		std::size_t objectIndexValue = 0;
 
 		void (*CollectionBindFunction)(ConvertedModel&, SMBC::Object*, const bool&) = nullptr;
