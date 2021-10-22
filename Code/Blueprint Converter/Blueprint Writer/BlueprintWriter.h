@@ -60,6 +60,7 @@ namespace SMBC
 		static void Bind_NoSeparation(ConvertedModel& cModel, SMBC::Object* object, const bool& is_joint);
 		static void Bind_SeparateJoints(ConvertedModel& cModel, SMBC::Object* object, const bool& is_joint);
 		static void Bind_SeparateUuid(ConvertedModel& cModel, SMBC::Object* object, const bool& is_joint);
+		static void Bind_SeparateColor(ConvertedModel& cModel, SMBC::Object* object, const bool& is_joint);
 		static void Bind_SeparateUuidAndColor(ConvertedModel& cModel, SMBC::Object* object, const bool& is_joint);
 
 		void CreateAndAddObjectToCollection(const std::string& col_name, SMBC::Object* object);

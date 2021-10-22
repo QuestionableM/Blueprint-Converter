@@ -10,7 +10,8 @@ namespace SMBC {
 		Sep_Blocks =		1,
 		Sep_Joints =		2,
 		Sep_Uuid =			3,
-		Sep_UuidAndColor =	4
+		Sep_Color =			4,
+		Sep_UuidAndColor =	5
 	};
 
 	namespace BPFunction {

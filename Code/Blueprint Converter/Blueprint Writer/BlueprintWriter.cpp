@@ -226,6 +226,11 @@ namespace SMBC
 		cModel.CreateAndAddObjectToCollection(object->Uuid.ToString(), object);
 	}
 
+	void ConvertedModel::Bind_SeparateColor(ConvertedModel& cModel, SMBC::Object* object, const bool& is_joint)
+	{
+		cModel.CreateAndAddObjectToCollection(object->Color.StringHex(), object);
+	}
+
 	void ConvertedModel::Bind_SeparateUuidAndColor(ConvertedModel& cModel, SMBC::Object* object, const bool& is_joint)
 	{
 		cModel.CreateAndAddObjectToCollection(object->Uuid.ToString() + " " + object->Color.StringHex(), object);
@@ -379,6 +384,7 @@ namespace SMBC
 
 	void ConvertedModel::SelectCollectionBinding()
 	{
+		DebugOutL("Current separation method: ", ConvertSettings::SeparationMethod);
 		switch (ConvertSettings::SeparationMethod)
 		{
 		case Sep_Joints:
@@ -386,6 +392,9 @@ namespace SMBC
 			break;
 		case Sep_Uuid:
 			CollectionBindFunction = ConvertedModel::Bind_SeparateUuid;
+			break;
+		case Sep_Color:
+			CollectionBindFunction = ConvertedModel::Bind_SeparateColor;
 			break;
 		case Sep_UuidAndColor:
 			CollectionBindFunction = ConvertedModel::Bind_SeparateUuidAndColor;

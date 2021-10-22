@@ -138,9 +138,10 @@ namespace BlueprintConverter {
 			this->SeparationType_CB->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 9.75F, System::Drawing::FontStyle::Regular,
 				System::Drawing::GraphicsUnit::Point, static_cast<System::Byte>(0)));
 			this->SeparationType_CB->FormattingEnabled = true;
-			this->SeparationType_CB->Items->AddRange(gcnew cli::array< System::Object^  >(5) {
+			this->SeparationType_CB->Items->AddRange(gcnew cli::array< System::Object^  >(6) {
 				L"None", L"Separate All Objects", L"Separate By Joints",
-					L"Group Objects by Uuid", L"Group Objects by Uuid and Color"
+				L"Group Objects by Uuid", L"Group Objects by Color",
+				L"Group Objects by Uuid and Color"
 			});
 			this->SeparationType_CB->Location = System::Drawing::Point(6, 35);
 			this->SeparationType_CB->Name = L"SeparationType_CB";
