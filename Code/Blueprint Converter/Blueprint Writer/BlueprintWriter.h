@@ -5,7 +5,7 @@
 #include <gtc/matrix_transform.hpp>
 
 #include "Blueprint Converter/BlueprintConverter.h"
-#include "Blueprint Converter/Cache Manager/CacheManager.h"
+#include "Blueprint Converter/Object Definitions/Object/Object.h"
 
 #include "Lib/ConvData/ConvData.h"
 

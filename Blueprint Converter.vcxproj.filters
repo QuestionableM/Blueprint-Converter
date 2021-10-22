@@ -4,7 +4,6 @@
     <ClCompile Include="Code\Main.cpp" />
     <ClCompile Include="Code\Blueprint Converter\BlueprintConverter.cpp" />
     <ClCompile Include="Code\Blueprint Converter\Blueprint Writer\BlueprintWriter.cpp" />
-    <ClCompile Include="Code\Blueprint Converter\Cache Manager\CacheManager.cpp" />
     <ClCompile Include="Code\Gui\Implementation\About.cpp" />
     <ClCompile Include="Code\Gui\Implementation\GeneratorSettings.cpp" />
     <ClCompile Include="Code\Gui\Implementation\MainGUI.cpp" />
@@ -30,11 +29,12 @@
     <ClCompile Include="Code\Blueprint Converter\Convert Settings\ConvertSettings.cpp" />
     <ClCompile Include="Code\Blueprint Converter\Object Definitions\Object\Object.cpp" />
     <ClCompile Include="Code\Blueprint Converter\Object Definitions\Model\Model.cpp" />
+    <ClCompile Include="Code\Blueprint Converter\Cache Manager\Model Storage\ModelStorage.cpp" />
+    <ClCompile Include="Code\Blueprint Converter\Cache Manager\Object Storage\ObjectStorage.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Code\Blueprint Converter\BlueprintConverter.h" />
     <ClInclude Include="Code\Blueprint Converter\Blueprint Writer\BlueprintWriter.h" />
-    <ClInclude Include="Code\Blueprint Converter\Cache Manager\CacheManager.h" />
     <ClInclude Include="Code\Gui\About.h" />
     <ClInclude Include="Code\Gui\GeneratorSettings.h" />
     <ClInclude Include="Code\Gui\MainGUI.h" />
@@ -62,5 +62,7 @@
     <ClInclude Include="Code\Blueprint Converter\Convert Settings\ConvertSettings.h" />
     <ClInclude Include="Code\Blueprint Converter\Object Definitions\Object\Object.h" />
     <ClInclude Include="Code\Blueprint Converter\Object Definitions\Model\Model.h" />
+    <ClInclude Include="Code\Blueprint Converter\Cache Manager\Model Storage\ModelStorage.h" />
+    <ClInclude Include="Code\Blueprint Converter\Cache Manager\Object Storage\ObjectStorage.h" />
   </ItemGroup>
 </Project>
