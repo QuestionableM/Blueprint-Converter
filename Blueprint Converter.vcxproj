@@ -24,7 +24,8 @@
     <ClCompile Include="Code\Blueprint Converter\Cache Manager\Cache Object\CacheObject.cpp" />
     <ClCompile Include="Code\Blueprint Converter\Cache Manager\CacheManager.cpp" />
     <ClCompile Include="Code\Blueprint Converter\Convert Settings\ConvertSettings.cpp" />
-    <ClCompile Include="Code\Blueprint Converter\Object Definitions\ObjectDefinitions.cpp" />
+    <ClCompile Include="Code\Blueprint Converter\Object Definitions\Model\Model.cpp" />
+    <ClCompile Include="Code\Blueprint Converter\Object Definitions\Object\Object.cpp" />
     <ClCompile Include="Code\DebugCon.cpp" />
     <ClCompile Include="Code\Gui\Implementation\GeneratorSettings.cpp" />
     <ClCompile Include="Code\Gui\Implementation\About.cpp" />
@@ -54,7 +55,8 @@
     <ClInclude Include="Code\Blueprint Converter\Cache Manager\Cache Object\CacheObject.h" />
     <ClInclude Include="Code\Blueprint Converter\Cache Manager\CacheManager.h" />
     <ClInclude Include="Code\Blueprint Converter\Convert Settings\ConvertSettings.h" />
-    <ClInclude Include="Code\Blueprint Converter\Object Definitions\ObjectDefinitions.h" />
+    <ClInclude Include="Code\Blueprint Converter\Object Definitions\Model\Model.h" />
+    <ClInclude Include="Code\Blueprint Converter\Object Definitions\Object\Object.h" />
     <ClInclude Include="Code\DebugCon.h" />
     <ClInclude Include="Code\Gui\About.h">
       <FileType>CppForm</FileType>

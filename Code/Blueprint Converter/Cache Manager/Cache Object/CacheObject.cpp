@@ -3,6 +3,8 @@
 #include "Blueprint Converter/Convert Settings/ConvertSettings.h"
 #include "Lib/String/String.h"
 
+#include "Blueprint Converter/Object Definitions/Model/Model.h"
+
 namespace SMBC
 {
 	nlohmann::json CachedObject::ConstructTexObject(const Texture::TextureList& tex)
@@ -28,7 +30,7 @@ namespace SMBC
 
 	std::string CachedObject::WriteNewMtlHeader(CachedObject* obj, const std::wstring& name)
 	{
-		std::string _mtl_mat = "netmtl ";
+		std::string _mtl_mat = "newmtl ";
 		String::Combine(_mtl_mat, name, "\n", _fp_t);
 
 		if (ConvertSettings::MatByColor)

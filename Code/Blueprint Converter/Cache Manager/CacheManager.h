@@ -3,7 +3,8 @@
 #include <assimp/Importer.hpp>
 
 #include "Object Database/Texture Database/TextureDatabase.h"
-#include "Blueprint Converter/Object Definitions/ObjectDefinitions.h"
+//#include "Blueprint Converter/Object Definitions/ObjectDefinitions.h"
+#include "Blueprint Converter/Object Definitions/Object/Object.h"
 #include "Blueprint Converter/Cache Manager/Cache Object/CacheObject.h"
 
 #include <unordered_map>
