@@ -218,20 +218,20 @@ namespace SMBC
 
 	void ConvertedModel::Bind_SeparateJoints(ConvertedModel& cModel, SMBC::Object* object, const bool& is_joint)
 	{
-		cModel.CreateAndAddObjectToCollection(is_joint ? L"joints" : L"objects", object);
+		cModel.CreateAndAddObjectToCollection(is_joint ? "joints" : "objects", object);
 	}
 
 	void ConvertedModel::Bind_SeparateUuid(ConvertedModel& cModel, SMBC::Object* object, const bool& is_joint)
 	{
-		cModel.CreateAndAddObjectToCollection(object->Uuid.ToWstring(), object);
+		cModel.CreateAndAddObjectToCollection(object->Uuid.ToString(), object);
 	}
 
 	void ConvertedModel::Bind_SeparateUuidAndColor(ConvertedModel& cModel, SMBC::Object* object, const bool& is_joint)
 	{
-		cModel.CreateAndAddObjectToCollection(object->Uuid.ToWstring() + L" " + object->Color, object);
+		cModel.CreateAndAddObjectToCollection(object->Uuid.ToString() + " " + object->Color.StringHex(), object);
 	}
 
-	void ConvertedModel::CreateAndAddObjectToCollection(const std::wstring& col_name, SMBC::Object* object)
+	void ConvertedModel::CreateAndAddObjectToCollection(const std::string& col_name, SMBC::Object* object)
 	{
 		SMBC::ObjectCollection* cur_collection = nullptr;
 
@@ -279,7 +279,7 @@ namespace SMBC
 				glm::vec3 _PosVec(_PosX.get<float>(), _PosY.get<float>(), _PosZ.get<float>());
 
 				SMBC::Uuid uuid_obj(_ShapeId.get<std::string>());
-				std::wstring _ColorWstr = (_Color.is_string() ? String::ToWide(_Color.get<std::string>()) : L"000000");
+				std::string color_str = (_Color.is_string() ? _Color.get<std::string>() : "000000");
 
 				if (_Bounds.is_object())
 				{
@@ -296,9 +296,9 @@ namespace SMBC
 					SMBC::Block* _Block = new SMBC::Block();
 					_Block->blkPtr	 = (SMBC::BlockData*)_BlockD;
 					_Block->Bounds	 = _BoundsVec;
-					_Block->Color	 = _ColorWstr;
+					_Block->Color	 = color_str;
 					_Block->Position = _PosVec;
-					_Block->Uuid	 = uuid_obj;
+					_Block->Uuid	 = _BlockD->Uuid;
 					_Block->xAxis	 = _XAxis.get<int>();
 					_Block->zAxis	 = _ZAxis.get<int>();
 					_Block->_index	 = this->objectIndexValue;
@@ -313,7 +313,7 @@ namespace SMBC
 					SMBC::Part* _Part = new SMBC::Part();
 					_Part->objPtr	= (SMBC::PartData*)part_data;
 					_Part->Uuid		= _Part->objPtr->Uuid;
-					_Part->Color	= _ColorWstr;
+					_Part->Color	= color_str;
 					_Part->Bounds	= _Part->objPtr->Bounds;
 					_Part->Position = _PosVec;
 					_Part->xAxis	= _XAxis.get<int>();
@@ -362,7 +362,7 @@ namespace SMBC
 			SMBC::Part* _jnt = new SMBC::Part();
 			_jnt->Uuid     = _jnt_data->Uuid;
 			_jnt->objPtr   = (SMBC::PartData*)_jnt_data;
-			_jnt->Color    = (_Color.is_string() ? String::ToWide(_Color.get<std::string>()) : L"000000");
+			_jnt->Color    = (_Color.is_string() ? _Color.get<std::string>() : "000000");
 			_jnt->Bounds   = _jnt->objPtr->Bounds;
 			_jnt->Position = _JointPos;
 			_jnt->xAxis    = _XAxis.get<int>();

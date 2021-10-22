@@ -21,6 +21,7 @@ namespace SMBC {
 		void Combine(std::string& mainStr, const long& curArg);
 		void Combine(std::string& mainStr, const unsigned int& curArg);
 		void Combine(std::string& mainStr, const int& curArg);
+		void Combine(std::string& mainStr, const unsigned char& curArg);
 
 		void Combine(std::wstring& mainStr, const std::wstring& curArg);
 		void Combine(std::wstring& mainStr, const wchar_t* curArg);
@@ -33,6 +34,7 @@ namespace SMBC {
 		void Combine(std::wstring& mainStr, const long& curArg);
 		void Combine(std::wstring& mainStr, const unsigned int& curArg);
 		void Combine(std::wstring& mainStr, const int& curArg);
+		void Combine(std::wstring& mainStr, const unsigned char& curArg);
 
 
 		template<typename StrType, typename CurArg, typename ...ArgList>

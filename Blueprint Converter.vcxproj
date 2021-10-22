@@ -33,6 +33,7 @@
     <ClCompile Include="Code\Gui\Implementation\MainGUI.cpp" />
     <ClCompile Include="Code\Gui\Implementation\SettingsGUI.cpp" />
     <ClCompile Include="Code\Gui\Implementation\ModList.cpp" />
+    <ClCompile Include="Code\Lib\Color\Color.cpp" />
     <ClCompile Include="Code\Lib\ConvData\ConvData.cpp" />
     <ClCompile Include="Code\Lib\File\FileFunc.cpp" />
     <ClCompile Include="Code\Lib\GuiLib\GuiLib.cpp" />
@@ -77,6 +78,7 @@
     </ClInclude>
     <ClInclude Include="Code\Lib\Bit.h" />
     <ClInclude Include="Code\Lib\BuildVersion.h" />
+    <ClInclude Include="Code\Lib\Color\Color.h" />
     <ClInclude Include="Code\Lib\ConvData\ConvData.h" />
     <ClInclude Include="Code\Lib\File\FileFunc.h" />
     <ClInclude Include="Code\Lib\GuiLib\GuiLib.h" />

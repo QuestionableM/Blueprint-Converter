@@ -100,6 +100,10 @@ namespace SMBC
 			mainStr.append(std::to_string(curArg));
 		}
 
+		void Combine(std::string& mainStr, const unsigned char& curArg)
+		{
+			mainStr.append(std::to_string(curArg));
+		}
 
 
 		void Combine(std::wstring& mainStr, const std::wstring& curArg)
@@ -153,6 +157,11 @@ namespace SMBC
 		}
 
 		void Combine(std::wstring& mainStr, const int& curArg)
+		{
+			mainStr.append(std::to_wstring(curArg));
+		}
+
+		void Combine(std::wstring& mainStr, const unsigned char& curArg)
 		{
 			mainStr.append(std::to_wstring(curArg));
 		}

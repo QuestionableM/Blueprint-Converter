@@ -35,7 +35,7 @@ namespace SMBC
 	{
 		std::wstring ModelName;
 		std::vector<SMBC::ObjectCollection*> ObjCollection = {};
-		std::unordered_map<std::wstring, SMBC::ObjectCollection*> ObjCollectionMap = {};
+		std::unordered_map<std::string, SMBC::ObjectCollection*> ObjCollectionMap = {};
 
 		bool HasStuffToConvert();
 
@@ -62,7 +62,7 @@ namespace SMBC
 		static void Bind_SeparateUuid(ConvertedModel& cModel, SMBC::Object* object, const bool& is_joint);
 		static void Bind_SeparateUuidAndColor(ConvertedModel& cModel, SMBC::Object* object, const bool& is_joint);
 
-		void CreateAndAddObjectToCollection(const std::wstring& col_name, SMBC::Object* object);
+		void CreateAndAddObjectToCollection(const std::string& col_name, SMBC::Object* object);
 		void LoadBlueprintBodies(const nlohmann::json& bpJson);
 		void LoadBlueprintJoints(const nlohmann::json& bpJson);
 

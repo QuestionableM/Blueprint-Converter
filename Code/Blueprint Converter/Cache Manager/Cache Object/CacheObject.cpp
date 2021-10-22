@@ -1,5 +1,4 @@
 #include "CacheObject.h"
-#include "Blueprint Converter/Cache Manager/CacheManager.h"
 #include "Blueprint Converter/Convert Settings/ConvertSettings.h"
 #include "Lib/String/String.h"
 
@@ -34,7 +33,7 @@ namespace SMBC
 		String::Combine(_mtl_mat, name, "\n", _fp_t);
 
 		if (ConvertSettings::MatByColor)
-			String::Combine(_mtl_mat, String::HexToFloatW(obj->color), "\n");
+			String::Combine(_mtl_mat, obj->color.StringNormalized(), "\n");
 		else
 			_mtl_mat.append("0.8 0.8 0.8\n");
 

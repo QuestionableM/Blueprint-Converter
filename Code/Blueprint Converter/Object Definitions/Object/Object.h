@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Object Database/Mod Data/ModData.h"
+#include "Lib/Color/Color.h"
 
 namespace SMBC
 {
@@ -10,7 +11,7 @@ namespace SMBC
 	struct Object
 	{
 		SMBC::Uuid Uuid;
-		std::wstring Color;
+		SMBC::Color Color;
 		int xAxis;
 		int zAxis;
 		glm::vec3 Position;

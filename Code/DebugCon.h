@@ -6,7 +6,7 @@
 #include <string>
 
 namespace SMBC {
-	enum class Color : WORD {
+	enum class ConCol : WORD {
 		RED = FOREGROUND_RED,
 		GREEN = FOREGROUND_GREEN,
 		BLUE = FOREGROUND_BLUE,
@@ -60,7 +60,7 @@ namespace SMBC {
 		static void Output(const double& number);
 		static void Output(const float& number);
 
-		static void Output(const Color& color);
+		static void Output(const ConCol& color);
 
 		static void Output(const bool& boolean);
 	public:
@@ -94,9 +94,9 @@ namespace SMBC {
 	};
 
 #define DebugOut(...) SMBC::Console::Out(__VA_ARGS__)
-#define DebugOutL(...) SMBC::Console::Out(__VA_ARGS__, SMBC::Color::WHITE, "\n")
-#define DebugWarningL(...) SMBC::Console::Out(SMBC::Color::YELLOW_INT, "WARNING: ", __VA_ARGS__, SMBC::Color::WHITE, "\n")
-#define DebugErrorL(...) SMBC::Console::Out(SMBC::Color::RED_INT, "ERROR: ", __VA_ARGS__, SMBC::Color::WHITE, "\n")
+#define DebugOutL(...) SMBC::Console::Out(__VA_ARGS__, SMBC::ConCol::WHITE, "\n")
+#define DebugWarningL(...) SMBC::Console::Out(SMBC::ConCol::YELLOW_INT, "WARNING: ", __VA_ARGS__, SMBC::ConCol::WHITE, "\n")
+#define DebugErrorL(...) SMBC::Console::Out(SMBC::ConCol::RED_INT, "ERROR: ", __VA_ARGS__, SMBC::ConCol::WHITE, "\n")
 #define CreateDebugConsole() SMBC::Console::Create(L"SMBC Debug Console")
 }
 #else

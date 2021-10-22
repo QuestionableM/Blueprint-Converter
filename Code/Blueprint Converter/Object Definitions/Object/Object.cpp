@@ -63,7 +63,7 @@ namespace SMBC
 		String::Combine(_mat_name, this->Uuid.ToString());
 
 		if (ConvertSettings::MatByColor)
-			String::Combine(_mat_name, " ", this->Color);
+			String::Combine(_mat_name, " ", this->Color.StringHex());
 
 		if (write_sub_idx)
 			String::Combine(_mat_name, " ", sub_data_idx);

@@ -36,7 +36,7 @@ namespace SMBC
 	{
 		std::wstring cUuidStr = object->Uuid.ToWstring();
 		if (ConvertSettings::MatByColor)
-			String::Combine(cUuidStr, L" ", object->Color);
+			String::Combine(cUuidStr, L" ", object->Color.StringHex());
 
 		if (CachedObjects.find(cUuidStr) != CachedObjects.end())
 		{

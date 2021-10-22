@@ -442,7 +442,7 @@ namespace SMBC
 		NewMod->WorkshopId = workshop_id;
 		NewMod->Path = dir;
 
-		DebugOutL("Loaded a new mod: ", Color::YELLOW_INT, NewMod->Name);
+		DebugOutL("Loaded a new mod: ", ConCol::YELLOW_INT, NewMod->Name);
 
 		Mods.insert(std::make_pair(uuid, NewMod));
 		return NewMod;

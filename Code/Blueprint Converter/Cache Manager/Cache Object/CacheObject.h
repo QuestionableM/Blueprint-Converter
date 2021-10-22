@@ -1,6 +1,8 @@
 #pragma once
 
 #include "Object Database/Object Data/ObjectData.h"
+#include "Lib/Color/Color.h"
+
 #include <fstream>
 #include <nlohmann/json.hpp>
 
@@ -17,7 +19,7 @@ namespace SMBC
 		static std::string WriteNewMtlHeader(CachedObject* obj, const std::wstring& name);
 
 	public:
-		std::wstring color;
+		SMBC::Color color;
 
 		virtual CachedObjectType Type() const = 0;
 		virtual std::wstring GetName() const = 0;
