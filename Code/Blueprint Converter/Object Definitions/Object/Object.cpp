@@ -14,9 +14,10 @@ namespace SMBC
 
 	void Object::WriteVertices(const std::vector<glm::vec3>& vertices, std::ofstream& out, const glm::vec3& offsetVec) const
 	{
+		const glm::mat4 obj_matrix = BPFunction::GetPartRotationMatrix(this->xAxis, this->zAxis);
 		for (const glm::vec3& vert : vertices)
 		{
-			glm::vec3 rotVert = BPFunction::GetPartRotation(vert, this->Bounds, this->xAxis, this->zAxis) + this->Position;
+			glm::vec3 rotVert = BPFunction::GetPartRotationFromMatrix(vert, this->Bounds, obj_matrix) + this->Position;
 			rotVert = glm::vec4(rotVert, 1.0f) * this->RotationMatrix;
 
 			std::string _vert_str = "v ";
@@ -43,9 +44,10 @@ namespace SMBC
 	{
 		if (!ConvertSettings::ExportNormals) return;
 
+		const glm::mat4 obj_matrix = BPFunction::GetPartRotationMatrix(this->xAxis, this->zAxis);
 		for (const glm::vec3& norm : normals)
 		{
-			glm::vec3 rotNorm = BPFunction::GetPartRotation(norm, glm::vec3(0.0f), this->xAxis, this->zAxis);
+			glm::vec3 rotNorm = BPFunction::GetPartRotationFromMatrix(norm, glm::vec3(0.0f), obj_matrix);
 			rotNorm = glm::vec4(rotNorm, 1.0f) * this->RotationMatrix;
 
 			std::string _norm_str = "vn ";
@@ -121,9 +123,10 @@ namespace SMBC
 	{
 		if (!modelPtr) return;
 
+		const glm::mat4 obj_matrix = BPFunction::GetPartRotationMatrix(this->xAxis, this->zAxis);
 		for (const glm::vec3& vert : modelPtr->vertices)
 		{
-			glm::vec3 rotVert = BPFunction::GetPartRotation(vert, this->Bounds, this->xAxis, this->zAxis) + this->Position;
+			glm::vec3 rotVert = BPFunction::GetPartRotationFromMatrix(vert, this->Bounds, obj_matrix) + this->Position;
 			rotVert = glm::vec4(rotVert, 1.0f) * this->RotationMatrix;
 
 			data.UpdateValues(rotVert);
@@ -169,9 +172,10 @@ namespace SMBC
 
 		CubeMesh cMesh(this->Bounds / 2.0f, this->Position, tiling_val);
 
+		const glm::mat4 obj_matrix = BPFunction::GetPartRotationMatrix(this->xAxis, this->zAxis);
 		for (const glm::vec3& vert : cMesh.Vertices)
 		{
-			glm::vec3 rotVert = BPFunction::GetPartRotation(vert, this->Bounds, this->xAxis, this->zAxis) + this->Position;
+			glm::vec3 rotVert = BPFunction::GetPartRotationFromMatrix(vert, this->Bounds, obj_matrix) + this->Position;
 			rotVert = glm::vec4(rotVert, 1.0f) * this->RotationMatrix;
 
 			data.UpdateValues(rotVert);
