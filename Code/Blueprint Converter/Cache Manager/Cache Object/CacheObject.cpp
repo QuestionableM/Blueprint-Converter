@@ -16,6 +16,31 @@ namespace SMBC
 		return tex_obj;
 	}
 
+	void CachedObject::WriteMtlTextures(std::string& str, const Texture::TextureList& tList)
+	{
+		if (!tList.nor.empty()) String::Combine(str, "map_Bump ", tList.nor, "\n");
+		if (!tList.dif.empty()) String::Combine(str, "map_Kd ",   tList.dif, "\n");
+		if (!tList.asg.empty()) String::Combine(str, "map_Ks ",   tList.asg, "\n");
+	}
+
+	const static std::string _fp_t = "Ns 324\nKa 1 1 1\nKd ";
+	const static std::string _sp_t = "Ks 0.5 0.5 0.5\nKe 0 0 0\nNi 1.45\nd 1\nillum2\n";
+
+	std::string CachedObject::WriteNewMtlHeader(CachedObject* obj, const std::wstring& name)
+	{
+		std::string _mtl_mat = "netmtl ";
+		String::Combine(_mtl_mat, name, "\n", _fp_t);
+
+		if (ConvertSettings::MatByColor)
+			String::Combine(_mtl_mat, String::HexToFloatW(obj->color), "\n");
+		else
+			_mtl_mat.append("0.8 0.8 0.8\n");
+
+		_mtl_mat.append(_sp_t);
+
+		return _mtl_mat;
+	}
+
 	CachedObjectType CachedBlock::Type() const
 	{
 		return CachedObjectType::Block;
@@ -26,29 +51,11 @@ namespace SMBC
 		return blkPtr->Name;
 	}
 
-	const static std::string _fp_t = "Ns 324\nKa 1 1 1\nKd ";
-	const static std::string _sp_t = "Ks 0.5 0.5 0.5\nKe 0 0 0\nNi 1.45\nd 1\nillum2\n";
-
 	void CachedBlock::WriteMtlData(const std::wstring& name, std::ofstream& out) const
 	{
-		if (!blkPtr) return;
+		std::string _mtl_mat = this->WriteNewMtlHeader((CachedObject*)this, name);
 
-		std::string _mtl_mat = "newmtl ";
-		String::Combine(_mtl_mat, name, "\n", _fp_t);
-
-		if (ConvertSettings::MatByColor)
-			String::Combine(_mtl_mat, String::HexToFloatW(this->color), "\n");
-		else
-			_mtl_mat.append("0.8 0.8 0.8\n");
-
-		_mtl_mat.append(_sp_t);
-
-		{
-			Texture::TextureList& texData = blkPtr->TextureList;
-			if (!texData.nor.empty()) String::Combine(_mtl_mat, "map_Bump ", texData.nor, "\n");
-			if (!texData.dif.empty()) String::Combine(_mtl_mat, "map_Kd ",   texData.dif, "\n");
-			if (!texData.asg.empty()) String::Combine(_mtl_mat, "map_Ks ",   texData.asg, "\n");
-		}
+		this->WriteMtlTextures(_mtl_mat, blkPtr->TextureList);
 
 		_mtl_mat.append("\n");
 
@@ -71,6 +78,7 @@ namespace SMBC
 	}
 
 
+
 	CachedObjectType CachedPart::Type() const
 	{
 		return CachedObjectType::Part;
@@ -88,17 +96,9 @@ namespace SMBC
 		for (std::size_t a = 0; a < modelPtr->subMeshData.size(); a++)
 		{
 			const SubMeshData* smData = modelPtr->subMeshData[a];
-			std::wstring mtlName = name + L' ' + std::to_wstring(smData->SubMeshIndex);
+			const std::wstring mtlName = name + L' ' + std::to_wstring(smData->SubMeshIndex);
 
-			std::string _mtl_mat = "newmtl ";
-			String::Combine(_mtl_mat, mtlName, "\n", _fp_t);
-
-			if (ConvertSettings::MatByColor)
-				String::Combine(_mtl_mat, String::HexToFloatW(this->color), "\n");
-			else
-				_mtl_mat.append("0.8 0.8 0.8\n");
-
-			_mtl_mat.append(_sp_t);
+			std::string _mtl_mat = this->WriteNewMtlHeader((CachedObject*)this, mtlName);
 
 			bool _Success = false;
 			Texture::TextureList _TList;
@@ -114,12 +114,7 @@ namespace SMBC
 				break;
 			}
 
-			if (_Success)
-			{
-				if (!_TList.nor.empty()) String::Combine(_mtl_mat, "map_Bump ", _TList.nor, "\n");
-				if (!_TList.dif.empty()) String::Combine(_mtl_mat, "map_Kd ",   _TList.dif, "\n");
-				if (!_TList.asg.empty()) String::Combine(_mtl_mat, "map_Ks ",   _TList.asg, "\n");
-			}
+			if (_Success) this->WriteMtlTextures(_mtl_mat, _TList);
 
 			_mtl_mat.append("\n");
 
@@ -129,8 +124,6 @@ namespace SMBC
 
 	nlohmann::json CachedPart::WriteTexturePaths() const
 	{
-		if (!objPtr) return nlohmann::json::object();
-
 		nlohmann::json output_json;
 
 		const Texture::Texture& cur_tex = objPtr->TextureList;

@@ -13,6 +13,8 @@ namespace SMBC
 	{
 	protected:
 		static nlohmann::json ConstructTexObject(const Texture::TextureList& tex);
+		static void WriteMtlTextures(std::string& str, const Texture::TextureList& tList);
+		static std::string WriteNewMtlHeader(CachedObject* obj, const std::wstring& name);
 
 	public:
 		std::wstring color;
