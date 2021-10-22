@@ -26,7 +26,7 @@ namespace SMBC
 	}
 
 	const static std::string _fp_t = "Ns 324\nKa 1 1 1\nKd ";
-	const static std::string _sp_t = "Ks 0.5 0.5 0.5\nKe 0 0 0\nNi 1.45\nd 1\nillum2\n";
+	const static std::string _sp_t = "Ks 0.5 0.5 0.5\nKe 0 0 0\nNi 1.45\nd 1\nillum 2\n";
 
 	std::string CachedObject::WriteNewMtlHeader(CachedObject* obj, const std::wstring& name)
 	{
