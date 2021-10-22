@@ -7,9 +7,19 @@ namespace SMBC
 		return (this->DataIdx.size() <= 0);
 	}
 
+	SubMeshData::SubMeshData(const int& sub_mesh_idx)
+	{
+		this->SubMeshIndex = sub_mesh_idx;
+	}
+
 	bool Model::IsEmpty()
 	{
 		return (this->subMeshData.size() <= 0 || (this->vertices.size() <= 0 && this->uvs.size() <= 0 && this->normals.size() <= 0));
+	}
+
+	Model::Model(const std::wstring& mesh_path)
+	{
+		this->meshPath = mesh_path;
 	}
 
 	Model::~Model()

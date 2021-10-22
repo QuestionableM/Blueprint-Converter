@@ -264,11 +264,11 @@ namespace SMBC
 			for (auto& _Child : _Childs)
 			{
 				const auto& _ShapeId = Json::Get(_Child, "shapeId");
-				const auto& _Pos = Json::Get(_Child, "pos");
-				const auto& _XAxis = Json::Get(_Child, "xaxis");
-				const auto& _ZAxis = Json::Get(_Child, "zaxis");
-				const auto& _Bounds = Json::Get(_Child, "bounds");
-				const auto& _Color = Json::Get(_Child, "color");
+				const auto& _Pos	 = Json::Get(_Child, "pos");
+				const auto& _XAxis	 = Json::Get(_Child, "xaxis");
+				const auto& _ZAxis	 = Json::Get(_Child, "zaxis");
+				const auto& _Bounds  = Json::Get(_Child, "bounds");
+				const auto& _Color	 = Json::Get(_Child, "color");
 
 				if (!(_ShapeId.is_string() && _Pos.is_object() && _XAxis.is_number() && _ZAxis.is_number())) continue;
 				const auto& _PosX = Json::Get(_Pos, "x");

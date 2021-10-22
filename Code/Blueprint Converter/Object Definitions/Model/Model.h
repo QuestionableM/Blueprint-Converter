@@ -9,11 +9,12 @@ namespace SMBC
 	struct SubMeshData
 	{
 		std::wstring MaterialName;
-		int SubMeshIndex;
+		unsigned int SubMeshIndex;
 
 		std::vector<std::vector<std::vector<long long>>> DataIdx;
 
 		bool IsEmpty();
+		SubMeshData(const int& sub_mesh_idx);
 	};
 
 	struct Model
@@ -26,6 +27,7 @@ namespace SMBC
 		std::wstring meshPath;
 
 		bool IsEmpty();
+		Model(const std::wstring& mesh_path);
 		~Model();
 	};
 

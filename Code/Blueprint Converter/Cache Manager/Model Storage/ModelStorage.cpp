@@ -2,13 +2,102 @@
 #include "Lib/String/String.h"
 #include "DebugCon.h"
 
-#include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
 namespace SMBC
 {
 	std::unordered_map<std::wstring, Model*> ModelStorage::CachedModels = {};
 	Assimp::Importer ModelStorage::Importer = Assimp::Importer();
+
+	const aiScene* ModelStorage::LoadScene(const std::wstring& path)
+	{
+		return Importer.ReadFile(
+			String::ToUtf8(path).c_str(),
+			aiProcess_FindInvalidData |
+			aiProcess_RemoveComponent |
+			aiProcess_RemoveRedundantMaterials |
+			aiProcess_JoinIdenticalVertices |
+			aiProcess_FindDegenerates |
+			aiProcess_OptimizeMeshes
+		);
+	}
+
+	void ModelStorage::LoadVertices(const aiMesh*& mesh, Model*& model)
+	{
+		const bool has_uvs = mesh->HasTextureCoords(0);
+		const bool has_normals = mesh->HasNormals();
+
+		if (has_uvs) model->uvs.reserve(mesh->mNumVertices);
+		if (has_normals) model->normals.reserve(mesh->mNumVertices);
+
+		model->vertices.reserve(mesh->mNumVertices);
+		for (unsigned int a = 0; a < mesh->mNumVertices; a++)
+		{
+			model->vertices.push_back(*reinterpret_cast<glm::vec3*>(&mesh->mVertices[a]));
+
+			if (has_uvs) model->uvs.push_back(*reinterpret_cast<glm::vec2*>(&mesh->mTextureCoords[0][a]));
+			if (has_normals) model->normals.push_back(*reinterpret_cast<glm::vec3*>(&mesh->mNormals[a]));
+		}
+	}
+
+	void ModelStorage::LoadMaterialName(const aiScene*& scene, const aiMesh*& mesh, SubMeshData*& sub_mesh)
+	{
+		if (!scene->HasMaterials()) return;
+
+		const aiMaterial* cMeshMat = scene->mMaterials[mesh->mMaterialIndex];
+		aiString cMatName;
+		cMeshMat->Get(AI_MATKEY_NAME, cMatName);
+
+		const std::string cStrMatName = std::string(cMatName.C_Str(), cMatName.length);
+		sub_mesh->MaterialName = String::ToWide(cStrMatName);
+	}
+
+	void ModelStorage::LoadIndices(const aiMesh*& mesh, Model*& model, SubMeshData*& sub_mesh)
+	{
+		const long long mVertOffset = model->vertices.size();
+		const long long mUvOffset = model->uvs.size();
+		const long long mNormalOffset = model->normals.size();
+
+		const bool has_uvs = mesh->HasTextureCoords(0);
+		const bool has_normals = mesh->HasNormals();
+
+		sub_mesh->DataIdx.reserve(mesh->mNumFaces);
+		for (unsigned int a = 0; a < mesh->mNumFaces; a++)
+		{
+			const aiFace& cFace = mesh->mFaces[a];
+			std::vector<std::vector<long long>> d_idx;
+
+			d_idx.reserve(cFace.mNumIndices);
+			for (unsigned int b = 0; b < cFace.mNumIndices; b++)
+			{
+				long long ind_idx = (long long)cFace.mIndices[b];
+
+				d_idx.push_back({
+					ind_idx + mVertOffset,
+					(has_uvs ? (ind_idx + mUvOffset) : -1),
+					(has_normals ? (ind_idx + mNormalOffset) : -1)
+				});
+			}
+
+			sub_mesh->DataIdx.push_back(d_idx);
+		}
+	}
+
+	void ModelStorage::LoadSubMeshes(const aiScene*& scene, Model*& model)
+	{
+		model->subMeshData.reserve(scene->mNumMeshes);
+		for (unsigned int a = 0; a < scene->mNumMeshes; a++)
+		{
+			const aiMesh* cMesh = scene->mMeshes[a];
+			SubMeshData* cSubMesh = new SubMeshData(a);
+
+			ModelStorage::LoadIndices(cMesh, model, cSubMesh);
+			ModelStorage::LoadVertices(cMesh, model);
+			ModelStorage::LoadMaterialName(scene, cMesh, cSubMesh);
+
+			model->subMeshData.push_back(cSubMesh);
+		}
+	}
 
 	Model* ModelStorage::LoadModel(
 		const std::wstring& path,
@@ -20,98 +109,12 @@ namespace SMBC
 
 		DebugOut("[Model] Loading: ", path, "\n");
 
-		const aiScene* ModelScene = Importer.ReadFile(
-			SMBC::String::ToUtf8(path).c_str(),
-			aiProcess_FindInvalidData |
-			aiProcess_RemoveComponent |
-			aiProcess_RemoveRedundantMaterials |
-			aiProcess_JoinIdenticalVertices |
-			aiProcess_FindDegenerates |
-			aiProcess_OptimizeMeshes
-		);
-
+		const aiScene* ModelScene = ModelStorage::LoadScene(path);
 		if (ModelScene && ModelScene->HasMeshes())
 		{
-			SMBC::Model* newModel = new SMBC::Model();
+			Model* newModel = new Model(path);
+			ModelStorage::LoadSubMeshes(ModelScene, newModel);
 
-			long long FaceOffset = 0ll;
-			long long TexturePointOffset = 0ll;
-			long long NormalOffset = 0ll;
-
-			bool _HasMaterials = ModelScene->HasMaterials();
-
-			newModel->subMeshData.reserve(ModelScene->mNumMeshes);
-			for (uint32_t a = 0u; a < ModelScene->mNumMeshes; a++)
-			{
-				FaceOffset = (long long)newModel->vertices.size();
-				TexturePointOffset = (long long)newModel->uvs.size();
-				NormalOffset = (long long)newModel->normals.size();
-
-				const aiMesh* Mesh = ModelScene->mMeshes[a];
-
-				bool _HasTextureCoords = (load_uvs && Mesh->mTextureCoords[0] != NULL);
-				bool _HasNormals = (load_normals && Mesh->HasNormals());
-
-				if (_HasTextureCoords) newModel->uvs.reserve(Mesh->mNumVertices);
-				if (_HasNormals) newModel->normals.reserve(Mesh->mNumVertices);
-
-				newModel->vertices.reserve(Mesh->mNumVertices);
-				for (uint32_t b = 0u; b < Mesh->mNumVertices; b++)
-				{
-					newModel->vertices.push_back(*reinterpret_cast<glm::vec3*>(&Mesh->mVertices[b]));
-
-					if (!_HasTextureCoords && !_HasNormals) continue;
-
-					if (_HasTextureCoords)
-					{
-						newModel->uvs.push_back(*reinterpret_cast<glm::vec2*>(&Mesh->mTextureCoords[0][b]));
-					}
-
-					if (_HasNormals)
-					{
-						newModel->normals.push_back(*reinterpret_cast<glm::vec3*>(&Mesh->mNormals[b]));
-					}
-				}
-
-				SMBC::SubMeshData* subMeshData = new SMBC::SubMeshData();
-				subMeshData->SubMeshIndex = a;
-				subMeshData->MaterialName = L"";
-
-				if (_HasMaterials)
-				{
-					const aiMaterial* MeshMat = ModelScene->mMaterials[Mesh->mMaterialIndex];
-					aiString MatName;
-					MeshMat->Get(AI_MATKEY_NAME, MatName);
-
-					std::string StrMatName = std::string(MatName.C_Str(), MatName.length);
-					subMeshData->MaterialName = SMBC::String::ToWide(StrMatName);
-				}
-
-				subMeshData->DataIdx.reserve(Mesh->mNumFaces);
-				for (uint32_t b = 0u; b < Mesh->mNumFaces; b++)
-				{
-					const aiFace& Face = Mesh->mFaces[b];
-
-					std::vector<std::vector<long long>> DIdx;
-
-					DIdx.reserve(Face.mNumIndices);
-					for (uint32_t c = 0u; c < Face.mNumIndices; c++) {
-						long long indIdx = (long long)Face.mIndices[c];
-
-						DIdx.push_back({
-							indIdx + FaceOffset,
-							(_HasTextureCoords ? (indIdx + TexturePointOffset) : -1),
-							(_HasNormals ? (indIdx + NormalOffset) : -1)
-							});
-					}
-
-					subMeshData->DataIdx.push_back(DIdx);
-				}
-
-				newModel->subMeshData.push_back(subMeshData);
-			}
-
-			newModel->meshPath = path;
 			CachedModels.insert(std::make_pair(path, newModel));
 			Importer.FreeScene();
 
