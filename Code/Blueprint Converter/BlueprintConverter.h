@@ -36,11 +36,5 @@ namespace SMBC {
 
 		glm::mat4 GetPartRotationMatrix(const int& xAxis, const int& zAxis);
 		glm::vec3 GetPartRotationFromMatrix(const glm::vec3& pos, const glm::vec3& bounds, const glm::mat4& matrix);
-		//glm::vec3 GetPartRotation(
-		//	const glm::vec3& _Position,
-		//	const glm::vec3& bounds,
-		//	const int& xAxis,
-		//	const int& zAxis
-		//);
 	};
 };

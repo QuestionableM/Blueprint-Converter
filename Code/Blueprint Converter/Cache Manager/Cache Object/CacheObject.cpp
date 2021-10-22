@@ -78,6 +78,16 @@ namespace SMBC
 		return nullptr;
 	}
 
+	const Mod* CachedBlock::GetModPtr() const
+	{
+		return blkPtr->ModPtr;
+	}
+
+	SMBC::Uuid CachedBlock::GetUuid() const
+	{
+		return blkPtr->Uuid;
+	}
+
 
 
 	CachedObjectType CachedPart::Type() const
@@ -171,6 +181,16 @@ namespace SMBC
 
 	const Model* CachedPart::GetModelPtr() const
 	{
-		return this->modelPtr;
+		return modelPtr;
+	}
+
+	const Mod* CachedPart::GetModPtr() const
+	{
+		return objPtr->ModPtr;
+	}
+
+	SMBC::Uuid CachedPart::GetUuid() const
+	{
+		return objPtr->Uuid;
 	}
 }

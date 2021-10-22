@@ -6,17 +6,6 @@
 
 namespace SMBC
 {
-	LangDB::LangDB(const std::wstring& environment)
-	{
-		this->Environment = environment;
-	}
-
-	void LangDB::ClearDatabase()
-	{
-		this->Environment.clear();
-		this->Translations.clear();
-	}
-
 	void LangDB::LoadLanguageFile(const std::wstring& path)
 	{
 		nlohmann::json _LangFile = Json::LoadParseJson(path);

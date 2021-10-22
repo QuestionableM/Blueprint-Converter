@@ -27,6 +27,8 @@ namespace SMBC
 		virtual nlohmann::json WriteTexturePaths() const = 0;
 		virtual bool IsValid() const = 0;
 		virtual const Model* GetModelPtr() const = 0;
+		virtual const Mod* GetModPtr() const = 0;
+		virtual SMBC::Uuid GetUuid() const = 0;
 	};
 
 	struct CachedBlock : public CachedObject
@@ -39,6 +41,8 @@ namespace SMBC
 		nlohmann::json WriteTexturePaths() const override;
 		bool IsValid() const override;
 		const Model* GetModelPtr() const override;
+		const Mod* GetModPtr() const override;
+		SMBC::Uuid GetUuid() const override;
 	};
 
 	struct CachedPart : public CachedObject
@@ -52,5 +56,7 @@ namespace SMBC
 		nlohmann::json WriteTexturePaths() const override;
 		bool IsValid() const override;
 		const Model* GetModelPtr() const override;
+		const Mod* GetModPtr() const override;
+		SMBC::Uuid GetUuid() const override;
 	};
 }

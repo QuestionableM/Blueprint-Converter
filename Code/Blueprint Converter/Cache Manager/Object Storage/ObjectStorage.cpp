@@ -75,6 +75,15 @@ namespace SMBC
 		_MtlFile.close();
 	}
 
+	std::string ObjectStorage::GetFullObjectName(const CachedObject* cObject)
+	{
+		const Mod* cModPtr = cObject->GetModPtr();
+		const std::wstring cObjName = cObject->GetName();
+
+		const std::wstring output_str = cObjName + L" (" + cModPtr->Name + L": " + cObject->GetUuid().ToWstring() + L")";
+		return String::ToUtf8(output_str);
+	}
+
 	void ObjectStorage::WriteTexturePaths(const std::wstring& path)
 	{
 		std::ofstream _TextureOutput(path);
@@ -84,12 +93,12 @@ namespace SMBC
 
 		for (const auto& object_data : CachedObjects)
 		{
-			const SMBC::CachedObject* cObject = object_data.second;
-			const std::string cObjectName = String::ToUtf8(cObject->GetName());
+			const CachedObject* cObject = object_data.second;
+			const std::string cObjectFullName = ObjectStorage::GetFullObjectName(cObject);
 
 			if (!cObject->IsValid()) continue;
 
-			_TextureList[cObjectName] = cObject->WriteTexturePaths();
+			_TextureList[cObjectFullName] = cObject->WriteTexturePaths();
 		}
 
 		_TextureOutput << std::setfill('\t') << std::setw(1) << _TextureList;

@@ -72,6 +72,7 @@ namespace SMBC
 			}
 		}
 
+		//written by Brent Batch in C# and translated by Questionable Mark into C++
 		glm::mat4 GetPartRotationMatrix(const int& xAxis, const int& zAxis)
 		{
 			bool _XPos = (xAxis > 0);
@@ -131,70 +132,6 @@ namespace SMBC
 			output_pos += bounds / 2.0f;
 
 			return output_pos;
-		}
-
-		//written by Brent Batch in C# and translated by Questionable Mark into C++
-		glm::vec3 GetPartRotation(
-			const glm::vec3& _Position,
-			const glm::vec3& bounds,
-			const int& xAxis,
-			const int& zAxis
-		) {
-			bool _XPos = (xAxis > 0);
-			bool _ZPos = (zAxis > 0);
-			int _AbsX = glm::abs(xAxis);
-			int _AbsZ = glm::abs(zAxis);
-
-			glm::mat4 _XRotation(1.0f);
-			glm::mat4 _ZRotation(1.0f);
-
-			glm::vec3 _TranslatedPos(_Position);
-
-			switch (_AbsX)
-			{
-			case 1:
-				if (!_XPos) _XRotation = glm::rotate(_XRotation, glm::radians(180.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-				switch (_AbsZ)
-				{
-				case 2:
-					_ZRotation = glm::rotate(_ZRotation, glm::radians(-90.0f), glm::vec3(_ZPos ? -1.0f : 1.0f, 0.0f, 0.0f));
-					break;
-				case 3:
-					if (!_ZPos) _ZRotation = glm::rotate(_ZRotation, glm::radians(180.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-					break;
-				}
-				break;
-			case 2:
-				_XRotation = glm::rotate(_XRotation, glm::radians(-90.0f), glm::vec3(0.0f, 0.0f, _XPos ? 1.0f : -1.0f));
-				switch (_AbsZ)
-				{
-				case 1:
-					_ZRotation = glm::rotate(_ZRotation, glm::radians(-90.0f), glm::vec3(0.0f, _ZPos ? 1.0f : -1.0f, 0.0f));
-					break;
-				case 3:
-					if (!_ZPos) _ZRotation = glm::rotate(_ZRotation, glm::radians(-180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-					break;
-				}
-				break;
-			case 3:
-				_XRotation = glm::rotate(_XRotation, glm::radians(-90.0f), glm::vec3(0.0f, _XPos ? -1.0f : 1.0f, 0.0f));
-				switch (_AbsZ)
-				{
-				case 1:
-					if (_ZPos == _XPos) _ZRotation = glm::rotate(_ZRotation, glm::radians(180.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-					break;
-				case 2:
-					_ZRotation = glm::rotate(_ZRotation, glm::radians(-90.0f), glm::vec3(0.0f, 0.0f, (_ZPos == _XPos) ? -1.0f : 1.0f));
-					break;
-				}
-				break;
-			}
-
-			_TranslatedPos = glm::vec4(_TranslatedPos, 1.0f) * _XRotation;
-			_TranslatedPos = glm::vec4(_TranslatedPos, 1.0f) * _ZRotation;
-			_TranslatedPos += bounds / 2.0f;
-
-			return _TranslatedPos;
 		}
 
 		SMBC::Error ConvertBlueprintToObj(

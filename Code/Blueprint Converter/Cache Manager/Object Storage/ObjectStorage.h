@@ -14,10 +14,16 @@ namespace SMBC
 
 		static CachedObject* LoadCachedBlock(SMBC::Block* block);
 		static CachedObject* LoadCachedPart(SMBC::Part* part);
+
 	public:
 		static void LoadObject(SMBC::Object* object);
 
 		static void WriteMtlFile(const std::wstring& path);
+
+	private:
+		static std::string GetFullObjectName(const CachedObject* cObject);
+
+	public:
 		static void WriteTexturePaths(const std::wstring& path);
 
 		static void ClearStorage();
