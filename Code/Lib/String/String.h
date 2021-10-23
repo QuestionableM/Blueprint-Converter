@@ -7,8 +7,14 @@ namespace SMBC {
 		std::string ToUtf8(const std::wstring& wstr);
 		std::wstring ToWide(const std::string& str);
 
-		std::string HexToFloat(const std::string& hex_str);
-		std::string HexToFloatW(const std::wstring& hex_wstr);
+		void ToLowerR(std::wstring& wstr);
+		std::wstring ToLower(const std::wstring& wstr);
+
+		void ToUpperR(std::wstring& wstr);
+		std::wstring ToUpper(const std::wstring& wstr);
+
+		void ReplaceR(std::wstring& orig_str, const wchar_t& to_replace, const wchar_t& replacer);
+		std::wstring Replace(const std::wstring& orig_str, const wchar_t& to_replace, const wchar_t& replacer);
 
 		void Combine(std::string& mainStr, const std::string& curArg);
 		void Combine(std::string& mainStr, const char* curArg);

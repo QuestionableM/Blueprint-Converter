@@ -6,7 +6,6 @@
 #include "Lib/String/String.h"
 
 #include <filesystem>
-#include <cwctype>
 
 namespace fs = std::filesystem;
 
@@ -83,10 +82,7 @@ namespace SMBC
 		new_bp->Path = bpJson;
 		new_bp->Folder = path;
 		new_bp->WorkshopId = (file_id > 0) ? std::to_wstring(file_id) : L"";
-
-		new_bp->LowerName = new_bp->Name;
-		for (wchar_t& curChar : new_bp->LowerName)
-			curChar = std::tolower(curChar);
+		new_bp->LowerName = String::ToLower(new_bp->Name);
 
 		new_bp->FindBlueprintImage();
 

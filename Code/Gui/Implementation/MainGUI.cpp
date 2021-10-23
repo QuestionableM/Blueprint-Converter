@@ -341,7 +341,7 @@ void _MainGUI::SearchTB_TextChanged(System::Object^ sender, System::EventArgs^ e
 	if (this->SearchTB->TextLength > 0 && !this->Blueprints->empty())
 	{
 		std::wstring l_SearchWstr = msclr::interop::marshal_as<std::wstring>(this->SearchTB->Text);
-		SMBC::PathReplacer::ToLowercaseR(l_SearchWstr);
+		SMBC::String::ToLowerR(l_SearchWstr);
 
 		for (SMBC::Blueprint*& _Blueprint : *this->Blueprints)
 		{
@@ -580,7 +580,7 @@ void _MainGUI::BP_OpenOutputDir_BTN_Click(System::Object^ sender, System::EventA
 	}
 
 	std::wstring path_cpy = cur_blueprint->Folder;
-	SMBC::PathReplacer::ReplaceAll(path_cpy, L'/', L'\\');
+	SMBC::String::ReplaceR(path_cpy, L'/', L'\\');
 	
 	SMBC::Gui::OpenFolderInExplorer(path_cpy);
 }

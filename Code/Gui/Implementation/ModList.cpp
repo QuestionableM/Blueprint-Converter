@@ -248,7 +248,7 @@ void _ModList::OpenInFileExplorer_BTN_Click(System::Object^ sender, System::Even
 	}
 
 	std::wstring path_cpy = CurMod->Path;
-	SMBC::PathReplacer::ReplaceAll(path_cpy, L'/', L'\\');
+	SMBC::String::ReplaceR(path_cpy, L'/', L'\\');
 
 	SMBC::Gui::OpenFolderInExplorer(path_cpy);
 }

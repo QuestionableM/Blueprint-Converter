@@ -3,8 +3,7 @@
 #include "Lib/Json/JsonFunc.h"
 #include "Lib/String/String.h"
 #include "Lib/File/FileFunc.h"
-
-#include <cwctype>
+#include "Lib/String/String.h"
 
 namespace SMBC
 {
@@ -55,8 +54,8 @@ namespace SMBC
 
 	std::wstring PathReplacer::GetResourceUpgrade(const std::wstring& path)
 	{
-		std::wstring _path_cpy = PathReplacer::ToLowercase(path);
-		PathReplacer::ReplaceAll(_path_cpy, L'\\', L'/');
+		std::wstring _path_cpy = String::ToLower(path);
+		String::ReplaceR(_path_cpy, L'\\', L'/');
 
 		if (PathReplacements.find(_path_cpy) != PathReplacements.end())
 			return PathReplacements.at(_path_cpy);
@@ -64,29 +63,13 @@ namespace SMBC
 		return _path_cpy;
 	}
 
-	std::wstring PathReplacer::ToLowercase(const std::wstring& path)
-	{
-		std::wstring _Output = path;
-
-		for (wchar_t& curChar : _Output)
-			curChar = std::towlower(curChar);
-
-		return _Output;
-	}
-
-	void PathReplacer::ToLowercaseR(std::wstring& path)
-	{
-		for (wchar_t& curChar : path)
-			curChar = std::towlower(curChar);
-	}
-
 	void PathReplacer::CreateKey(std::wstring& key, std::wstring& value)
 	{
-		key = PathReplacer::ToLowercase(key);
-		value = PathReplacer::ToLowercase(value);
+		String::ToLowerR(key);
+		String::ToLowerR(value);
 
-		PathReplacer::ReplaceAll(key, L'\\', L'/');
-		PathReplacer::ReplaceAll(value, L'\\', L'/');
+		String::ReplaceR(key, L'\\', L'/');
+		String::ReplaceR(value, L'\\', L'/');
 	}
 
 	void PathReplacer::Add(const std::wstring& key, const std::wstring& value)
@@ -122,13 +105,6 @@ namespace SMBC
 			KeyReplacements.insert(std::make_pair(content_key, path));
 	}
 
-	void PathReplacer::ReplaceAll(std::wstring& str, const wchar_t& to_replace, const wchar_t& replacer)
-	{
-		size_t _idx = 0;
-		while ((_idx = str.find(to_replace)) != std::wstring::npos)
-			str[_idx] = replacer;
-	}
-
 	std::wstring PathReplacer::ReplaceKey(const std::wstring& str)
 	{
 		std::wstring final_path = PathReplacer::GetResourceUpgrade(str);
@@ -136,7 +112,7 @@ namespace SMBC
 		if (PathReplacer::ReplaceKeyInternal(final_path))
 		{
 			std::wstring CanonicalPath = File::GetCanonicalPathW(final_path);
-			PathReplacer::ToLowercaseR(CanonicalPath);
+			String::ToLowerR(CanonicalPath);
 
 			return CanonicalPath;
 		}
@@ -146,7 +122,7 @@ namespace SMBC
 
 	void PathReplacer::RemoveNewLineCharacters(std::wstring& str)
 	{
-		PathReplacer::ReplaceAll(str, L'\n', L' ');
-		PathReplacer::ReplaceAll(str, L'\r', L' ');
+		String::ReplaceR(str, L'\n', L' ');
+		String::ReplaceR(str, L'\r', L' ');
 	}
 }

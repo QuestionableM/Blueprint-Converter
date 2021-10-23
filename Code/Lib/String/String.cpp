@@ -1,5 +1,8 @@
 #include "String.h"
+
 #include <Windows.h>
+#include <locale>
+#include <cwctype>
 
 namespace SMBC
 {
@@ -21,28 +24,47 @@ namespace SMBC
 			return wstr;
 		}
 
-		std::string HexToFloat(const std::string& hex_str)
+		void ToLowerR(std::wstring& wstr)
 		{
-			float fr = (float)std::stoi(hex_str.substr(0, 2), nullptr, 16) / 255.0f;
-			float fg = (float)std::stoi(hex_str.substr(2, 2), nullptr, 16) / 255.0f;
-			float fb = (float)std::stoi(hex_str.substr(4, 2), nullptr, 16) / 255.0f;
-
-			std::string _output;
-			SMBC::String::Combine(_output, fr, " ", fg, " ", fb);
-
-			return _output;
+			for (wchar_t& w_char : wstr)
+				w_char = std::towlower(w_char);
 		}
 
-		std::string HexToFloatW(const std::wstring& hex_wstr)
+		std::wstring ToLower(const std::wstring& wstr)
 		{
-			float fr = (float)std::stoi(hex_wstr.substr(0, 2), nullptr, 16) / 255.0f;
-			float fg = (float)std::stoi(hex_wstr.substr(2, 2), nullptr, 16) / 255.0f;
-			float fb = (float)std::stoi(hex_wstr.substr(4, 2), nullptr, 16) / 255.0f;
+			std::wstring output_wstr = wstr;
+			String::ToLowerR(output_wstr);
 
-			std::string _output;
-			SMBC::String::Combine(_output, fr, " ", fg, " ", fb);
+			return output_wstr;
+		}
 
-			return _output;
+		void ToUpperR(std::wstring& wstr)
+		{
+			for (wchar_t& w_char : wstr)
+				w_char = std::towupper(w_char);
+		}
+
+		std::wstring ToUpper(const std::wstring& wstr)
+		{
+			std::wstring output_wstr = wstr;
+			String::ToUpperR(output_wstr);
+
+			return output_wstr;
+		}
+
+		void ReplaceR(std::wstring& orig_str, const wchar_t& to_replace, const wchar_t& replacer)
+		{
+			std::size_t cIdx = 0;
+			while ((cIdx = orig_str.find(to_replace)) != std::wstring::npos)
+				orig_str[cIdx] = replacer;
+		}
+
+		std::wstring Replace(const std::wstring& orig_str, const wchar_t& to_replace, const wchar_t& replacer)
+		{
+			std::wstring output_wstr = orig_str;
+			String::ReplaceR(output_wstr, to_replace, replacer);
+
+			return output_wstr;
 		}
 
 		void Combine(std::string& mainStr, const std::string& curArg)
