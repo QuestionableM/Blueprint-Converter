@@ -21,10 +21,8 @@ namespace SMBC
 		std::wstring Name;
 		Mod* ModPtr;
 
-		virtual ObjectType Type() = 0;
-
-		static const BlockData* ToBlock(ObjectData* data_ptr);
-		static const PartData*  ToPart(ObjectData* data_ptr);
+		virtual ObjectType Type() const = 0;
+		virtual ~ObjectData() = default;
 	};
 
 	class BlockData : public ObjectData
@@ -33,7 +31,7 @@ namespace SMBC
 		SMBC::Texture::TextureList TextureList;
 		int Tiling;
 
-		ObjectType Type() override;
+		ObjectType Type() const override;
 
 		BlockData(
 			const SMBC::Uuid& uuid,
@@ -41,6 +39,7 @@ namespace SMBC
 			SMBC::Texture::TextureList& textures,
 			const int& tiling
 		);
+		~BlockData() = default;
 	};
 
 	class PartData : public ObjectData
@@ -50,7 +49,7 @@ namespace SMBC
 		std::wstring Path;
 		glm::vec3 Bounds;
 
-		ObjectType Type() override;
+		ObjectType Type() const override;
 
 		PartData(
 			const SMBC::Uuid& uuid,
@@ -59,5 +58,6 @@ namespace SMBC
 			SMBC::Texture::Texture& textures,
 			const glm::vec3& bounds
 		);
+		~PartData() = default;
 	};
 }

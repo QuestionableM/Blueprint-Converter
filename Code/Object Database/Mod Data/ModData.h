@@ -63,7 +63,6 @@ namespace SMBC
 			const std::wstring& dir
 		);
 
-		Mod() = default;
 		~Mod();
 	};
 }

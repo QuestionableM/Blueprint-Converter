@@ -1,24 +1,10 @@
 #include "ObjectData.h"
 
+#include "DebugCon.h"
+
 namespace SMBC
 {
-	const BlockData* ObjectData::ToBlock(ObjectData* data_ptr)
-	{
-		if (data_ptr->Type() != ObjectType::Block)
-			return nullptr;
-
-		return static_cast<const BlockData*>(data_ptr);
-	}
-
-	const PartData* ObjectData::ToPart(ObjectData* data_ptr)
-	{
-		if (data_ptr->Type() != ObjectType::Part)
-			return nullptr;
-
-		return static_cast<const PartData*>(data_ptr);
-	}
-
-	ObjectType BlockData::Type()
+	ObjectType BlockData::Type() const
 	{
 		return ObjectType::Block;
 	}
@@ -35,7 +21,7 @@ namespace SMBC
 		this->TextureList = textures;
 	}
 
-	ObjectType PartData::Type()
+	ObjectType PartData::Type() const
 	{
 		return ObjectType::Part;
 	}

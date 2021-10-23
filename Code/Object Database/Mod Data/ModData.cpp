@@ -384,17 +384,19 @@ namespace SMBC
 	const PartData* Mod::GetPart(const SMBC::Uuid& uuid)
 	{
 		const ObjectData* current_obj = GetObject(uuid);
-		if (!current_obj) return nullptr;
+		if (!current_obj || current_obj->Type() != ObjectType::Part)
+			return nullptr;
 
-		return ObjectData::ToPart((ObjectData*)current_obj);
+		return static_cast<const PartData*>(current_obj);
 	}
 
 	const BlockData* Mod::GetBlock(const SMBC::Uuid& uuid)
 	{
 		const ObjectData* current_obj = GetObject(uuid);
-		if (!current_obj) return nullptr;
-		
-		return ObjectData::ToBlock((ObjectData*)current_obj);
+		if (!current_obj || current_obj->Type() != ObjectType::Block)
+			return nullptr;
+
+		return static_cast<const BlockData*>(current_obj);
 	}
 
 	Mod* Mod::CreateModFromDirectory(const std::wstring& dir)
@@ -450,6 +452,7 @@ namespace SMBC
 
 	Mod::~Mod()
 	{
+		DebugOutL("Removing mod: ", ConCol::YELLOW_INT, this->Name);
 		for (auto& obj : Objects)
 			delete obj.second;
 	}

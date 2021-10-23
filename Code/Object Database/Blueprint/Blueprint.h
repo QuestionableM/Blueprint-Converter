@@ -13,20 +13,16 @@ namespace SMBC
 		std::wstring Path;
 		std::wstring Folder;
 		std::wstring WorkshopId;
+		std::wstring ImagePath;
 		std::wstring LowerName;
 
 		bool IsSupportedExtension(const std::wstring& _ext);
 		static std::wstring FixBlueprintName(const std::wstring& name);
-		std::wstring FindBlueprintImage();
+		void FindBlueprintImage();
 		bool BlueprintExists();
 
-		Blueprint(
-			const std::wstring& name,
-			const std::wstring& path,
-			const std::wstring& folder,
-			const std::wstring& workshop_id
-		);
+		static Blueprint* CreateBlueprintFromDirectory(const std::wstring& path);
 
-		Blueprint() = default;
+		~Blueprint() = default;
 	};
 }

@@ -35,7 +35,7 @@ namespace SMBC
 	}
 
 	static const std::wstring BlockNotFoundString = L"BLOCK NOT FOUND";
-	const std::wstring& LangDB::GetTranslation(const Uuid& uuid)
+	const std::wstring& LangDB::GetTranslation(const Uuid& uuid) const
 	{
 		if (this->Translations.find(uuid) != this->Translations.end())
 			return this->Translations.at(uuid);

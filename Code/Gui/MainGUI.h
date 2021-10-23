@@ -19,9 +19,9 @@ namespace BlueprintConverter {
 		bool LoadedDatabase = false;
 		bool isCancelled = false;
 		int SelItemIndex = -1;
-		std::vector<SMBC::Blueprint>* Blueprints = nullptr;
+		std::vector<SMBC::Blueprint*>* Blueprints = nullptr;
 	public:
-		std::vector<SMBC::Blueprint>* TempBPTable = nullptr;
+		std::vector<SMBC::Blueprint*>* TempBPTable = nullptr;
 		MainGUI(void);
 	protected:
 		~MainGUI();
@@ -418,9 +418,9 @@ namespace BlueprintConverter {
 		System::Void OpenInWorkshop_BTN_Click(System::Object^ sender, System::EventArgs^ e);
 		System::Void BP_OpenOutputDir_BTN_Click(System::Object^ sender, System::EventArgs^ e);
 		
-		bool GetCurrentBlueprint(SMBC::Blueprint& bp);
+		SMBC::Blueprint* GetCurrentBlueprint();
 		System::Void BP_ShowModList_BTN_Click(System::Object^ sender, System::EventArgs^ e);
-		std::vector<SMBC::Blueprint>& GetCurrentBPList();
+		std::vector<SMBC::Blueprint*>* GetCurrentBPList();
 		void UpdateBlueprintLabel(bool bp_loading);
 		System::Void BlueprintList_SizeChanged(System::Object^ sender, System::EventArgs^ e);
 

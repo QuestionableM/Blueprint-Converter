@@ -3,7 +3,8 @@
 #include "Object Database/Mod Data/ModData.h"
 #include "Object Database/Blueprint/Blueprint.h"
 
-namespace BlueprintConverter {
+namespace BlueprintConverter
+{
 	using namespace System;
 	using namespace System::ComponentModel;
 	using namespace System::Collections;
@@ -11,7 +12,8 @@ namespace BlueprintConverter {
 	using namespace System::Data;
 	using namespace System::Drawing;
 
-	struct ModListData {
+	struct ModListData
+	{
 		SMBC::Mod* ptr = nullptr;
 		unsigned long long used_parts = 0;
 	};
@@ -20,7 +22,7 @@ namespace BlueprintConverter {
 	{
 	public:
 		int selected_mod = -1;
-		ModList(const SMBC::Blueprint& blueprint);
+		ModList(const SMBC::Blueprint* blueprint);
 		std::unordered_map<SMBC::Uuid, ModListData*>* UsedModData = nullptr;
 		std::vector<ModListData*>* UsedModVector = nullptr;
 

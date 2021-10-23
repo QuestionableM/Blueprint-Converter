@@ -5,8 +5,10 @@
 #if _DEBUG
 #include <string>
 
-namespace SMBC {
-	enum class ConCol : WORD {
+namespace SMBC
+{
+	enum class ConCol : WORD
+	{
 		RED = FOREGROUND_RED,
 		GREEN = FOREGROUND_GREEN,
 		BLUE = FOREGROUND_BLUE,
@@ -41,7 +43,8 @@ namespace SMBC {
 	};
 
 	class __ConsoleOutputHandler;
-	class Console {
+	class Console
+	{
 		friend __ConsoleOutputHandler;
 
 		static HANDLE Handle;
@@ -70,25 +73,29 @@ namespace SMBC {
 		static __ConsoleOutputHandler Out;
 	};
 
-	class __ConsoleOutputHandler {
+	class __ConsoleOutputHandler
+	{
 		friend Console;
 
 		__ConsoleOutputHandler() = default;
 
 		template<typename T>
-		inline void variadic_func(const T& arg) {
+		inline void variadic_func(const T& arg)
+		{
 			Console::Output(arg);
 		}
 
 		template<typename CurArg, typename ...ConArgs>
-		inline void variadic_func(const CurArg& curArg, const ConArgs& ...argList) {
+		inline void variadic_func(const CurArg& curArg, const ConArgs& ...argList)
+		{
 			this->variadic_func(curArg);
 			this->variadic_func(argList...);
 		}
 
 	public:
 		template<typename ...ConArgs>
-		inline void operator()(const ConArgs& ...argList) {
+		inline void operator()(const ConArgs& ...argList)
+		{
 			this->variadic_func(argList...);
 		}
 	};

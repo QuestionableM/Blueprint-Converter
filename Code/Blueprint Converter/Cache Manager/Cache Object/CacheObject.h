@@ -29,6 +29,7 @@ namespace SMBC
 		virtual const Model* GetModelPtr() const = 0;
 		virtual const Mod* GetModPtr() const = 0;
 		virtual SMBC::Uuid GetUuid() const = 0;
+		virtual ~CachedObject() = default;
 	};
 
 	struct CachedBlock : public CachedObject
@@ -43,6 +44,7 @@ namespace SMBC
 		const Model* GetModelPtr() const override;
 		const Mod* GetModPtr() const override;
 		SMBC::Uuid GetUuid() const override;
+		CachedBlock() = default;
 	};
 
 	struct CachedPart : public CachedObject
@@ -58,5 +60,6 @@ namespace SMBC
 		const Model* GetModelPtr() const override;
 		const Mod* GetModPtr() const override;
 		SMBC::Uuid GetUuid() const override;
+		CachedPart() = default;
 	};
 }

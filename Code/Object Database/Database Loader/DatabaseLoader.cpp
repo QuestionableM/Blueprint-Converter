@@ -40,12 +40,12 @@ namespace SMBC
 	{
 		if (Settings::ModFolders.empty()) return;
 
-		for (std::wstring& _ModDirectory : Settings::ModFolders)
+		for (const std::wstring& _ModDirectory : Settings::ModFolders)
 		{
 			if (!File::Exists(_ModDirectory)) continue;
 
 			fs::directory_iterator _DirIter(_ModDirectory, fs::directory_options::skip_permission_denied);
-			for (auto& dir : _DirIter)
+			for (const auto& dir : _DirIter)
 			{
 				if (!dir.is_directory()) continue;
 

@@ -20,17 +20,19 @@
 
 #include "Object Database/Database Loader/DatabaseLoader.h"
 
-namespace SMBC {
+namespace SMBC
+{
 	using namespace BlueprintConverter;
-};
+}
+
 namespace fs = std::filesystem;
 typedef SMBC::MainGUI _MainGUI;
 
 _MainGUI::MainGUI()
 {
 	this->InitializeComponent();
-	this->Blueprints = new std::vector<SMBC::Blueprint>();
-	this->TempBPTable = new std::vector<SMBC::Blueprint>();
+	this->Blueprints = new std::vector<SMBC::Blueprint*>();
+	this->TempBPTable = new std::vector<SMBC::Blueprint*>();
 	this->BlueprintImage->WaitOnLoad = true;
 	this->ActionProgress->Minimum = 0;
 	this->GuiUpdater->Start();
@@ -254,37 +256,19 @@ void _MainGUI::DatabaseLoader_RunWorkerCompleted(System::Object^ sender, System:
 
 void _MainGUI::BlueprintLoader_DoWork(System::Object^ sender, System::ComponentModel::DoWorkEventArgs^ e)
 {
-	for (std::wstring& BlueprintFolder : SMBC::Settings::BlueprintFolders)
+	for (const std::wstring& BlueprintFolder : SMBC::Settings::BlueprintFolders)
 	{
 		if (!SMBC::File::Exists(BlueprintFolder)) continue;
 
 		fs::directory_iterator BPDirIter(BlueprintFolder, fs::directory_options::skip_permission_denied);
-		for (auto& Folder : BPDirIter)
+		for (const auto& Folder : BPDirIter)
 		{
 			if (!Folder.is_directory()) continue;
 
-			std::wstring BlueprintJson = (Folder.path().wstring() + L"/description.json");
+			SMBC::Blueprint* new_blueprint = SMBC::Blueprint::CreateBlueprintFromDirectory(Folder.path().wstring());
+			if (!new_blueprint) continue;
 
-			nlohmann::json _BlueprintDesc = SMBC::Json::LoadParseJson(BlueprintJson, true);
-			if (!_BlueprintDesc.is_object())
-				continue;
-
-			std::wstring _BPName = SMBC::Json::GetWstr(_BlueprintDesc, "name");
-			std::wstring _BPType = SMBC::Json::GetWstr(_BlueprintDesc, "type");
-
-			if (_BPName.empty() || _BPType != L"Blueprint") continue;
-
-			const auto& _FileIdJson = SMBC::Json::Get(_BlueprintDesc, "fileId");
-			long long _FileId = _FileIdJson.is_number() ? _FileIdJson.get<long long>() : 0ll;
-
-			SMBC::Blueprint _NewBlueprint(
-				_BPName,
-				BlueprintJson,
-				Folder.path().wstring(),
-				(_FileId > 0) ? std::to_wstring(_FileId) : L""
-			);
-
-			this->Blueprints->push_back(_NewBlueprint);
+			this->Blueprints->push_back(new_blueprint);
 		}
 	}
 }
@@ -292,9 +276,11 @@ void _MainGUI::BlueprintLoader_DoWork(System::Object^ sender, System::ComponentM
 void _MainGUI::BlueprintLoader_RunWorkerCompleted(System::Object^ sender, System::ComponentModel::RunWorkerCompletedEventArgs^ e)
 {
 	this->BlueprintList->BeginUpdate();
+
 	this->BlueprintList->Items->Clear();
-	for (SMBC::Blueprint& _Blueprint : *this->Blueprints)
-		this->BlueprintList->Items->Add(gcnew System::String(_Blueprint.Name.c_str()));
+	for (SMBC::Blueprint*& bpObject : *this->Blueprints)
+		this->BlueprintList->Items->Add(gcnew System::String(bpObject->Name.c_str()));
+
 	this->BlueprintList->EndUpdate();
 
 	this->ChangeGUIState(true, this->LoadedDatabase, true);
@@ -303,18 +289,18 @@ void _MainGUI::BlueprintLoader_RunWorkerCompleted(System::Object^ sender, System
 
 void _MainGUI::BlueprintList_SelectedIndexChanged(System::Object^ sender, System::EventArgs^ e)
 {
-	int Index = this->BlueprintList->SelectedIndex;
+	const int Index = this->BlueprintList->SelectedIndex;
 	if (Index <= -1 || Index == this->SelItemIndex) return;
 	this->SelItemIndex = Index;
 
-	SMBC::Blueprint _CurBlueprint;
-	if (!this->GetCurrentBlueprint(_CurBlueprint))
+	SMBC::Blueprint* cur_blueprint = this->GetCurrentBlueprint();
+	if (!cur_blueprint)
 	{
 		SMBC::Gui::Error("Error", "Couldn't get the specified blueprint!");
 		return;
 	}
 
-	if (!_CurBlueprint.BlueprintExists())
+	if (!cur_blueprint->BlueprintExists())
 	{
 		SMBC::Gui::Warning(
 			"Blueprint Doesn't Exist",
@@ -325,20 +311,22 @@ void _MainGUI::BlueprintList_SelectedIndexChanged(System::Object^ sender, System
 		return;
 	}
 
-	this->BP_OpenOutputDir_BTN->Enabled = !_CurBlueprint.Folder.empty();
-	this->BP_ShowModList_BTN->Enabled = !_CurBlueprint.Path.empty();
-	this->BlueprintOptions_CMS->Enabled = (!_CurBlueprint.Folder.empty() || !_CurBlueprint.Path.empty());
+	this->BP_OpenOutputDir_BTN->Enabled = !cur_blueprint->Folder.empty();
+	this->BP_ShowModList_BTN->Enabled	= !cur_blueprint->Path.empty();
+	this->BlueprintOptions_CMS->Enabled = (!cur_blueprint->Folder.empty() || !cur_blueprint->Path.empty());
+	this->OpenInWorkshop_BTN->Enabled	= !cur_blueprint->WorkshopId.empty();
 
-	std::wstring _BPImage = _CurBlueprint.FindBlueprintImage();
-	this->OpenInWorkshop_BTN->Enabled = !_CurBlueprint.WorkshopId.empty();
-
-	if (this->BlueprintImage->Image) delete this->BlueprintImage->Image;
-	this->BlueprintImage->Image = nullptr;
+	if (this->BlueprintImage->Image)
+	{
+		delete this->BlueprintImage->Image;
+		this->BlueprintImage->Image = nullptr;
+	}
 	this->BlueprintImage->Invalidate();
 
-	if (!_BPImage.empty())
-		this->BlueprintImage->ImageLocation = gcnew System::String(_BPImage.c_str());
-	this->BPPath_TB->Text = gcnew System::String(_CurBlueprint.Folder.c_str());
+	if (!cur_blueprint->ImagePath.empty())
+		this->BlueprintImage->ImageLocation = gcnew System::String(cur_blueprint->ImagePath.c_str());
+
+	this->BPPath_TB->Text = gcnew System::String(cur_blueprint->Folder.c_str());
 }
 
 void _MainGUI::SearchTB_TextChanged(System::Object^ sender, System::EventArgs^ e)
@@ -355,20 +343,22 @@ void _MainGUI::SearchTB_TextChanged(System::Object^ sender, System::EventArgs^ e
 		std::wstring l_SearchWstr = msclr::interop::marshal_as<std::wstring>(this->SearchTB->Text);
 		SMBC::PathReplacer::ToLowercaseR(l_SearchWstr);
 
-		for (SMBC::Blueprint& _Blueprint : *this->Blueprints)
+		for (SMBC::Blueprint*& _Blueprint : *this->Blueprints)
 		{
-			if (_Blueprint.LowerName.find(l_SearchWstr) != std::wstring::npos)
+			if (_Blueprint->LowerName.find(l_SearchWstr) != std::wstring::npos)
 				this->TempBPTable->push_back(_Blueprint);
 		}
 	}
 
-	std::vector<SMBC::Blueprint>& _CurList = this->GetCurrentBPList();
-	if (!_CurList.empty() || (_CurList.empty() && this->BlueprintList->Items->Count > 0))
+	std::vector<SMBC::Blueprint*>* cur_list = this->GetCurrentBPList();
+	if (!cur_list->empty() || (cur_list->empty() && this->BlueprintList->Items->Count > 0))
 	{
 		this->BlueprintList->BeginUpdate();
 		this->BlueprintList->Items->Clear();
-		for (SMBC::Blueprint& _Blueprint : _CurList)
-			this->BlueprintList->Items->Add(gcnew System::String(_Blueprint.Name.c_str()));
+
+		for (SMBC::Blueprint*& _Blueprint : *cur_list)
+			this->BlueprintList->Items->Add(gcnew System::String(_Blueprint->Name.c_str()));
+
 		this->BlueprintList->EndUpdate();
 	}
 	
@@ -404,8 +394,14 @@ void _MainGUI::LoadBlueprints()
 	this->SelItemIndex = -1;
 	this->ChangeGUIState(false, this->LoadedDatabase, true);
 	this->SearchTB->Clear();
-	this->Blueprints->clear();
 	this->TempBPTable->clear();
+
+	{
+		for (SMBC::Blueprint*& bp : *this->Blueprints)
+			delete bp;
+
+		this->Blueprints->clear();
+	}
 
 	this->UpdateBlueprintLabel(true);
 	this->BPListStatus_LBL->Text = L"Loading Blueprints...";
@@ -440,25 +436,25 @@ void _MainGUI::ChangeGUIState(bool bploaded, bool databaseloaded, bool bpgenerat
 		bool _HasBPFolder = false;
 		bool _HasBPPath = false;
 
-		SMBC::Blueprint _CurBlueprint;
-		if (this->GetCurrentBlueprint(_CurBlueprint))
+		SMBC::Blueprint* cur_bp = this->GetCurrentBlueprint();
+		if (cur_bp != nullptr)
 		{
-			_HasWorkshopId = !_CurBlueprint.WorkshopId.empty();
-			_HasBPFolder = !_CurBlueprint.Folder.empty();
-			_HasBPPath = !_CurBlueprint.Path.empty();
+			_HasWorkshopId = !cur_bp->WorkshopId.empty();
+			_HasBPFolder   = !cur_bp->Folder.empty();
+			_HasBPPath	   = !cur_bp->Path.empty();
 		}
 
 		this->BlueprintOptions_CMS->Enabled = (_HasBPFolder || _HasBPPath);
 		this->BP_OpenOutputDir_BTN->Enabled = _HasBPFolder;
-		this->BP_ShowModList_BTN->Enabled = _HasBPPath;
-		this->OpenInWorkshop_BTN->Enabled = _HasWorkshopId;
+		this->BP_ShowModList_BTN->Enabled   = _HasBPPath;
+		this->OpenInWorkshop_BTN->Enabled   = _HasWorkshopId;
 	}
 	else
 	{
-		this->OpenInWorkshop_BTN->Enabled = false;
+		this->OpenInWorkshop_BTN->Enabled	= false;
 		this->BlueprintOptions_CMS->Enabled = false;
 		this->BP_OpenOutputDir_BTN->Enabled = false;
-		this->BP_ShowModList_BTN->Enabled = false;
+		this->BP_ShowModList_BTN->Enabled	= false;
 	}
 
 	this->OpenBlueprint->Enabled = dpandbp;
@@ -555,10 +551,9 @@ void _MainGUI::MainGUI_FormClosing(System::Object^ sender, System::Windows::Form
 
 void _MainGUI::OpenInWorkshop_BTN_Click(System::Object^ sender, System::EventArgs^ e)
 {
-	SMBC::Blueprint _CurBlueprint;
-	if (!this->GetCurrentBlueprint(_CurBlueprint)) return;
+	SMBC::Blueprint* cur_bp = this->GetCurrentBlueprint();
 
-	if (_CurBlueprint.WorkshopId.empty())
+	if (cur_bp->WorkshopId.empty())
 	{
 		SMBC::Gui::Error("Error", "Couldn't open the workshop link to the specified blueprint!");
 		return;
@@ -568,48 +563,45 @@ void _MainGUI::OpenInWorkshop_BTN_Click(System::Object^ sender, System::EventArg
 	if (SMBC::Settings::OpenLinksInSteam)
 		_WorkshopLink.append(L"steam://openurl/");
 
-	SMBC::String::Combine(_WorkshopLink, L"https://steamcommunity.com/sharedfiles/filedetails/?id=", _CurBlueprint.WorkshopId);
+	SMBC::String::Combine(_WorkshopLink, L"https://steamcommunity.com/sharedfiles/filedetails/?id=", cur_bp->WorkshopId);
 
 	System::Diagnostics::Process::Start(gcnew System::String(_WorkshopLink.c_str()));
 }
 
 void _MainGUI::BP_OpenOutputDir_BTN_Click(System::Object^ sender, System::EventArgs^ e)
 {
-	SMBC::Blueprint _CurBlueprint;
-	if (!this->GetCurrentBlueprint(_CurBlueprint)) return;
+	SMBC::Blueprint* cur_blueprint = this->GetCurrentBlueprint();
+	if (!cur_blueprint) return;
 
-	if (!SMBC::File::Exists(_CurBlueprint.Folder))
+	if (!SMBC::File::Exists(cur_blueprint->Folder))
 	{
 		SMBC::Gui::Error("Internal Error", "The path to the selected blueprint doesn't exist!");
 		return;
 	}
 
-	std::wstring path_cpy = _CurBlueprint.Folder;
+	std::wstring path_cpy = cur_blueprint->Folder;
 	SMBC::PathReplacer::ReplaceAll(path_cpy, L'/', L'\\');
 	
 	SMBC::Gui::OpenFolderInExplorer(path_cpy);
 }
 
-bool _MainGUI::GetCurrentBlueprint(SMBC::Blueprint& bp)
+SMBC::Blueprint* _MainGUI::GetCurrentBlueprint()
 {
-	int _CurIdx = this->BlueprintList->SelectedIndex;
+	const int cur_idx = this->BlueprintList->SelectedIndex;
+	if (cur_idx <= -1) return nullptr;
 
-	if (_CurIdx <= -1) return false;
+	std::vector<SMBC::Blueprint*>* cur_list = this->GetCurrentBPList();
+	if ((int)cur_list->size() < cur_idx) return nullptr;
 
-	std::vector<SMBC::Blueprint>& _CurList = this->GetCurrentBPList();
-	if ((int)_CurList.size() < _CurIdx) return false;
-	bp = _CurList.at(_CurIdx);
-	
-	return true;
+	return cur_list->at(cur_idx);
 }
 
 void _MainGUI::BP_ShowModList_BTN_Click(System::Object^ sender, System::EventArgs^ e)
 {
-	SMBC::Blueprint sel_blueprint;
+	SMBC::Blueprint* sel_blueprint = this->GetCurrentBlueprint();
+	if (!sel_blueprint) return;
 
-	if (!this->GetCurrentBlueprint(sel_blueprint)) return;
-
-	if (!SMBC::File::Exists(sel_blueprint.Path))
+	if (!SMBC::File::Exists(sel_blueprint->Path))
 	{
 		SMBC::Gui::Warning(L"Invalid Blueprint", L"The path to specified blueprint doesn't exist anymore!");
 		return;
@@ -622,30 +614,31 @@ void _MainGUI::BP_ShowModList_BTN_Click(System::Object^ sender, System::EventArg
 	delete ModListGUI;
 }
 
-std::vector<SMBC::Blueprint>& _MainGUI::GetCurrentBPList()
+std::vector<SMBC::Blueprint*>* _MainGUI::GetCurrentBPList()
 {
-	return (this->SearchTB->TextLength > 0) ? *this->TempBPTable : *this->Blueprints;
+	return (this->SearchTB->TextLength > 0) ? this->TempBPTable : this->Blueprints;
 }
 
 void _MainGUI::UpdateBlueprintLabel(bool bp_loading)
 {
-	std::vector<SMBC::Blueprint>& cur_list = this->GetCurrentBPList();
-	bool _visible = (cur_list.empty() || bp_loading);
+	std::vector<SMBC::Blueprint*>* cur_list = this->GetCurrentBPList();
+	bool _visible = (cur_list->empty() || bp_loading);
 
 	if (this->BPListStatus_LBL->Visible != _visible)
 		this->BPListStatus_LBL->Visible = _visible;
 
-	if (!_visible) return;
+	if (_visible)
+	{
+		System::String^ old_label = this->BPListStatus_LBL->Text;
 
-	System::String^ old_label = this->BPListStatus_LBL->Text;
+		if (this->SearchTB->TextLength > 0)
+			this->BPListStatus_LBL->Text = L"No Results";
+		else
+			this->BPListStatus_LBL->Text = L"No Blueprints";
 
-	if (this->SearchTB->TextLength > 0)
-		this->BPListStatus_LBL->Text = L"No Results";
-	else
-		this->BPListStatus_LBL->Text = L"No Blueprints";
-
-	if ((this->BPListStatus_LBL->Text != old_label) || _visible)
-		this->UpdateLabelPosition();
+		if ((this->BPListStatus_LBL->Text != old_label) || _visible)
+			this->UpdateLabelPosition();
+	}
 }
 
 void _MainGUI::BlueprintList_SizeChanged(System::Object^ sender, System::EventArgs^ e)

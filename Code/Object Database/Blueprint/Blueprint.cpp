@@ -2,6 +2,8 @@
 
 #include "Lib/OtherFunc/OtherFunc.h"
 #include "Lib/File/FileFunc.h"
+#include "Lib/Json/JsonFunc.h"
+#include "Lib/String/String.h"
 
 #include <filesystem>
 #include <cwctype>
@@ -14,7 +16,7 @@ namespace SMBC
 
 	bool Blueprint::IsSupportedExtension(const std::wstring& _ext)
 	{
-		for (std::wstring& _Ext : SMBC::Blueprint::ImageExtensions)
+		for (std::wstring& _Ext : Blueprint::ImageExtensions)
 			if (_Ext == _ext) return true;
 
 		return false;
@@ -26,52 +28,68 @@ namespace SMBC
 
 		for (const wchar_t& _Letter : name)
 		{
-			if (SMBC::Other::IsLetterAllowed(_Letter))
+			if (Other::IsLetterAllowed(_Letter))
 				_Output += _Letter;
 		}
 
 		return _Output;
 	}
 
-	std::wstring Blueprint::FindBlueprintImage()
+	void Blueprint::FindBlueprintImage()
 	{
-		if (!SMBC::File::Exists(this->Folder)) return L"";
+		if (!File::Exists(this->Folder) || !this->ImagePath.empty()) return;
 
-		fs::directory_iterator _Iter(this->Folder, fs::directory_options::skip_permission_denied);
-		for (auto& Image : _Iter)
+		fs::directory_iterator dir_iter(this->Folder, fs::directory_options::skip_permission_denied);
+		for (const auto& dir : dir_iter)
 		{
-			const fs::path& _img_p = Image.path();
+			if (!dir.is_regular_file()) continue;
 
-			if (
-				Image.is_regular_file() && _img_p.has_extension() &&
-				this->IsSupportedExtension(_img_p.extension().wstring())
-			) return _img_p.wstring();
+			const fs::path& imgPath = dir.path();
+
+			if (imgPath.has_extension() && this->IsSupportedExtension(imgPath.extension().wstring()))
+			{
+				this->ImagePath = imgPath.wstring();
+				return;
+			}
 		}
-
-		return L"";
 	}
 
 	bool Blueprint::BlueprintExists()
 	{
-		bool _FolderExists = SMBC::File::Exists(this->Folder);
-		bool _PathExists = SMBC::File::Exists(this->Path);
+		bool _FolderExists = File::Exists(this->Folder);
+		bool _PathExists = File::Exists(this->Path);
 
 		return (_FolderExists && _PathExists);
 	}
 
-	Blueprint::Blueprint(
-		const std::wstring& name,
-		const std::wstring& path,
-		const std::wstring& folder,
-		const std::wstring& workshop_id
-	) {
-		this->Name = name;
-		this->Path = path;
-		this->Folder = folder;
-		this->WorkshopId = workshop_id;
+	Blueprint* Blueprint::CreateBlueprintFromDirectory(const std::wstring& path)
+	{
+		const std::wstring bpJson = (path + L"/description.json");
 
-		this->LowerName = this->Name;
-		for (wchar_t& curChar : this->LowerName)
-			curChar = std::towlower(curChar);
+		const nlohmann::json bpDesc = Json::LoadParseJson(bpJson, true);
+		if (!bpDesc.is_object()) return nullptr;
+
+		const auto& bpName = Json::Get(bpDesc, "name");
+		const auto& bpType = Json::Get(bpDesc, "type");
+
+		if (!bpName.is_string() || !bpType.is_string()) return nullptr;
+		if (bpType.get<std::string>() != "Blueprint") return nullptr;
+
+		const auto& file_id_obj = Json::Get(bpDesc, "fileId");
+		long long file_id = file_id_obj.is_number() ? file_id_obj.get<long long>() : 0ll;
+
+		Blueprint* new_bp = new Blueprint();
+		new_bp->Name = String::ToWide(bpName.get<std::string>());
+		new_bp->Path = bpJson;
+		new_bp->Folder = path;
+		new_bp->WorkshopId = (file_id > 0) ? std::to_wstring(file_id) : L"";
+
+		new_bp->LowerName = new_bp->Name;
+		for (wchar_t& curChar : new_bp->LowerName)
+			curChar = std::tolower(curChar);
+
+		new_bp->FindBlueprintImage();
+
+		return new_bp;
 	}
 }

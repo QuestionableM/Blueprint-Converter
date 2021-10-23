@@ -15,6 +15,7 @@ namespace SMBC
 
 		bool IsEmpty();
 		SubMeshData(const int& sub_mesh_idx);
+		~SubMeshData() = default;
 	};
 
 	struct Model

@@ -19,7 +19,7 @@ typedef SMBC::ModList _ModList;
 static int ProgressCounter = 0;
 static int ProgressMaxCounter = 0;
 
-_ModList::ModList(const SMBC::Blueprint& blueprint)
+_ModList::ModList(const SMBC::Blueprint* blueprint)
 {
 	this->InitializeComponent();
 
@@ -27,10 +27,10 @@ _ModList::ModList(const SMBC::Blueprint& blueprint)
 	ProgressMaxCounter = 0;
 	this->UsedModData = new std::unordered_map<SMBC::Uuid, SMBC::ModListData*>();
 	this->UsedModVector = new std::vector<SMBC::ModListData*>();
-	this->BPName_LBL->Text = gcnew System::String((L"Blueprint Name: " + blueprint.Name).c_str());
+	this->BPName_LBL->Text = gcnew System::String((L"Blueprint Name: " + blueprint->Name).c_str());
 
 	this->GuiUpdater->Start();
-	this->ModSearcher_BW->RunWorkerAsync(gcnew System::String(blueprint.Folder.c_str()));
+	this->ModSearcher_BW->RunWorkerAsync(gcnew System::String(blueprint->Folder.c_str()));
 }
 
 _ModList::~ModList()
