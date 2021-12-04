@@ -64,6 +64,7 @@ namespace SMBC
 	Blueprint* Blueprint::CreateBlueprintFromDirectory(const std::wstring& path)
 	{
 		const std::wstring bpJson = (path + L"/description.json");
+		if (!File::Exists(bpJson)) return nullptr;
 
 		const nlohmann::json bpDesc = Json::LoadParseJson(bpJson, true);
 		if (!bpDesc.is_object()) return nullptr;

@@ -14,16 +14,14 @@ namespace SMBC
 		this->nor = nor;
 	}
 
-	void TexList::ReplaceTextureKeys()
-	{
-		if (!this->dif.empty()) this->dif = PathReplacer::ReplaceKey(this->dif);
-		if (!this->asg.empty()) this->asg = PathReplacer::ReplaceKey(this->asg);
-		if (!this->nor.empty()) this->nor = PathReplacer::ReplaceKey(this->nor);
-	}
-
 	bool TexList::HasTextures() const
 	{
 		return (!this->dif.empty() || !this->asg.empty() || !this->nor.empty());
+	}
+
+	std::wstring& TexList::GetStringRef(const int& idx)
+	{
+		return ((std::wstring*)&this->dif)[idx];
 	}
 
 	Tex::Texture(const SMBC::Texture::TextureType& tex_type)

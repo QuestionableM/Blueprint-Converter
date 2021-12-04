@@ -14,17 +14,21 @@ namespace SMBC
 	std::unordered_map<Uuid, ObjectData*> Mod::AllObjects = {};
 	std::unordered_map<Uuid, Mod*>        Mod::Mods       = {};
 
+	static const std::string blkTexNames[3] = { "dif", "asg", "nor" };
 	bool Mod::GetBlockTextures(const nlohmann::json& block, Texture::TextureList& tex)
 	{
-		const auto& bDif = Json::Get(block, "dif");
-		const auto& bAsg = Json::Get(block, "asg");
-		const auto& bNor = Json::Get(block, "nor");
+		for (int a = 0; a < 3; a++)
+		{
+			const auto& bTexture = Json::Get(block, blkTexNames[a]);
 
-		tex.dif = (bDif.is_string() ? String::ToWide(bDif.get<std::string>()) : L"");
-		tex.asg = (bAsg.is_string() ? String::ToWide(bAsg.get<std::string>()) : L"");
-		tex.nor = (bNor.is_string() ? String::ToWide(bNor.get<std::string>()) : L"");
+			if (bTexture.is_string())
+			{
+				std::wstring& strRef = tex.GetStringRef(a);
 
-		tex.ReplaceTextureKeys();
+				strRef = String::ToWide(bTexture.get<std::string>());
+				strRef = PathReplacer::ReplaceKey(strRef);
+			}
+		}
 
 		return tex.HasTextures();
 	}
@@ -72,29 +76,21 @@ namespace SMBC
 
 	void Mod::LoadTextureList(const nlohmann::json& texList, Texture::TextureList& entry)
 	{
-		std::size_t arr_sz = texList.size();
-		std::size_t list_sz = (arr_sz > 3 ? 3 : arr_sz);
+		const int arr_sz = (int)texList.size();
+		const int list_sz = (arr_sz > 3 ? 3 : arr_sz);
 
-		for (std::size_t a = 0; a < list_sz; a++)
+		for (int a = 0; a < list_sz; a++)
 		{
 			const auto& cur_item = texList.at(a);
 
-			std::wstring wstr_path = L"";
 			if (cur_item.is_string())
 			{
+				std::wstring& wstr_path = entry.GetStringRef(a);
+
 				wstr_path = String::ToWide(cur_item.get<std::string>());
 				wstr_path = PathReplacer::ReplaceKey(wstr_path);
 			}
-
-			switch (a)
-			{
-			case 0: entry.dif = wstr_path; break;
-			case 1: entry.asg = wstr_path; break;
-			case 2: entry.nor = wstr_path; break;
-			}
 		}
-
-		entry.ReplaceTextureKeys();
 	}
 
 	void Mod::AddSubMesh(const nlohmann::json& subMesh, Texture::Texture& tex, const std::wstring& idx)
@@ -105,7 +101,7 @@ namespace SMBC
 		Texture::TextureList new_entry;
 		Mod::LoadTextureList(sTexList, new_entry);
 
-		tex.TexList.insert(std::make_pair(idx, new_entry));
+		tex.AddTexture(idx, new_entry);
 	}
 
 	bool Mod::TryLoadSubMeshList(const nlohmann::json& pLodItem, Texture::Texture& tex)
@@ -402,6 +398,7 @@ namespace SMBC
 	Mod* Mod::CreateModFromDirectory(const std::wstring& dir)
 	{
 		const std::wstring mDescPath = dir + L"/description.json";
+		if (!File::Exists(mDescPath)) return nullptr;
 
 		nlohmann::json mDescJson = Json::LoadParseJson(mDescPath, true);
 		if (!mDescJson.is_object()) return nullptr;

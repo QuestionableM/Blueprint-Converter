@@ -6,24 +6,22 @@ namespace SMBC {
 	namespace Texture {
 		enum TextureType { None = 0, SubMeshList = 1, SubMeshMap = 2 };
 
-		struct TextureList {
+		struct TextureList
+		{
 			std::wstring dif;
 			std::wstring asg;
 			std::wstring nor;
 
-			TextureList(
-				const std::wstring& dif,
-				const std::wstring& asg,
-				const std::wstring& nor
-			);
-
+			TextureList(const std::wstring& dif, const std::wstring& asg, const std::wstring& nor);
 			TextureList() = default;
 
-			void ReplaceTextureKeys();
 			bool HasTextures() const;
+
+			std::wstring& GetStringRef(const int& idx);
 		};
 
-		class Texture {
+		class Texture
+		{
 		public:
 			SMBC::Texture::TextureType TexType = SMBC::Texture::TextureType::None;
 			std::unordered_map<std::wstring, SMBC::Texture::TextureList> TexList;
