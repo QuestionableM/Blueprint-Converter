@@ -232,9 +232,7 @@ namespace SMBC
 		}
 		else
 		{
-			const std::string colName = "Objects_" + std::to_string(body_idx);
-
-			cModel.CreateAndAddObjectToCollection(colName, object);
+			cModel.CreateAndAddObjectToCollection("Objects_" + std::to_string(body_idx), object);
 		}
 	}
 

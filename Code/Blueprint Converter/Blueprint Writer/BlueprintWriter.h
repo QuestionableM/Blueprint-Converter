@@ -69,7 +69,7 @@ namespace SMBC
 		void LoadBlueprintBodies(const nlohmann::json& bpJson);
 		void LoadBlueprintJoints(const nlohmann::json& bpJson);
 
-		std::size_t objectIndexValue = 0;
+		int objectIndexValue = 0;
 
 		void (*CollectionBindFunction)(ConvertedModel&, SMBC::Object*, const bool&, const std::size_t&) = nullptr;
 
