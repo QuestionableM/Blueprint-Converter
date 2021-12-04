@@ -114,6 +114,9 @@ namespace SMBC
 		out.write(obj_label.c_str(), obj_label.size());
 	}
 
+
+
+
 	ObjectType Part::Type() const
 	{
 		return ObjectType::Part;

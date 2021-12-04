@@ -199,7 +199,7 @@ namespace SMBC
 		return bpJson;
 	}
 
-	void ConvertedModel::Bind_NoSeparation(ConvertedModel& cModel, SMBC::Object* object, const bool& is_joint)
+	void ConvertedModel::Bind_NoSeparation(ConvertedModel& cModel, SMBC::Object* object, const bool& is_joint, const std::size_t& body_idx)
 	{
 		SMBC::ObjectCollection* cur_collection = nullptr;
 
@@ -216,24 +216,49 @@ namespace SMBC
 		cur_collection->ObjectList.push_back(object);
 	}
 
-	void ConvertedModel::Bind_SeparateJoints(ConvertedModel& cModel, SMBC::Object* object, const bool& is_joint)
+	void ConvertedModel::Bind_SeparateJoints(ConvertedModel& cModel, SMBC::Object* object, const bool& is_joint, const std::size_t& body_idx)
 	{
-		cModel.CreateAndAddObjectToCollection(is_joint ? "joints" : "objects", object);
+		if (is_joint)
+		{
+			SMBC::ObjectCollection* obj_collection = cModel.GetCollectionFromObjectIndex(object->ObjectIndex);
+			if (!obj_collection)
+			{
+				cModel.CreateAndAddObjectToCollection("Joints", object);
+			}
+			else
+			{
+				obj_collection->ObjectList.push_back(object);
+			}
+		}
+		else
+		{
+			const std::string colName = "Objects_" + std::to_string(body_idx);
+
+			cModel.CreateAndAddObjectToCollection(colName, object);
+		}
 	}
 
-	void ConvertedModel::Bind_SeparateUuid(ConvertedModel& cModel, SMBC::Object* object, const bool& is_joint)
+	void ConvertedModel::Bind_SeparateUuid(ConvertedModel& cModel, SMBC::Object* object, const bool& is_joint, const std::size_t& body_idx)
 	{
 		cModel.CreateAndAddObjectToCollection(object->Uuid.ToString(), object);
 	}
 
-	void ConvertedModel::Bind_SeparateColor(ConvertedModel& cModel, SMBC::Object* object, const bool& is_joint)
+	void ConvertedModel::Bind_SeparateColor(ConvertedModel& cModel, SMBC::Object* object, const bool& is_joint, const std::size_t& body_idx)
 	{
 		cModel.CreateAndAddObjectToCollection(object->Color.StringHex(), object);
 	}
 
-	void ConvertedModel::Bind_SeparateUuidAndColor(ConvertedModel& cModel, SMBC::Object* object, const bool& is_joint)
+	void ConvertedModel::Bind_SeparateUuidAndColor(ConvertedModel& cModel, SMBC::Object* object, const bool& is_joint, const std::size_t& body_idx)
 	{
 		cModel.CreateAndAddObjectToCollection(object->Uuid.ToString() + " " + object->Color.StringHex(), object);
+	}
+
+	SMBC::ObjectCollection* ConvertedModel::GetCollectionFromObjectIndex(const int& idx)
+	{
+		if (CollectionIndexMap.find(idx) != CollectionIndexMap.end())
+			return CollectionIndexMap.at(idx);
+
+		return nullptr;
 	}
 
 	void ConvertedModel::CreateAndAddObjectToCollection(const std::string& col_name, SMBC::Object* object)
@@ -241,15 +266,19 @@ namespace SMBC
 		SMBC::ObjectCollection* cur_collection = nullptr;
 
 		if (ObjCollectionMap.find(col_name) != ObjCollectionMap.end())
+		{
 			cur_collection = ObjCollectionMap.at(col_name);
+		}
 		else
 		{
 			cur_collection = new SMBC::ObjectCollection();
+
 			ObjCollectionMap.insert(std::make_pair(col_name, cur_collection));
 			ObjCollection.push_back(cur_collection);
 		}
 
 		cur_collection->ObjectList.push_back(object);
+		CollectionIndexMap.insert(std::make_pair(object->ObjectIndex, cur_collection));
 	}
 
 	void ConvertedModel::LoadBlueprintBodies(const nlohmann::json& bpJson)
@@ -258,6 +287,8 @@ namespace SMBC
 		if (!bArray.is_array()) return;
 
 		bool bSeparateJoints = (ConvertSettings::SeparationMethod == Sep_Joints);
+
+		std::size_t body_index = 0;
 
 		ConvData::SetState(State::GettingObjects);
 		for (auto& _Body : bArray)
@@ -299,40 +330,42 @@ namespace SMBC
 					if (!_BlockD) continue;
 
 					SMBC::Block* _Block = new SMBC::Block();
-					_Block->blkPtr	 = (SMBC::BlockData*)_BlockD;
-					_Block->Bounds	 = _BoundsVec;
-					_Block->Color	 = color_str;
-					_Block->Position = _PosVec;
-					_Block->Uuid	 = _BlockD->Uuid;
-					_Block->xAxis	 = _XAxis.get<int>();
-					_Block->zAxis	 = _ZAxis.get<int>();
-					_Block->_index	 = this->objectIndexValue;
+					_Block->blkPtr	    = (SMBC::BlockData*)_BlockD;
+					_Block->Bounds	    = _BoundsVec;
+					_Block->Color	    = color_str;
+					_Block->Position    = _PosVec;
+					_Block->Uuid	    = _BlockD->Uuid;
+					_Block->xAxis	    = _XAxis.get<int>();
+					_Block->zAxis	    = _ZAxis.get<int>();
+					_Block->ObjectIndex	= this->objectIndexValue;
 
-					this->CollectionBindFunction(*this, _Block, false);
+					this->CollectionBindFunction(*this, _Block, false, body_index);
 				}
 				else
 				{
 					const SMBC::PartData* part_data = SMBC::Mod::GetPart(uuid_obj);
 					if (!part_data) continue;
 
-					SMBC::Part* _Part = new SMBC::Part();
-					_Part->objPtr	= (SMBC::PartData*)part_data;
-					_Part->Uuid		= _Part->objPtr->Uuid;
-					_Part->Color	= color_str;
-					_Part->Bounds	= _Part->objPtr->Bounds;
-					_Part->Position = _PosVec;
-					_Part->xAxis	= _XAxis.get<int>();
-					_Part->zAxis	= _ZAxis.get<int>();
-					_Part->_index	= this->objectIndexValue;
+					SMBC::Part* _Part  = new SMBC::Part();
+					_Part->objPtr	   = (SMBC::PartData*)part_data;
+					_Part->Uuid		   = _Part->objPtr->Uuid;
+					_Part->Color	   = color_str;
+					_Part->Bounds	   = _Part->objPtr->Bounds;
+					_Part->Position    = _PosVec;
+					_Part->xAxis	   = _XAxis.get<int>();
+					_Part->zAxis	   = _ZAxis.get<int>();
+					_Part->ObjectIndex = this->objectIndexValue;
 
 					BPFunction::GetPartPosAndBounds(_Part->Position, _Part->Bounds, _Part->xAxis, _Part->zAxis, false);
 
-					this->CollectionBindFunction(*this, _Part, false);
+					this->CollectionBindFunction(*this, _Part, false, body_index);
 				}
 
 				this->objectIndexValue++;
 				ConvData::ProgressValue++;
 			}
+
+			body_index++;
 		}
 	}
 
@@ -374,9 +407,9 @@ namespace SMBC
 			_jnt->zAxis    = _ZAxis.get<int>();
 
 			BPFunction::GetPartPosAndBounds(_jnt->Position, _jnt->Bounds, _jnt->xAxis, _jnt->zAxis, true);
-			_jnt->_index = (_ChildA.is_number() ? _ChildA.get<int>() : -1);
+			_jnt->ObjectIndex = (_ChildA.is_number() ? _ChildA.get<int>() : -1);
 
-			this->CollectionBindFunction(*this, _jnt, true);
+			this->CollectionBindFunction(*this, _jnt, true, 0);
 
 			ConvData::ProgressValue++;
 		}

@@ -16,7 +16,7 @@ namespace SMBC
 		int zAxis;
 		glm::vec3 Position;
 		glm::vec3 Bounds;
-		std::size_t _index;
+		int ObjectIndex;
 
 		virtual ObjectType Type() const = 0;
 		virtual void CalcCenterPoint(OffsetData& data) const = 0;
@@ -43,6 +43,7 @@ namespace SMBC
 		void CalcCenterPoint(OffsetData& data) const override;
 		void WriteToFile(std::ofstream& out, OffsetData& data, const std::size_t& idx, const glm::vec3& offsetVec) const override;
 		void SetModelPtr(Model* model_ptr) override;
+
 		~Part() = default;
 	};
 
@@ -54,6 +55,7 @@ namespace SMBC
 		void CalcCenterPoint(OffsetData& data) const override;
 		void WriteToFile(std::ofstream& out, OffsetData& data, const std::size_t& idx, const glm::vec3& offsetVec) const override;
 		void SetModelPtr(Model* model_ptr) override;
+
 		~Block() = default;
 	};
 }

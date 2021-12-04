@@ -36,6 +36,7 @@ namespace SMBC
 		std::wstring ModelName;
 		std::vector<SMBC::ObjectCollection*> ObjCollection = {};
 		std::unordered_map<std::string, SMBC::ObjectCollection*> ObjCollectionMap = {};
+		std::unordered_map<int, SMBC::ObjectCollection*> CollectionIndexMap = {};
 
 		bool HasStuffToConvert();
 
@@ -57,19 +58,20 @@ namespace SMBC
 		SMBC::Error WriteBlueprintToFile(const std::size_t& objectCount);
 
 		static nlohmann::json ReadAndCheckBlueprintFile(const std::wstring& path);
-		static void Bind_NoSeparation(ConvertedModel& cModel, SMBC::Object* object, const bool& is_joint);
-		static void Bind_SeparateJoints(ConvertedModel& cModel, SMBC::Object* object, const bool& is_joint);
-		static void Bind_SeparateUuid(ConvertedModel& cModel, SMBC::Object* object, const bool& is_joint);
-		static void Bind_SeparateColor(ConvertedModel& cModel, SMBC::Object* object, const bool& is_joint);
-		static void Bind_SeparateUuidAndColor(ConvertedModel& cModel, SMBC::Object* object, const bool& is_joint);
+		static void Bind_NoSeparation		 (ConvertedModel& cModel, SMBC::Object* object, const bool& is_joint, const std::size_t& body_idx);
+		static void Bind_SeparateJoints		 (ConvertedModel& cModel, SMBC::Object* object, const bool& is_joint, const std::size_t& body_idx);
+		static void Bind_SeparateUuid		 (ConvertedModel& cModel, SMBC::Object* object, const bool& is_joint, const std::size_t& body_idx);
+		static void Bind_SeparateColor		 (ConvertedModel& cModel, SMBC::Object* object, const bool& is_joint, const std::size_t& body_idx);
+		static void Bind_SeparateUuidAndColor(ConvertedModel& cModel, SMBC::Object* object, const bool& is_joint, const std::size_t& body_idx);
 
+		SMBC::ObjectCollection* GetCollectionFromObjectIndex(const int& idx);
 		void CreateAndAddObjectToCollection(const std::string& col_name, SMBC::Object* object);
 		void LoadBlueprintBodies(const nlohmann::json& bpJson);
 		void LoadBlueprintJoints(const nlohmann::json& bpJson);
 
 		std::size_t objectIndexValue = 0;
 
-		void (*CollectionBindFunction)(ConvertedModel&, SMBC::Object*, const bool&) = nullptr;
+		void (*CollectionBindFunction)(ConvertedModel&, SMBC::Object*, const bool&, const std::size_t&) = nullptr;
 
 		void SelectCollectionBinding();
 	public:
