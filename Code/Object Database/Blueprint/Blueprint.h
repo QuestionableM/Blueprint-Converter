@@ -1,6 +1,5 @@
 #pragma once
 
-#include <vector>
 #include <string>
 
 namespace SMBC
@@ -8,7 +7,6 @@ namespace SMBC
 	class Blueprint
 	{
 	public:
-		static std::vector<std::wstring> ImageExtensions;
 		std::wstring Name;
 		std::wstring Path;
 		std::wstring Folder;

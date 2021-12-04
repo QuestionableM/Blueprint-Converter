@@ -11,12 +11,11 @@ namespace fs = std::filesystem;
 
 namespace SMBC
 {
-	std::vector<std::wstring> Blueprint::ImageExtensions = { L".jpg", L".png", L".bmp" };
-
+	const static std::unordered_map<std::wstring, bool> SupportedImageExtensions = { { L".jpg", 1 }, { L".png", 1 }, { L".bmp", 1 } };
 	bool Blueprint::IsSupportedExtension(const std::wstring& _ext)
 	{
-		for (std::wstring& _Ext : Blueprint::ImageExtensions)
-			if (_Ext == _ext) return true;
+		if (SupportedImageExtensions.find(_ext) != SupportedImageExtensions.end())
+			return true;
 
 		return false;
 	}
