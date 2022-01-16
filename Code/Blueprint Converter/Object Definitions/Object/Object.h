@@ -30,7 +30,7 @@ namespace SMBC
 		static void WriteUvs(const std::vector<glm::vec2>& uvs, std::ofstream& out);
 		void WriteNormals(const std::vector<glm::vec3>& normals, std::ofstream& out) const;
 		void WriteTextures(std::ofstream& out, const std::size_t& sub_data_idx, const bool& write_sub_idx) const;
-		static void WriteIndices(const std::vector<std::vector<std::vector<long long>>>& data_idx, OffsetData& oData, std::ofstream& out);
+		static void WriteIndices(const std::vector<std::vector<std::vector<long long>>>& data_idx, OffsetData& oData, std::ofstream& out, const long long& uv_idx);
 		static void WriteObjectSeparator(std::ofstream& out, const std::string& name, const std::size_t& idx);
 	};
 

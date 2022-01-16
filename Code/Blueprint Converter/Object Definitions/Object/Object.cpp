@@ -7,6 +7,7 @@
 
 #include "Lib/String/String.h"
 #include "Lib/OtherFunc/OtherFunc.h"
+#include "DebugCon.h"
 
 namespace SMBC
 {
@@ -75,7 +76,7 @@ namespace SMBC
 		out.write(_mat_name.c_str(), _mat_name.size());
 	}
 
-	void Object::WriteIndices(const std::vector<std::vector<std::vector<long long>>>& data_idx, OffsetData& oData, std::ofstream& out)
+	void Object::WriteIndices(const std::vector<std::vector<std::vector<long long>>>& data_idx, OffsetData& oData, std::ofstream& out, const long long& uv_idx)
 	{
 		for (std::size_t a = 0; a < data_idx.size(); a++)
 		{
@@ -93,7 +94,7 @@ namespace SMBC
 				_f_str.append("/");
 
 				if (has_uv)
-					_f_str.append(std::to_string(d_idx[1] + oData.Texture + 1));
+					_f_str.append(std::to_string(d_idx[1] + uv_idx + 1));
 
 				if (has_normal)
 					String::Combine(_f_str, "/", d_idx[2] + oData.Normal + 1);
@@ -142,21 +143,39 @@ namespace SMBC
 
 		this->WriteObjectSeparator(out, "Part", idx);
 
-		this->WriteVertices(modelPtr->vertices, out, offsetVec);
-		this->WriteUvs(modelPtr->uvs, out);
-		this->WriteNormals(modelPtr->normals, out);
+		const bool can_write_uvs = (modelPtr->WrittenUvIdx == -1);
+
+		{
+			this->WriteVertices(modelPtr->vertices, out, offsetVec);
+
+			if (can_write_uvs)
+			{
+				this->WriteUvs(modelPtr->uvs, out);
+				modelPtr->WrittenUvIdx = (long long)data.Texture;
+				DebugOutL("Written uvs for: ", modelPtr->meshPath);
+			}
+
+			this->WriteNormals(modelPtr->normals, out);
+		}
 
 		for (std::size_t subDataIdx = 0; subDataIdx < modelPtr->subMeshData.size(); subDataIdx++)
 		{
 			SMBC::SubMeshData*& subData = modelPtr->subMeshData[subDataIdx];
 
 			this->WriteTextures(out, subDataIdx, true);
-			this->WriteIndices(subData->DataIdx, data, out);
+			this->WriteIndices(subData->DataIdx, data, out, modelPtr->WrittenUvIdx);
 		}
 
-		data.Vertex += modelPtr->vertices.size();
-		data.Texture += modelPtr->uvs.size();
-		data.Normal += modelPtr->normals.size();
+		{
+			data.Vertex += modelPtr->vertices.size();
+
+			if (can_write_uvs)
+			{
+				data.Texture += modelPtr->uvs.size();
+			}
+
+			data.Normal += modelPtr->normals.size();
+		}
 	}
 
 	void Part::SetModelPtr(Model* model_ptr)
@@ -197,7 +216,7 @@ namespace SMBC
 		this->WriteNormals(cCube.Normals, out);
 
 		this->WriteTextures(out, 0, false);
-		this->WriteIndices(cCube.DataIndexes, data, out);
+		this->WriteIndices(cCube.DataIndexes, data, out, data.Texture);
 
 		data.Vertex += cCube.Vertices.size();
 		data.Texture += cCube.TexturePoints.size();

@@ -15,16 +15,18 @@ namespace BlueprintConverter {
 	public:
 		GeneratorSettings(const std::wstring& blueprint_name);
 		bool Success = false;
-		System::Windows::Forms::CheckBox^ ExportTexPaths_CB;
 
+	protected:
+		~GeneratorSettings();
+
+	public:
+		System::Windows::Forms::CheckBox^ ExportTexPaths_CB;
 		System::Windows::Forms::CheckBox^ ExportNormals_CB;
 		System::Windows::Forms::CheckBox^ ExportUVs_CB;
 		System::Windows::Forms::TextBox^ BlueprintName_TB;
 		System::Windows::Forms::CheckBox^ ApplyTextures_CB;
 		System::Windows::Forms::CheckBox^ MaterialsByColor_CB;
 		System::Windows::Forms::ComboBox^ SeparationType_CB;
-	protected:
-		~GeneratorSettings();
 
 	private:
 		System::Windows::Forms::Button^ Convert_BTN;

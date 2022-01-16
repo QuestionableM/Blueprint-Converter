@@ -26,6 +26,7 @@ namespace SMBC
 		std::vector<SMBC::SubMeshData*> subMeshData;
 
 		std::wstring meshPath;
+		long long WrittenUvIdx = -1ll;
 
 		bool IsEmpty();
 		Model(const std::wstring& mesh_path);
