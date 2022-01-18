@@ -16,6 +16,8 @@ namespace SMBC {
 		void ReplaceR(std::wstring& orig_str, const wchar_t& to_replace, const wchar_t& replacer);
 		std::wstring Replace(const std::wstring& orig_str, const wchar_t& to_replace, const wchar_t& replacer);
 
+		std::string FloatVecToString(const float* f, const std::size_t& amount, const std::string& separator = " ");
+
 		void Combine(std::string& mainStr, const std::string& curArg);
 		void Combine(std::string& mainStr, const char* curArg);
 		void Combine(std::string& mainStr, const std::wstring& curArg);
@@ -44,7 +46,8 @@ namespace SMBC {
 
 
 		template<typename StrType, typename CurArg, typename ...ArgList>
-		inline void Combine(StrType& mainStr, const CurArg& curArg, const ArgList& ...argList) {
+		inline void Combine(StrType& mainStr, const CurArg& curArg, const ArgList& ...argList)
+		{
 			SMBC::String::Combine(mainStr, curArg);
 			SMBC::String::Combine(mainStr, argList...);
 		}

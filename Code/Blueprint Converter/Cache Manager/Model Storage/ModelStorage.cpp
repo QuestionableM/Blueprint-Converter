@@ -1,4 +1,6 @@
 #include "ModelStorage.h"
+
+#include "Blueprint Converter/Convert Settings/ConvertSettings.h"
 #include "Lib/String/String.h"
 #include "DebugCon.h"
 
@@ -24,8 +26,8 @@ namespace SMBC
 
 	void ModelStorage::LoadVertices(const aiMesh*& mesh, Model*& model)
 	{
-		const bool has_uvs = mesh->HasTextureCoords(0);
-		const bool has_normals = mesh->HasNormals();
+		const bool has_uvs     = ConvertSettings::ExportUvs     && mesh->HasTextureCoords(0);
+		const bool has_normals = ConvertSettings::ExportNormals && mesh->HasNormals();
 
 		if (has_uvs) model->uvs.reserve(mesh->mNumVertices);
 		if (has_normals) model->normals.reserve(mesh->mNumVertices);
@@ -58,14 +60,14 @@ namespace SMBC
 		const long long mUvOffset = model->uvs.size();
 		const long long mNormalOffset = model->normals.size();
 
-		const bool has_uvs = mesh->HasTextureCoords(0);
-		const bool has_normals = mesh->HasNormals();
+		const bool has_uvs     = ConvertSettings::ExportUvs     && mesh->HasTextureCoords(0);
+		const bool has_normals = ConvertSettings::ExportNormals && mesh->HasNormals();
 
 		sub_mesh->DataIdx.reserve(mesh->mNumFaces);
 		for (unsigned int a = 0; a < mesh->mNumFaces; a++)
 		{
 			const aiFace& cFace = mesh->mFaces[a];
-			std::vector<std::vector<long long>> d_idx;
+			std::vector<VertexData> d_idx;
 
 			d_idx.reserve(cFace.mNumIndices);
 			for (unsigned int b = 0; b < cFace.mNumIndices; b++)
@@ -99,15 +101,10 @@ namespace SMBC
 		}
 	}
 
-	Model* ModelStorage::LoadModel(
-		const std::wstring& path,
-		const bool& load_uvs,
-		const bool& load_normals
-	) {
+	Model* ModelStorage::LoadModel(const std::wstring& path)
+	{
 		if (CachedModels.find(path) != CachedModels.end())
 			return CachedModels.at(path);
-
-		DebugOut("[Model] Loading: ", path, "\n");
 
 		const aiScene* ModelScene = ModelStorage::LoadScene(path);
 		if (ModelScene && ModelScene->HasMeshes())
@@ -120,6 +117,8 @@ namespace SMBC
 
 			return newModel;
 		}
+
+		DebugErrorL("[Model] Couldn't load: ", path);
 
 		Importer.FreeScene();
 		return nullptr;

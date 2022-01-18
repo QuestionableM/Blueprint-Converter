@@ -16,16 +16,16 @@ namespace SMBC
 		WritingObjects =	5
 	};
 
-	enum class Error : int
+	class ConvertError
 	{
-		None =			0,
-		File =			1,
-		Write =			2,
-		NoBlocks =		3,
-		NoBpData =		4,
-		MainDirCreate = 5,
-		BPDirCreate =	6,
-		InvalidPath =	7
+		std::wstring ErrorMsg;
+	public:
+		ConvertError() = default;
+
+		void operator=(const std::wstring& error_msg);
+
+		explicit operator bool() const noexcept;
+		std::wstring GetString() const noexcept;
 	};
 
 	//Blueprint Conversion Data
@@ -39,7 +39,8 @@ namespace SMBC
 		static void SetState(const SMBC::State& state, const std::size_t& MaxValue = 0);
 	};
 
-	const static std::vector<std::wstring> ActionTable = {
+	const static std::vector<std::wstring> ActionTable =
+	{
 		L"Reading Blueprint JSON...",
 		L"Getting Blueprint Blocks and Parts... ",
 		L"Getting Blueprint Joints... ",
@@ -48,7 +49,7 @@ namespace SMBC
 		L"Writing Objects Into the File... "
 	};
 
-	const static std::vector<std::wstring> ConversionErrorTable = {
+	/*const static std::vector<std::wstring> ConversionErrorTable = {
 		L"No error. This message should never be seen!",
 		L"Couldn't open the specified blueprint file. Possible reasons: Syntax error, Is not a json file",
 		L"Couldn't write converted blueprint into file!",
@@ -57,5 +58,5 @@ namespace SMBC
 		L"Couldn't create \"Converted Models\" directory!",
 		L"Couldn't create a directory with the specified blueprint!",
 		L"Blueprint name is invalid!"
-	};
+	};*/
 }

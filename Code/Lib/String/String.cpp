@@ -67,6 +67,20 @@ namespace SMBC
 			return output_wstr;
 		}
 
+		std::string FloatVecToString(const float* f, const std::size_t& amount, const std::string& separator)
+		{
+			std::string out;
+
+			for (std::size_t a = 0; a < amount; a++)
+			{
+				if (a > 0) out.append(separator);
+
+				out.append(std::to_string(f[a]));
+			}
+
+			return out;
+		}
+
 		void Combine(std::string& mainStr, const std::string& curArg)
 		{
 			mainStr.append(curArg);

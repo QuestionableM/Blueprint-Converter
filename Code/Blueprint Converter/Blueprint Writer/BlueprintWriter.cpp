@@ -1,5 +1,7 @@
 #include "BlueprintWriter.h"
-#include "Blueprint Converter/BlueprintConverter.h"
+
+#include "Blueprint Converter/Object Definitions/Entity/BlueprintData/BlueprintData.h"
+/*#include "Blueprint Converter/BlueprintConverter.h"
 #include "Blueprint Converter/Convert Settings/ConvertSettings.h"
 #include "Blueprint Converter/Cache Manager/Object Storage/ObjectStorage.h"
 #include "Blueprint Converter/Cache Manager/Model Storage/ModelStorage.h"
@@ -14,22 +16,18 @@
 #include <filesystem>
 #include <fstream>
 
-#if _DEBUG
-#include <assimp/DefaultLogger.hpp>
-#endif
-
-namespace fs = std::filesystem;
+namespace fs = std::filesystem;*/
 
 namespace SMBC
 {
-	bool ObjectCollection::IsEmpty()
+	/*bool ObjectCollection::IsEmpty()
 	{
 		return (ObjectList.size() == 0);
 	}
 
 	ObjectCollection::~ObjectCollection()
 	{
-		for (SMBC::Object*& cur_object : ObjectList)
+		for (SMBC::Entity*& cur_object : ObjectList)
 			delete cur_object;
 	}
 
@@ -53,12 +51,6 @@ namespace SMBC
 			delete obj;
 	}
 
-	void OffsetData::UpdateValues(const glm::vec3& val)
-	{
-		this->pt_sum += val;
-		this->point_count++;
-	}
-
 	std::size_t ConvertedModel::CountTotalObjectAmount()
 	{
 		std::size_t obj_amount = 0;
@@ -73,7 +65,7 @@ namespace SMBC
 	{
 		ConvData::SetState(State::ReadingObjects, total_obj_count);
 		for (ObjectCollection*& cur_col : this->ObjCollection)
-			for (SMBC::Object*& object : cur_col->ObjectList)
+			for (SMBC::Entity*& object : cur_col->ObjectList)
 			{
 				ObjectStorage::LoadObject(object);
 
@@ -137,12 +129,12 @@ namespace SMBC
 		out.write(obj_label.c_str(), obj_label.size());
 	}
 
-	void ConvertedModel::WriteCollectionToFile(std::ofstream& out, const std::vector<SMBC::Object*>& obj_vec, const glm::vec3& offsetVec)
+	void ConvertedModel::WriteCollectionToFile(std::ofstream& out, const std::vector<SMBC::Entity*>& obj_vec, const glm::vec3& offsetVec)
 	{
 		for (std::size_t obj_idx = 0; obj_idx < obj_vec.size(); obj_idx++)
 		{
-			const Object* cObject = obj_vec[obj_idx];
-			cObject->WriteToFile(out, offsetData, obj_idx, offsetVec);
+			const Entity* cObject = obj_vec[obj_idx];
+			cObject->WriteObjectToFile(out, offsetData, obj_idx, offsetVec);
 
 			ConvData::ProgressValue++;
 		}
@@ -199,7 +191,7 @@ namespace SMBC
 		return bpJson;
 	}
 
-	void ConvertedModel::Bind_NoSeparation(ConvertedModel& cModel, SMBC::Object* object, const bool& is_joint, const std::size_t& body_idx)
+	void ConvertedModel::Bind_NoSeparation(ConvertedModel& cModel, SMBC::Entity* object, const bool& is_joint, const std::size_t& body_idx)
 	{
 		SMBC::ObjectCollection* cur_collection = nullptr;
 
@@ -216,7 +208,7 @@ namespace SMBC
 		cur_collection->ObjectList.push_back(object);
 	}
 
-	void ConvertedModel::Bind_SeparateJoints(ConvertedModel& cModel, SMBC::Object* object, const bool& is_joint, const std::size_t& body_idx)
+	void ConvertedModel::Bind_SeparateJoints(ConvertedModel& cModel, SMBC::Entity* object, const bool& is_joint, const std::size_t& body_idx)
 	{
 		if (is_joint)
 		{
@@ -236,17 +228,17 @@ namespace SMBC
 		}
 	}
 
-	void ConvertedModel::Bind_SeparateUuid(ConvertedModel& cModel, SMBC::Object* object, const bool& is_joint, const std::size_t& body_idx)
+	void ConvertedModel::Bind_SeparateUuid(ConvertedModel& cModel, SMBC::Entity* object, const bool& is_joint, const std::size_t& body_idx)
 	{
 		cModel.CreateAndAddObjectToCollection(object->Uuid.ToString(), object);
 	}
 
-	void ConvertedModel::Bind_SeparateColor(ConvertedModel& cModel, SMBC::Object* object, const bool& is_joint, const std::size_t& body_idx)
+	void ConvertedModel::Bind_SeparateColor(ConvertedModel& cModel, SMBC::Entity* object, const bool& is_joint, const std::size_t& body_idx)
 	{
 		cModel.CreateAndAddObjectToCollection(object->Color.StringHex(), object);
 	}
 
-	void ConvertedModel::Bind_SeparateUuidAndColor(ConvertedModel& cModel, SMBC::Object* object, const bool& is_joint, const std::size_t& body_idx)
+	void ConvertedModel::Bind_SeparateUuidAndColor(ConvertedModel& cModel, SMBC::Entity* object, const bool& is_joint, const std::size_t& body_idx)
 	{
 		cModel.CreateAndAddObjectToCollection(object->Uuid.ToString() + " " + object->Color.StringHex(), object);
 	}
@@ -283,8 +275,6 @@ namespace SMBC
 	{
 		const auto& bArray = SMBC::Json::Get(bpJson, "bodies");
 		if (!bArray.is_array()) return;
-
-		bool bSeparateJoints = (ConvertSettings::SeparationMethod == Sep_Joints);
 
 		std::size_t body_index = 0;
 
@@ -474,5 +464,5 @@ namespace SMBC
 	#endif
 
 		return this->WriteBlueprintToFile(total_obj_count);
-	}
+	}*/
 }

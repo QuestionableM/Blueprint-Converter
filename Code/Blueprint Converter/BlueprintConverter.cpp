@@ -1,5 +1,6 @@
 #include "BlueprintConverter.h"
-#include "Blueprint Converter/Blueprint Writer/BlueprintWriter.h"
+
+#include "Blueprint Converter/Object Definitions/Entity/BlueprintData/BlueprintData.h"
 #include "Blueprint Converter/Convert Settings/ConvertSettings.h"
 
 #include <gtc/matrix_transform.hpp>
@@ -134,32 +135,14 @@ namespace SMBC
 			return output_pos;
 		}
 
-		SMBC::Error ConvertBlueprintToObj(
-			const std::wstring& blueprint_path,
-			const std::wstring blueprint_name,
-			const int& separation_method,
-			const bool& texture_list,
-			const bool& apply_textures,
-			const bool& export_uvs,
-			const bool& export_normals,
-			const bool& mat_by_color
-		) {
-			ConvertSettings::ApplyTextures = apply_textures;
-			ConvertSettings::ExportNormals = export_normals;
-			ConvertSettings::ExportUvs = export_uvs;
-			ConvertSettings::SeparationMethod = separation_method;
-			ConvertSettings::TextureList = texture_list;
-			ConvertSettings::MatByColor = mat_by_color;
+		void ConvertBlueprintToObj(const std::wstring& bp_path, const std::wstring& bp_name, ConvertError& cError)
+		{
+			BlueprintData* bpData = BlueprintData::LoadFromFile(bp_path, cError);
+			if (cError || !bpData) return;
 
-			SMBC::ConvertedModel _ConvModel;
-			_ConvModel.ModelName = blueprint_name;
+			bpData->WriteToFile(bp_name, cError);
 
-			SMBC::ConvData::SetState(SMBC::State::ReadingJson);
-			SMBC::Error loadResult = _ConvModel.LoadBlueprintData(blueprint_path);
-			if (loadResult != SMBC::Error::None)
-				return loadResult;
-
-			return _ConvModel.ConvertAndWrite();
+			delete bpData;
 		}
 	}
 }

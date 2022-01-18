@@ -1,4 +1,4 @@
-#include "Object.h"
+#include "Entity.h"
 
 #include "Blueprint Converter/Convert Settings/ConvertSettings.h"
 #include "Blueprint Converter/Blueprint Writer/BlueprintWriter.h"
@@ -7,11 +7,35 @@
 
 #include "Lib/String/String.h"
 #include "Lib/OtherFunc/OtherFunc.h"
-#include "DebugCon.h"
+
+#include <glm.hpp>
+#include <gtx/transform.hpp>
 
 namespace SMBC
 {
-	const glm::mat4 Object::RotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+	glm::mat4 Entity::GetTransformMatrix() const
+	{
+		glm::mat4 transform(1.0f);
+
+		transform *= glm::translate(this->mPosition);
+		transform *= glm::scale(this->mScale);
+
+		return transform;
+	}
+
+	std::size_t Entity::GetAmountOfObjects() const
+	{
+		return 1;
+	}
+
+	void Entity::WriteObjectToFile(std::ofstream& file, OffsetData& mOffset) const
+	{
+		const glm::mat4 model_matrix = this->GetTransformMatrix();
+
+		pModel->WriteToFile(file, model_matrix, mOffset, this);
+	}
+
+	/*const glm::mat4 Object::RotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 
 	void Object::WriteVertices(const std::vector<glm::vec3>& vertices, std::ofstream& out, const glm::vec3& offsetVec) const
 	{
@@ -223,5 +247,5 @@ namespace SMBC
 		data.Normal += cCube.Normals.size();
 	}
 
-	void Block::SetModelPtr(Model* model_ptr) {}
+	void Block::SetModelPtr(Model* model_ptr) {}*/
 }

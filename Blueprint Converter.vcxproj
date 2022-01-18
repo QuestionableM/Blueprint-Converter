@@ -25,8 +25,14 @@
     <ClCompile Include="Code\Blueprint Converter\Cache Manager\Model Storage\ModelStorage.cpp" />
     <ClCompile Include="Code\Blueprint Converter\Cache Manager\Object Storage\ObjectStorage.cpp" />
     <ClCompile Include="Code\Blueprint Converter\Convert Settings\ConvertSettings.cpp" />
+    <ClCompile Include="Code\Blueprint Converter\Object Definitions\Entity\BlueprintData\BlueprintData.cpp" />
     <ClCompile Include="Code\Blueprint Converter\Object Definitions\Model\Model.cpp" />
-    <ClCompile Include="Code\Blueprint Converter\Object Definitions\Object\Object.cpp" />
+    <ClCompile Include="Code\Blueprint Converter\Object Definitions\Entity\Block\Block.cpp" />
+    <ClCompile Include="Code\Blueprint Converter\Object Definitions\Entity\Body\Body.cpp" />
+    <ClCompile Include="Code\Blueprint Converter\Object Definitions\Entity\Joint\Joint.cpp" />
+    <ClCompile Include="Code\Blueprint Converter\Object Definitions\Entity\Entity.cpp" />
+    <ClCompile Include="Code\Blueprint Converter\Object Definitions\Entity\Part\Part.cpp" />
+    <ClCompile Include="Code\Blueprint Converter\OffsetData\OffsetData.cpp" />
     <ClCompile Include="Code\DebugCon.cpp" />
     <ClCompile Include="Code\Gui\Implementation\GeneratorSettings.cpp" />
     <ClCompile Include="Code\Gui\Implementation\About.cpp" />
@@ -58,8 +64,14 @@
     <ClInclude Include="Code\Blueprint Converter\Cache Manager\Model Storage\ModelStorage.h" />
     <ClInclude Include="Code\Blueprint Converter\Cache Manager\Object Storage\ObjectStorage.h" />
     <ClInclude Include="Code\Blueprint Converter\Convert Settings\ConvertSettings.h" />
+    <ClInclude Include="Code\Blueprint Converter\Object Definitions\Entity\BlueprintData\BlueprintData.h" />
     <ClInclude Include="Code\Blueprint Converter\Object Definitions\Model\Model.h" />
-    <ClInclude Include="Code\Blueprint Converter\Object Definitions\Object\Object.h" />
+    <ClInclude Include="Code\Blueprint Converter\Object Definitions\Entity\Block\Block.h" />
+    <ClInclude Include="Code\Blueprint Converter\Object Definitions\Entity\Body\Body.h" />
+    <ClInclude Include="Code\Blueprint Converter\Object Definitions\Entity\Joint\Joint.h" />
+    <ClInclude Include="Code\Blueprint Converter\Object Definitions\Entity\Entity.h" />
+    <ClInclude Include="Code\Blueprint Converter\Object Definitions\Entity\Part\Part.h" />
+    <ClInclude Include="Code\Blueprint Converter\OffsetData\OffsetData.h" />
     <ClInclude Include="Code\DebugCon.h" />
     <ClInclude Include="Code\Gui\About.h">
       <FileType>CppForm</FileType>

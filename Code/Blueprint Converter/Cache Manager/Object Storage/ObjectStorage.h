@@ -1,14 +1,13 @@
 #pragma once
 
 #include "Blueprint Converter/Cache Manager/Cache Object/CacheObject.h"
-#include "Blueprint Converter/Object Definitions/Object/Object.h"
 
 #include <unordered_map>
 #include <string>
 
 namespace SMBC
 {
-	class ObjectStorage
+	/*class ObjectStorage
 	{
 		static std::unordered_map<std::wstring, SMBC::CachedObject*> CachedObjects;
 
@@ -27,5 +26,5 @@ namespace SMBC
 		static void WriteTexturePaths(const std::wstring& path);
 
 		static void ClearStorage();
-	};
+	};*/
 }

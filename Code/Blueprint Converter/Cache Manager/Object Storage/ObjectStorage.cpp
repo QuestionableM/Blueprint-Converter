@@ -10,7 +10,7 @@
 
 namespace SMBC
 {
-	std::unordered_map<std::wstring, CachedObject*> ObjectStorage::CachedObjects = {};
+	/*std::unordered_map<std::wstring, CachedObject*> ObjectStorage::CachedObjects = {};
 
 	CachedObject* ObjectStorage::LoadCachedBlock(SMBC::Block* block)
 	{
@@ -112,5 +112,5 @@ namespace SMBC
 			delete obj_data.second;
 
 		CachedObjects.clear();
-	}
+	}*/
 }

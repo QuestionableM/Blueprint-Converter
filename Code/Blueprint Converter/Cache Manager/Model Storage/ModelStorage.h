@@ -20,13 +20,9 @@ namespace SMBC
 		static void LoadMaterialName(const aiScene*& scene, const aiMesh*& mesh, SubMeshData*& sub_mesh);
 		static void LoadIndices(const aiMesh*& mesh, Model*& model, SubMeshData*& sub_mesh);
 		static void LoadSubMeshes(const aiScene*& scene, Model*& model);
-	public:
-		static SMBC::Model* LoadModel(
-			const std::wstring& path,
-			const bool& load_uvs,
-			const bool& load_normals
-		);
 
+	public:
+		static SMBC::Model* LoadModel(const std::wstring& path);
 		static void ClearStorage();
 	};
 }

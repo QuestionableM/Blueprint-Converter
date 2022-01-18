@@ -6,12 +6,21 @@
 
 namespace SMBC
 {
+	struct OffsetData;
+
+	struct VertexData
+	{
+		long long pVert;
+		long long pUv;
+		long long pNorm;
+	};
+
 	struct SubMeshData
 	{
 		std::wstring MaterialName;
 		unsigned int SubMeshIndex;
 
-		std::vector<std::vector<std::vector<long long>>> DataIdx;
+		std::vector<std::vector<VertexData>> DataIdx;
 
 		bool IsEmpty();
 		SubMeshData(const int& sub_mesh_idx);
@@ -28,9 +37,16 @@ namespace SMBC
 		std::wstring meshPath;
 		long long WrittenUvIdx = -1ll;
 
-		bool IsEmpty();
+	public:
 		Model(const std::wstring& mesh_path);
+		Model(Model&) = delete;
+		Model(Model&&) = delete;
+		Model(const Model&) = delete;
 		~Model();
+
+		void WriteToFile(std::ofstream& file, const glm::mat4& model_mat, OffsetData& mOffset, const class Entity* pEntity);
+
+		bool IsEmpty();
 	};
 
 	struct CubeMesh

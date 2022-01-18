@@ -8,8 +8,8 @@
 #include "Gui/GeneratorSettings.h"
 #include "Gui/ModList.h"
 
-#include "Blueprint Converter/BlueprintConverter.h"
 #include "Object Database/Keyword Replacer/KeywordReplacer.h"
+#include "Object Database/Database Loader/DatabaseLoader.h"
 
 #include "Lib/ConvData/ConvData.h"
 #include "Lib/GuiLib/GuiLib.h"
@@ -18,7 +18,8 @@
 #include "Lib/String/String.h"
 #include "Lib/ProgramSettings.h"
 
-#include "Object Database/Database Loader/DatabaseLoader.h"
+#include "Blueprint Converter/BlueprintConverter.h"
+#include "Blueprint Converter/Convert Settings/ConvertSettings.h"
 
 namespace SMBC
 {
@@ -164,29 +165,41 @@ void _MainGUI::ObjectGenerator_DoWork(System::Object^ sender, System::ComponentM
 	System::String^ _BlueprintPathS = safe_cast<System::String^>(_Data->GetValue((int)0));
 	System::String^ _BlueprintNameS = safe_cast<System::String^>(_Data->GetValue((int)1));
 
-	int _SeparationMethod = safe_cast<int>(_Data->GetValue((int)2));
+	int sSeparationMethod = safe_cast<int>(_Data->GetValue((int)2));
 
-	bool _ApplyTextures = safe_cast<bool>(_Data->GetValue((int)3));
-	bool _ExportTexPaths = safe_cast<bool>(_Data->GetValue((int)4));
-	bool _MaterialsByColor = safe_cast<bool>(_Data->GetValue((int)5));
-	bool _ExportNormals = safe_cast<bool>(_Data->GetValue((int)6));
-	bool _ExportUvs = safe_cast<bool>(_Data->GetValue((int)7));
+	bool sApplyTextures = safe_cast<bool>(_Data->GetValue((int)3));
+	bool sExportTexPaths = safe_cast<bool>(_Data->GetValue((int)4));
+	bool sMaterialsByColor = safe_cast<bool>(_Data->GetValue((int)5));
+	bool sExportNormals = safe_cast<bool>(_Data->GetValue((int)6));
+	bool sExportUvs = safe_cast<bool>(_Data->GetValue((int)7));
 
 	std::wstring _BlueprintPath = msclr::interop::marshal_as<std::wstring>(_BlueprintPathS);
 	std::wstring _BlueprintName = msclr::interop::marshal_as<std::wstring>(_BlueprintNameS);
 
-	SMBC::Error error_data = SMBC::BPFunction::ConvertBlueprintToObj(
-		_BlueprintPath,
-		_BlueprintName,
-		_SeparationMethod,
-		_ExportTexPaths,
-		_ApplyTextures && _ExportUvs,
-		_ExportUvs,
-		_ExportNormals,
-		_MaterialsByColor && _ApplyTextures && _ExportUvs
-	);
+	SMBC::ConvertSettings::SeparationMethod = sSeparationMethod;
+	SMBC::ConvertSettings::ApplyTextures = sApplyTextures && sExportUvs;
+	SMBC::ConvertSettings::TextureList = sExportTexPaths;
+	SMBC::ConvertSettings::MatByColor = sMaterialsByColor && sApplyTextures && sExportUvs;
+	SMBC::ConvertSettings::ExportNormals = sExportNormals;
+	SMBC::ConvertSettings::ExportUvs = sExportUvs;
 
-	e->Result = static_cast<int>(error_data);
+	SMBC::ConvertError cError;
+	SMBC::BPFunction::ConvertBlueprintToObj(_BlueprintPath, _BlueprintName, cError);
+
+	System::Array^ rArray = nullptr;
+	if (cError)
+	{
+		rArray = gcnew cli::array<System::Object^>(2);
+		rArray->SetValue(true, (int)0);
+		rArray->SetValue(gcnew System::String(cError.GetString().c_str()), (int)1);
+	}
+	else
+	{
+		rArray = gcnew cli::array<System::Object^>(1);
+		rArray->SetValue(false, (int)0);
+	}
+
+	e->Result = rArray;
 }
 
 void _MainGUI::GuiUpdater_Tick(System::Object^ sender, System::EventArgs^ e)
@@ -216,13 +229,14 @@ void _MainGUI::ObjectGenerator_RunWorkerCompleted(System::Object^ sender, System
 	this->GuiUpdater->Stop();
 	this->GuiUpdater_Tick(nullptr, nullptr);
 
-	int result_code = safe_cast<int>(e->Result);
-	if (result_code > 0)
+	System::Array^ res_array = safe_cast<System::Array^>(e->Result);
+	const bool has_errors = safe_cast<bool>(res_array->GetValue((int)0));
+
+	if (has_errors)
 	{
-		SMBC::Gui::Error(
-			"Conversion Error",
-			gcnew System::String(SMBC::ConversionErrorTable[result_code].c_str())
-		);
+		System::String^ mErrorMsg = safe_cast<System::String^>(res_array->GetValue((int)1));
+
+		SMBC::Gui::Error("Conversion Error", mErrorMsg);
 	}
 	else
 	{

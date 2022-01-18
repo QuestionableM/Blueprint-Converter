@@ -5,8 +5,10 @@
 
 #include "Lib/ConvData/ConvData.h"
 
-namespace SMBC {
-	enum : int {
+namespace SMBC
+{
+	enum : int
+	{
 		Sep_Blocks =		1,
 		Sep_Joints =		2,
 		Sep_Uuid =			3,
@@ -14,17 +16,9 @@ namespace SMBC {
 		Sep_UuidAndColor =	5
 	};
 
-	namespace BPFunction {
-		SMBC::Error ConvertBlueprintToObj(
-			const std::wstring& blueprint_path,
-			const std::wstring blueprint_name,
-			const int& separation_method,
-			const bool& texture_list,
-			const bool& apply_textures,
-			const bool& export_uvs,
-			const bool& export_normals,
-			const bool& mat_by_color
-		);
+	namespace BPFunction
+	{
+		void ConvertBlueprintToObj(const std::wstring& bp_path, const std::wstring& bp_name, ConvertError& cError);
 
 		void GetPartPosAndBounds(
 			glm::vec3& pos,
