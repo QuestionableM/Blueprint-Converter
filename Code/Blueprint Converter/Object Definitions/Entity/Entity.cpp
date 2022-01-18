@@ -7,6 +7,7 @@
 
 #include "Lib/String/String.h"
 #include "Lib/OtherFunc/OtherFunc.h"
+#include "Lib/ConvData/ConvData.h"
 
 #include <glm.hpp>
 #include <gtx/transform.hpp>
@@ -33,6 +34,8 @@ namespace SMBC
 		const glm::mat4 model_matrix = this->GetTransformMatrix();
 
 		pModel->WriteToFile(file, model_matrix, mOffset, this);
+
+		ConvData::ProgressValue++;
 	}
 
 	/*const glm::mat4 Object::RotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));

@@ -111,8 +111,19 @@ namespace SMBC
 
 	}
 
+	std::size_t BlueprintData::GetAmountOfObjects() const
+	{
+		std::size_t obj_sum = 0;
+
+		for (SMBC::Entity* pEntity : this->Objects)
+			obj_sum += pEntity->GetAmountOfObjects();
+
+		return obj_sum;
+	}
+
 	nlohmann::json BlueprintData::LoadAndCheckBlueprint(const std::wstring& path, ConvertError& cError)
 	{
+		SMBC::ConvData::SetState(SMBC::State::ReadingJson);
 		nlohmann::json bpJson = Json::LoadParseJson(path);
 		if (!bpJson.is_object())
 		{
@@ -187,6 +198,9 @@ namespace SMBC
 		}
 
 		OffsetData mOffsetData;
+
+		const std::size_t object_count = this->GetAmountOfObjects();
+		SMBC::ConvData::SetState(SMBC::State::WritingObjects, object_count);
 
 		for (SMBC::Entity* pEntity : this->Objects)
 			pEntity->WriteObjectToFile(output_stream, mOffsetData);

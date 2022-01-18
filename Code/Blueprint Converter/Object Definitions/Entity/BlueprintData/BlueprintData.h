@@ -25,6 +25,7 @@ namespace SMBC
 	private:
 		void LoadObjects(const nlohmann::json& bpJson);
 		void LoadJoints(const nlohmann::json& bpJson);
+		std::size_t GetAmountOfObjects() const;
 
 		static nlohmann::json LoadAndCheckBlueprint(const std::wstring& path, ConvertError& cError);
 
