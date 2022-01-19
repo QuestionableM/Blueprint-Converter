@@ -33,6 +33,8 @@ namespace SMBC
 
 	public:
 		static BlueprintData* LoadFromFile(const std::wstring& path, ConvertError& cError);
+
+		void WriteMtlFile(const std::wstring& path) const;
 		void WriteToFile(const std::wstring& name, ConvertError& cError) const;
 	};
 }

@@ -3,6 +3,7 @@
 #include "Lib/Json/JsonFunc.h"
 #include "Lib/ConvData/ConvData.h"
 #include "Lib/File/FileFunc.h"
+#include "Lib/String/String.h"
 
 #include "Blueprint Converter/Convert Settings/ConvertSettings.h"
 #include "Blueprint Converter/Cache Manager/Model Storage/ModelStorage.h"
@@ -189,6 +190,50 @@ namespace SMBC
 		return new_bp_data;
 	}
 
+	void BlueprintData::WriteMtlFile(const std::wstring& path) const
+	{
+		if (!ConvertSettings::ApplyTextures) return;
+
+		std::unordered_map<std::string, ObjectTextureData> tData;
+
+		for (const SMBC::Entity* pEntity : this->Objects)
+		{
+			pEntity->FillTextureMap(tData);
+
+			ConvData::ProgressMax = tData.size();
+		}
+
+		std::ofstream oMtl(path);
+		if (!oMtl.is_open()) return;
+
+		for (const auto& tDatum : tData)
+		{
+			std::string output_str = "newmtl " + tDatum.first;
+			output_str.append("\nNs 324");
+			output_str.append("\nKa 1 1 1\nKd ");
+			output_str.append(tDatum.second.mColor.StringNormalized());
+			output_str.append("\nKs 0.5 0.5 0.5");
+			output_str.append("\nKe 0 0 0");
+			output_str.append("\nNi 1.45");
+			output_str.append("\nd 1");
+			output_str.append("\nillum 2");
+
+			{
+				const Texture::TextureList& tList = tDatum.second.mTextures;
+
+				if (!tList.nor.empty()) output_str.append("\nmap_Bump " + String::ToUtf8(tList.nor));
+				if (!tList.dif.empty()) output_str.append("\nmap_Kd " + String::ToUtf8(tList.dif));
+				if (!tList.asg.empty()) output_str.append("\nmap_Ks " + String::ToUtf8(tList.asg));
+			}
+
+			output_str.append("\n\n");
+
+			oMtl.write(output_str.c_str(), output_str.size());
+
+			ConvData::ProgressValue++;
+		}
+	}
+
 	void BlueprintData::WriteToFile(const std::wstring& name, ConvertError& cError) const
 	{
 		static const std::wstring OutputDirectory = L"./Converted Models";
@@ -221,9 +266,6 @@ namespace SMBC
 		}
 
 		const std::wstring model_path = model_dir + L"/" + name + L".obj";
-
-		DebugOutL("ModelPath: ", model_path);
-
 		std::ofstream output_stream(model_path);
 		if (!output_stream.is_open())
 		{
@@ -231,16 +273,18 @@ namespace SMBC
 			return;
 		}
 
-		OffsetData mOffsetData;
+		{
+			OffsetData mOffsetData;
 
-		const std::size_t object_count = this->GetAmountOfObjects();
-		SMBC::ConvData::SetState(SMBC::State::WritingObjects, object_count);
+			const std::size_t object_count = this->GetAmountOfObjects();
+			SMBC::ConvData::SetState(SMBC::State::WritingObjects, object_count);
 
-		DebugOutL("Writing ", object_count, " objects to file...");
+			for (SMBC::Entity* pEntity : this->Objects)
+				pEntity->WriteObjectToFile(output_stream, mOffsetData);
+		}
 
-		for (SMBC::Entity* pEntity : this->Objects)
-			pEntity->WriteObjectToFile(output_stream, mOffsetData);
-
-		DebugOutL("Finished loading models to file!");
+		{
+			this->WriteMtlFile(model_dir + L"/" + name + L".mtl");
+		}
 	}
 }
