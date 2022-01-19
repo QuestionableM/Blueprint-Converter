@@ -26,6 +26,7 @@
     <ClCompile Include="Code\Blueprint Converter\Cache Manager\Object Storage\ObjectStorage.cpp" />
     <ClCompile Include="Code\Blueprint Converter\Convert Settings\ConvertSettings.cpp" />
     <ClCompile Include="Code\Blueprint Converter\Object Definitions\Entity\BlueprintData\BlueprintData.cpp" />
+    <ClCompile Include="Code\Blueprint Converter\Object Definitions\Model\BlockModel.cpp" />
     <ClCompile Include="Code\Blueprint Converter\Object Definitions\Model\Model.cpp" />
     <ClCompile Include="Code\Blueprint Converter\Object Definitions\Entity\Block\Block.cpp" />
     <ClCompile Include="Code\Blueprint Converter\Object Definitions\Entity\Body\Body.cpp" />
@@ -54,6 +55,7 @@
     <ClCompile Include="Code\Object Database\Mod Data\ModData.cpp" />
     <ClCompile Include="Code\Object Database\Database Loader\DatabaseLoader.cpp" />
     <ClCompile Include="Code\Object Database\Object Data\ObjectData.cpp" />
+    <ClCompile Include="Code\Object Database\Rotations\ObjectRotations.cpp" />
     <ClCompile Include="Code\Object Database\Texture Database\TextureDatabase.cpp" />
     <ClCompile Include="Code\Lib\Uuid\Uuid.cpp" />
   </ItemGroup>
@@ -65,6 +67,7 @@
     <ClInclude Include="Code\Blueprint Converter\Cache Manager\Object Storage\ObjectStorage.h" />
     <ClInclude Include="Code\Blueprint Converter\Convert Settings\ConvertSettings.h" />
     <ClInclude Include="Code\Blueprint Converter\Object Definitions\Entity\BlueprintData\BlueprintData.h" />
+    <ClInclude Include="Code\Blueprint Converter\Object Definitions\Model\BlockModel.h" />
     <ClInclude Include="Code\Blueprint Converter\Object Definitions\Model\Model.h" />
     <ClInclude Include="Code\Blueprint Converter\Object Definitions\Entity\Block\Block.h" />
     <ClInclude Include="Code\Blueprint Converter\Object Definitions\Entity\Body\Body.h" />
@@ -104,6 +107,7 @@
     <ClInclude Include="Code\Object Database\Mod Data\ModData.h" />
     <ClInclude Include="Code\Object Database\Database Loader\DatabaseLoader.h" />
     <ClInclude Include="Code\Object Database\Object Data\ObjectData.h" />
+    <ClInclude Include="Code\Object Database\Rotations\ObjectRotations.hpp" />
     <ClInclude Include="Code\Object Database\Texture Database\TextureDatabase.h" />
     <ClInclude Include="Code\Lib\Uuid\Uuid.h" />
   </ItemGroup>

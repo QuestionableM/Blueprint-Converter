@@ -1,6 +1,9 @@
 #include "Part.h"
 
 #include "Blueprint Converter/Object Definitions/Model/Model.h"
+#include "Object Database/Rotations/ObjectRotations.hpp"
+
+#include <gtx/transform.hpp>
 
 namespace SMBC
 {
@@ -46,5 +49,17 @@ namespace SMBC
 				tex_map.insert(std::make_pair(mtl_name, oTexData));
 			}
 		}
+	}
+
+	glm::mat4 Part::GetTransformMatrix() const
+	{
+		const glm::mat4 axis_rotation = Rotations::GetRotationMatrix(this->mAxis);
+
+		glm::mat4 model_matrix(1.0f);
+		model_matrix *= glm::translate(this->mPosition);
+		model_matrix *= axis_rotation;
+		model_matrix *= glm::translate(pParent->Bounds / 2.0f);
+
+		return model_matrix;
 	}
 }

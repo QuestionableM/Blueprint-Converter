@@ -8,6 +8,7 @@
 namespace SMBC
 {
 	class ConvertError;
+	class Body;
 
 	class BlueprintData
 	{
@@ -23,6 +24,7 @@ namespace SMBC
 		~BlueprintData();
 
 	private:
+		static void LoadChild(const nlohmann::json& bpChild, Body* pBody, const std::size_t& obj_idx);
 		void LoadObjects(const nlohmann::json& bpJson);
 		void LoadJoints(const nlohmann::json& bpJson);
 		std::size_t GetAmountOfObjects() const;

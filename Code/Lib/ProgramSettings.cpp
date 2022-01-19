@@ -13,8 +13,6 @@ namespace fs = std::filesystem;
 
 namespace SMBC
 {
-	std::wstring Settings::ConfigPath = L"./Resources/Config.json";
-
 	std::vector<std::wstring> Settings::BlueprintFolders = {};
 	std::vector<std::wstring> Settings::ModFolders = {};
 	std::vector<std::wstring> Settings::SMDirDatabase = {};
@@ -131,7 +129,7 @@ namespace SMBC
 
 	void Settings::LoadSettingsFile()
 	{
-		nlohmann::json jConfigFile = Json::LoadParseJson(Settings::ConfigPath);
+		nlohmann::json jConfigFile = Json::LoadParseJson(Settings::ConfigPath.data());
 		if (!jConfigFile.is_object())
 			return;
 
@@ -147,10 +145,10 @@ namespace SMBC
 		const bool mod_list,
 		const bool open_in_steam
 	) {
-		nlohmann::json _JsonOutput = Json::LoadParseJson(Settings::ConfigPath);
+		nlohmann::json _JsonOutput = Json::LoadParseJson(Settings::ConfigPath.data());
 
 		File::SafeCreateDir(L"./Resources");
-		std::ofstream _ConfigJson(Settings::ConfigPath);
+		std::ofstream _ConfigJson(Settings::ConfigPath.data());
 		if (!_ConfigJson.is_open()) return;
 
 		nlohmann::json jUserSettings = {};

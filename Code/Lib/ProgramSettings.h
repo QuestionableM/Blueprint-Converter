@@ -8,7 +8,9 @@
 namespace SMBC {
 	class Settings {
 	public:
-		static std::wstring ConfigPath;
+		constexpr static const std::wstring_view ConfigPath = L"./Resources/Config.json";
+		constexpr static const std::wstring_view RotSetPath = L"./Resources/RotationSettings.json";
+
 		static std::vector<std::wstring> BlueprintFolders;
 		static std::vector<std::wstring> ModFolders;
 		static std::vector<std::wstring> SMDirDatabase;

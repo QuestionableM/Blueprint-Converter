@@ -22,5 +22,7 @@ namespace SMBC
 		EntityType Type() const override;
 		std::string GetMtlName(const std::wstring& mat_name, const std::size_t& mIdx) const override;
 		void FillTextureMap(std::unordered_map<std::string, ObjectTextureData>& tex_map) const override;
+
+		glm::mat4 GetTransformMatrix() const override;
 	};
 }

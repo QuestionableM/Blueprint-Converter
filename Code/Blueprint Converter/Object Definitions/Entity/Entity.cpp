@@ -16,12 +16,7 @@ namespace SMBC
 {
 	glm::mat4 Entity::GetTransformMatrix() const
 	{
-		glm::mat4 transform(1.0f);
-
-		transform *= glm::translate(this->mPosition);
-		transform *= glm::scale(this->mScale);
-
-		return transform;
+		return glm::mat4(1.0f);
 	}
 
 	std::size_t Entity::GetAmountOfObjects() const

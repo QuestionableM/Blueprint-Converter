@@ -1,5 +1,11 @@
 #include "Block.h"
 
+#include "Object Database/Rotations/ObjectRotations.hpp"
+#include "Blueprint Converter/Object Definitions/Model/BlockModel.h"
+#include "Lib/ConvData/ConvData.h"
+
+#include <gtx/transform.hpp>
+
 namespace SMBC
 {
 	Block::Block(
@@ -42,5 +48,31 @@ namespace SMBC
 		oTexData.mColor = this->mColor;
 
 		tex_map.insert(std::make_pair(mtl_name, oTexData));
+	}
+
+
+
+	glm::mat4 Block::GetTransformMatrix() const
+	{
+		const glm::mat4 block_matrix = Rotations::GetRotationMatrix(this->mAxis);
+
+		glm::mat4 transform_matrix(1.0f);
+		transform_matrix *= glm::translate(this->mPosition);
+		transform_matrix *= block_matrix;
+		transform_matrix *= glm::translate(this->mScale / 2.0f);
+
+		return transform_matrix;
+	}
+
+	void Block::WriteObjectToFile(std::ofstream& file, OffsetData& mOffset) const
+	{
+		const glm::mat4 block_matrix = this->GetTransformMatrix();
+
+		Model new_block(L"BLOCK_INTERNAL");
+		BlockModel::CreateBlockModel(new_block, this->mPosition, this->mScale / 2.0f, pParent->Tiling);
+
+		new_block.WriteToFile(file, block_matrix, mOffset, this);
+
+		ConvData::ProgressValue++;
 	}
 }

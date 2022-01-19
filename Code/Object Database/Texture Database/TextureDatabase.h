@@ -29,6 +29,8 @@ namespace SMBC {
 			Texture(const SMBC::Texture::TextureType& tex_type);
 			Texture() = default;
 
+			std::wstring PickString(const std::size_t& mIdx, const std::wstring& mMatName) const;
+
 			void AddTexture(const std::wstring& name, const SMBC::Texture::TextureList& tex_list);
 			bool GetTextureByName(const std::wstring& name, SMBC::Texture::TextureList& tex_list) const;
 		};

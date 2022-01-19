@@ -29,6 +29,11 @@ namespace SMBC
 		this->TexType = tex_type;
 	}
 
+	std::wstring Tex::PickString(const std::size_t& mIdx, const std::wstring& mMatName) const
+	{
+		return (this->TexType == TextureType::SubMeshList ? std::to_wstring(mIdx) : mMatName);
+	}
+
 	void Tex::AddTexture(const std::wstring& name, const SMBC::Texture::TextureList& tex_list)
 	{
 		this->TexList.insert(std::make_pair(name, tex_list));

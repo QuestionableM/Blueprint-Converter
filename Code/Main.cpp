@@ -4,6 +4,7 @@
 #include "Gui/MainGUI.h"
 #include "Lib/ProgramSettings.h"
 
+#include "Object Database/Rotations/ObjectRotations.hpp"
 #include "DebugCon.h"
 
 namespace SMBC
@@ -19,6 +20,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	CoUninitialize();
 
 	SMBC::Settings::LoadSettingsFile();
+	SMBC::Rotations::InitializeRotations();
 
 	SMBC::Application::EnableVisualStyles();
 	SMBC::Application::SetCompatibleTextRenderingDefault(false);
