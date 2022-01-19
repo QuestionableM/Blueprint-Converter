@@ -34,7 +34,7 @@ namespace SMBC
 		for (std::size_t a = 0; a < pModel->subMeshData.size(); a++)
 		{
 			const SubMeshData* pSubMesh = pModel->subMeshData[a];
-			const std::wstring tex_name = (pParent->TextureList.TexType == Texture::TextureType::SubMeshList ? std::to_wstring(a) : pSubMesh->MaterialName);
+			const std::wstring tex_name = pParent->TextureList.PickString(a, pSubMesh->MaterialName);
 
 			ObjectTextureData oTexData;
 			if (pParent->TextureList.GetTextureByName(tex_name, oTexData.mTextures))

@@ -34,7 +34,7 @@ namespace SMBC
 	public:
 		static BlueprintData* LoadFromFile(const std::wstring& path, ConvertError& cError);
 
-		void WriteMtlFile(const std::wstring& path) const;
+		void WriteMtlFile(const std::wstring& path, const std::unordered_map<std::string, ObjectTextureData>& tex_data) const;
 		void WriteToFile(const std::wstring& name, ConvertError& cError) const;
 	};
 }

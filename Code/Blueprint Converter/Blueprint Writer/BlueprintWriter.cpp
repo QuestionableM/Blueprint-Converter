@@ -20,61 +20,7 @@ namespace fs = std::filesystem;*/
 
 namespace SMBC
 {
-	/*bool ObjectCollection::IsEmpty()
-	{
-		return (ObjectList.size() == 0);
-	}
-
-	ObjectCollection::~ObjectCollection()
-	{
-		for (SMBC::Entity*& cur_object : ObjectList)
-			delete cur_object;
-	}
-
-	bool ConvertedModel::HasStuffToConvert()
-	{
-		std::size_t _StuffCounter = 0;
-		for (const SMBC::ObjectCollection* _CurCol : this->ObjCollection)
-		{
-			_StuffCounter += _CurCol->ObjectList.size();
-
-			if (_StuffCounter > 0) return true;
-		}
-
-		return false;
-	}
-
-	ConvertedModel::~ConvertedModel()
-	{
-		DebugOutL("Removing ", ObjCollection.size(), " collections from memory");
-		for (SMBC::ObjectCollection*& obj : ObjCollection)
-			delete obj;
-	}
-
-	std::size_t ConvertedModel::CountTotalObjectAmount()
-	{
-		std::size_t obj_amount = 0;
-
-		for (const ObjectCollection* cur_col : this->ObjCollection)
-			obj_amount += cur_col->ObjectList.size();
-
-		return obj_amount;
-	}
-
-	void ConvertedModel::LoadCollections(const std::size_t& total_obj_count)
-	{
-		ConvData::SetState(State::ReadingObjects, total_obj_count);
-		for (ObjectCollection*& cur_col : this->ObjCollection)
-			for (SMBC::Entity*& object : cur_col->ObjectList)
-			{
-				ObjectStorage::LoadObject(object);
-
-				object->CalcCenterPoint(offsetData);
-
-				ConvData::ProgressValue++;
-			}
-	}
-
+	/*
 	void ConvertedModel::OpenWriter(const std::wstring& path, std::ofstream& out)
 	{
 		if (ConvertSettings::TextureList || ConvertSettings::ApplyTextures)

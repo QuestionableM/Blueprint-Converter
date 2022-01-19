@@ -190,23 +190,14 @@ namespace SMBC
 		return new_bp_data;
 	}
 
-	void BlueprintData::WriteMtlFile(const std::wstring& path) const
+	void BlueprintData::WriteMtlFile(const std::wstring& path, const std::unordered_map<std::string, ObjectTextureData>& tex_data) const
 	{
 		if (!ConvertSettings::ApplyTextures) return;
-
-		std::unordered_map<std::string, ObjectTextureData> tData;
-
-		for (const SMBC::Entity* pEntity : this->Objects)
-		{
-			pEntity->FillTextureMap(tData);
-
-			ConvData::ProgressMax = tData.size();
-		}
 
 		std::ofstream oMtl(path);
 		if (!oMtl.is_open()) return;
 
-		for (const auto& tDatum : tData)
+		for (const auto& tDatum : tex_data)
 		{
 			std::string output_str = "newmtl " + tDatum.first;
 			output_str.append("\nNs 324");
@@ -283,8 +274,18 @@ namespace SMBC
 				pEntity->WriteObjectToFile(output_stream, mOffsetData);
 		}
 
+		if (ConvertSettings::ApplyTextures || ConvertSettings::TextureList)
 		{
-			this->WriteMtlFile(model_dir + L"/" + name + L".mtl");
+			std::unordered_map<std::string, ObjectTextureData> tData;
+
+			for (const SMBC::Entity* pEntity : this->Objects)
+			{
+				pEntity->FillTextureMap(tData);
+
+				ConvData::ProgressMax = tData.size();
+			}
+
+			this->WriteMtlFile(model_dir + L"/" + name + L".mtl", tData);
 		}
 	}
 }
