@@ -82,5 +82,6 @@
     <ClInclude Include="Code\Blueprint Converter\Object Definitions\Entity\BlueprintData\BlueprintData.h" />
     <ClInclude Include="Code\Object Database\Rotations\ObjectRotations.hpp" />
     <ClInclude Include="Code\Blueprint Converter\Object Definitions\Model\BlockModel.h" />
+    <ClInclude Include="Code\BuildConfig.hpp" />
   </ItemGroup>
 </Project>

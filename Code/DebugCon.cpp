@@ -1,5 +1,6 @@
-#if _DEBUG
 #include "DebugCon.h"
+
+#ifdef SMBC_DEBUG_CONSOLE_ENABLED
 
 namespace SMBC
 {

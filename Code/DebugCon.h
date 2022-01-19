@@ -1,8 +1,10 @@
 #pragma once
 
-#include <Windows.h>
+#include "BuildConfig.hpp"
 
-#if _DEBUG
+#ifdef SMBC_DEBUG_CONSOLE_ENABLED
+
+#include <Windows.h>
 #include <string>
 
 namespace SMBC
@@ -107,9 +109,9 @@ namespace SMBC
 #define CreateDebugConsole() SMBC::Console::Create(L"SMBC Debug Console")
 }
 #else
-#define DebugOut(...) ((void)0)
-#define DebugOutL(...) ((void)0)
-#define DebugWarningL(...) ((void)0)
-#define DebugErrorL(...) ((void)0)
-#define CreateDebugConsole() ((void)0)
+#define DebugOut(...) ((void*)0)
+#define DebugOutL(...) ((void*)0)
+#define DebugWarningL(...) ((void*)0)
+#define DebugErrorL(...) ((void*)0)
+#define CreateDebugConsole() ((void*)0)
 #endif

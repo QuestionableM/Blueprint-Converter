@@ -69,6 +69,8 @@ namespace SMBC
 
 	void BlockModel::FillBlockUvs(Model& pModel, const glm::vec3& bounds, const glm::vec3& pos, const int& tiling)
 	{
+		if (!ConvertSettings::ExportUvs) return;
+
 		float f_tiling = (float)tiling;
 
 		for (std::size_t a = 0; a < pModel.uvs.size(); a++)

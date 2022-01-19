@@ -5,6 +5,7 @@
 #include "Blueprint Converter/Object Definitions/Entity/Entity.h"
 
 #include "Lib/String/String.h"
+#include "DebugCon.h"
 
 #include <fstream>
 

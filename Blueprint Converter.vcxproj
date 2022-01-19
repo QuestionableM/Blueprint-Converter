@@ -75,6 +75,7 @@
     <ClInclude Include="Code\Blueprint Converter\Object Definitions\Entity\Entity.h" />
     <ClInclude Include="Code\Blueprint Converter\Object Definitions\Entity\Part\Part.h" />
     <ClInclude Include="Code\Blueprint Converter\OffsetData\OffsetData.h" />
+    <ClInclude Include="Code\BuildConfig.hpp" />
     <ClInclude Include="Code\DebugCon.h" />
     <ClInclude Include="Code\Gui\About.h">
       <FileType>CppForm</FileType>

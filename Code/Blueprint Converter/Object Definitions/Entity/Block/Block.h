@@ -10,6 +10,7 @@ namespace SMBC
 	{
 		const SMBC::BlockData* pParent;
 		const SMBC::Body* pBody;
+		glm::vec3 mScale;
 
 	public:
 		Block(

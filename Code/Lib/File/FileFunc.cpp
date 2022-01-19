@@ -1,6 +1,7 @@
 #include "FileFunc.h"
 #include <filesystem>
 
+#include <Windows.h>
 #include "DebugCon.h"
 
 namespace fs = std::filesystem;

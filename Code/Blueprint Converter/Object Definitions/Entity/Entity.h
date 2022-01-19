@@ -32,9 +32,6 @@ namespace SMBC
 	{
 	protected:
 		glm::vec3 mPosition = glm::vec3(0.0f);
-
-		//Used as Bounds for Joints and Parts, but as Scale for Blocks
-		glm::vec3 mScale = glm::vec3(1.0f);
 		AxisData mAxis;
 
 		SMBC::Color mColor;
