@@ -101,7 +101,7 @@ namespace SMBC
 		Texture::TextureList new_entry;
 		Mod::LoadTextureList(sTexList, new_entry);
 
-		tex.AddTexture(idx, new_entry);
+		tex.AddEntry(idx, new_entry);
 	}
 
 	bool Mod::TryLoadSubMeshList(const nlohmann::json& pLodItem, Texture::Texture& tex)

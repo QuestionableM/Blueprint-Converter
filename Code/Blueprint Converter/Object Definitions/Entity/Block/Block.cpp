@@ -2,7 +2,9 @@
 
 #include "Object Database/Rotations/ObjectRotations.hpp"
 #include "Blueprint Converter/Object Definitions/Model/BlockModel.h"
+
 #include "Lib/ConvData/ConvData.h"
+#include "Lib/String/String.h"
 
 #include <gtx/transform.hpp>
 
@@ -48,6 +50,19 @@ namespace SMBC
 		oTexData.mColor = this->mColor;
 
 		tex_map.insert(std::make_pair(mtl_name, oTexData));
+	}
+
+	void Block::FillTextureJson(nlohmann::json& mJson) const
+	{
+		const std::string mNameStr = String::ToUtf8(this->GetName());
+
+		if (mJson.find(mNameStr) == mJson.end())
+			mJson[mNameStr] = pParent->TextureList.ToJson();
+	}
+
+	std::wstring Block::GetName() const
+	{
+		return pParent->Name + L" (" + pParent->ModPtr->Name + L": " + pParent->Uuid.ToWstring() + L")";
 	}
 
 

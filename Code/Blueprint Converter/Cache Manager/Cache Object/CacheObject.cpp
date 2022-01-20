@@ -118,10 +118,10 @@ namespace SMBC
 			switch (c_Tex.TexType)
 			{
 			case Texture::TextureType::SubMeshList:
-				_Success = c_Tex.GetTextureByName(std::to_wstring(smData->SubMeshIndex), _TList);
+				_Success = c_Tex.GetEntry(std::to_wstring(smData->SubMeshIndex), _TList);
 				break;
 			case Texture::TextureType::SubMeshMap:
-				_Success = c_Tex.GetTextureByName(smData->MaterialName, _TList);
+				_Success = c_Tex.GetEntry(smData->MaterialName, _TList);
 				break;
 			}
 

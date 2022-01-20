@@ -2,9 +2,18 @@
 #include <string>
 #include <unordered_map>
 
-namespace SMBC {
-	namespace Texture {
-		enum TextureType { None = 0, SubMeshList = 1, SubMeshMap = 2 };
+#include <nlohmann/json.hpp>
+
+namespace SMBC
+{
+	namespace Texture
+	{
+		enum TextureType
+		{
+			None = 0,
+			SubMeshList = 1,
+			SubMeshMap = 2
+		};
 
 		struct TextureList
 		{
@@ -18,6 +27,7 @@ namespace SMBC {
 			bool HasTextures() const;
 
 			std::wstring& GetStringRef(const int& idx);
+			nlohmann::json ToJson() const;
 		};
 
 		class Texture
@@ -30,9 +40,10 @@ namespace SMBC {
 			Texture() = default;
 
 			std::wstring PickString(const std::size_t& mIdx, const std::wstring& mMatName) const;
+			nlohmann::json ToJson() const;
 
-			void AddTexture(const std::wstring& name, const SMBC::Texture::TextureList& tex_list);
-			bool GetTextureByName(const std::wstring& name, SMBC::Texture::TextureList& tex_list) const;
+			void AddEntry(const std::wstring& name, const SMBC::Texture::TextureList& tex_list);
+			bool GetEntry(const std::wstring& name, SMBC::Texture::TextureList& tex_list) const;
 		};
 	}
 }

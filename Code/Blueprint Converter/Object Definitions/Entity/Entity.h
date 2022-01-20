@@ -48,6 +48,8 @@ namespace SMBC
 		virtual EntityType Type() const = 0;
 		virtual std::string GetMtlName(const std::wstring& mat_name, const std::size_t& mIdx) const = 0;
 		virtual void FillTextureMap(std::unordered_map<std::string, ObjectTextureData>& tex_map) const = 0;
+		virtual std::wstring GetName() const = 0;
+		virtual void FillTextureJson(nlohmann::json& mJson) const = 0;
 
 		virtual glm::mat4 GetTransformMatrix() const;
 		virtual std::size_t GetAmountOfObjects() const;

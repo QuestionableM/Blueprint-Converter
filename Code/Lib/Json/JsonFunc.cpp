@@ -1,8 +1,9 @@
 #include "JsonFunc.h"
 
 #include <sstream>
-#include "Lib/String/String.h"
+#include <iomanip>
 
+#include "Lib/String/String.h"
 #include "DebugCon.h"
 
 namespace SMBC
@@ -72,6 +73,14 @@ namespace SMBC
 	#endif
 
 		return nlohmann::json();
+	}
+
+	void Json::WriteToFile(const std::wstring& path, const nlohmann::json& mJson)
+	{
+		std::ofstream mOutput(path);
+		if (!mOutput.is_open()) return;
+
+		mOutput << std::setw(1) << std::setfill('\t') << mJson;
 	}
 
 	const nlohmann::json& Json::Get(const nlohmann::json& json, const std::string& key)

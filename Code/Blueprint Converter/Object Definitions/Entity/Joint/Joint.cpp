@@ -2,6 +2,7 @@
 
 #include "Blueprint Converter/Object Definitions/Model/Model.h"
 #include "Object Database/Rotations/ObjectRotations.hpp"
+#include "Lib/String/String.h"
 
 #include <gtx/transform.hpp>
 
@@ -38,7 +39,7 @@ namespace SMBC
 			const std::wstring tex_name = pParent->TextureList.PickString(a, pSubMesh->MaterialName);
 
 			ObjectTextureData oTexData;
-			if (pParent->TextureList.GetTextureByName(tex_name, oTexData.mTextures))
+			if (pParent->TextureList.GetEntry(tex_name, oTexData.mTextures))
 			{
 				oTexData.mColor = this->mColor;
 
@@ -50,6 +51,19 @@ namespace SMBC
 				tex_map.insert(std::make_pair(mtl_name, oTexData));
 			}
 		}
+	}
+
+	void Joint::FillTextureJson(nlohmann::json& mJson) const
+	{
+		const std::string mNameStr = String::ToUtf8(this->GetName());
+
+		if (mJson.find(mNameStr) == mJson.end())
+			mJson[mNameStr] = pParent->TextureList.ToJson();
+	}
+
+	std::wstring Joint::GetName() const
+	{
+		return pParent->Name + L" (" + pParent->ModPtr->Name + L": " + pParent->Uuid.ToWstring() + L")";
 	}
 
 

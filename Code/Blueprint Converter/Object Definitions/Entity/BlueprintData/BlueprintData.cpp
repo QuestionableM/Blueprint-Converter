@@ -190,14 +190,22 @@ namespace SMBC
 		return new_bp_data;
 	}
 
-	void BlueprintData::WriteMtlFile(const std::wstring& path, const std::unordered_map<std::string, ObjectTextureData>& tex_data) const
+	void BlueprintData::WriteMtlFile(const std::wstring& path) const
 	{
 		if (!ConvertSettings::ApplyTextures) return;
+
+		std::unordered_map<std::string, ObjectTextureData> tData;
+		for (const SMBC::Entity* pEntity : this->Objects)
+		{
+			pEntity->FillTextureMap(tData);
+
+			ConvData::ProgressMax = tData.size();
+		}
 
 		std::ofstream oMtl(path);
 		if (!oMtl.is_open()) return;
 
-		for (const auto& tDatum : tex_data)
+		for (const auto& tDatum : tData)
 		{
 			std::string output_str = "newmtl " + tDatum.first;
 			output_str.append("\nNs 324");
@@ -213,8 +221,8 @@ namespace SMBC
 				const Texture::TextureList& tList = tDatum.second.mTextures;
 
 				if (!tList.nor.empty()) output_str.append("\nmap_Bump " + String::ToUtf8(tList.nor));
-				if (!tList.dif.empty()) output_str.append("\nmap_Kd " + String::ToUtf8(tList.dif));
-				if (!tList.asg.empty()) output_str.append("\nmap_Ks " + String::ToUtf8(tList.asg));
+				if (!tList.dif.empty()) output_str.append("\nmap_Kd "   + String::ToUtf8(tList.dif));
+				if (!tList.asg.empty()) output_str.append("\nmap_Ks "   + String::ToUtf8(tList.asg));
 			}
 
 			output_str.append("\n\n");
@@ -225,7 +233,18 @@ namespace SMBC
 		}
 	}
 
-	void BlueprintData::WriteToFile(const std::wstring& name, ConvertError& cError) const
+	void BlueprintData::WriteTexPaths(const std::wstring& path) const
+	{
+		if (!ConvertSettings::TextureList) return;
+
+		nlohmann::json tList = nlohmann::json::object();
+		for (const SMBC::Entity* pEntity : this->Objects)
+			pEntity->FillTextureJson(tList);
+
+		Json::WriteToFile(path, tList);
+	}
+
+	std::wstring BlueprintData::PrepareForWrite(const std::wstring& name, ConvertError& cError) const
 	{
 		static const std::wstring OutputDirectory = L"./Converted Models";
 
@@ -234,7 +253,7 @@ namespace SMBC
 			cError = L"Couldn't create the main directory!";
 			return;
 		}
-		
+
 		const std::wstring model_dir = OutputDirectory + L"/" + name;
 
 		{
@@ -244,48 +263,47 @@ namespace SMBC
 			if (ec)
 			{
 				cError = L"Blueprint name is invalid!";
-				return;
+				return L"";
 			}
 			else
 			{
 				if (!File::SafeCreateDir(model_dir))
 				{
 					cError = L"Couldn't create a blueprint output directory!";
-					return;
+					return L"";
 				}
 			}
 		}
 
-		const std::wstring model_path = model_dir + L"/" + name + L".obj";
-		std::ofstream output_stream(model_path);
+		return model_dir;
+	}
+
+	void BlueprintData::WriteObjects(std::ofstream& mOutput) const
+	{
+		OffsetData mOffsetData;
+
+		const std::size_t object_count = this->GetAmountOfObjects();
+		SMBC::ConvData::SetState(SMBC::State::WritingObjects, object_count);
+
+		for (SMBC::Entity* pEntity : this->Objects)
+			pEntity->WriteObjectToFile(mOutput, mOffsetData);
+	}
+
+	void BlueprintData::WriteToFile(const std::wstring& name, ConvertError& cError) const
+	{
+		const std::wstring model_dir = this->PrepareForWrite(name, cError);
+		if (cError) return;
+
+		std::ofstream output_stream(model_dir + L"/" + name + L".obj");
 		if (!output_stream.is_open())
 		{
 			cError = L"Couldn't write the specified blueprint to a file!";
 			return;
 		}
 
-		{
-			OffsetData mOffsetData;
+		this->WriteObjects(output_stream);
 
-			const std::size_t object_count = this->GetAmountOfObjects();
-			SMBC::ConvData::SetState(SMBC::State::WritingObjects, object_count);
-
-			for (SMBC::Entity* pEntity : this->Objects)
-				pEntity->WriteObjectToFile(output_stream, mOffsetData);
-		}
-
-		if (ConvertSettings::ApplyTextures || ConvertSettings::TextureList)
-		{
-			std::unordered_map<std::string, ObjectTextureData> tData;
-
-			for (const SMBC::Entity* pEntity : this->Objects)
-			{
-				pEntity->FillTextureMap(tData);
-
-				ConvData::ProgressMax = tData.size();
-			}
-
-			this->WriteMtlFile(model_dir + L"/" + name + L".mtl", tData);
-		}
+		this->WriteMtlFile (model_dir + L"/" + name + L".mtl");
+		this->WriteTexPaths(model_dir + L"/UsedTextures.json");
 	}
 }

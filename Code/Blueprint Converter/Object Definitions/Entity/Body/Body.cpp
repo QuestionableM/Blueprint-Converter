@@ -30,6 +30,17 @@ namespace SMBC
 			pEntity->FillTextureMap(tex_map);
 	}
 
+	void Body::FillTextureJson(nlohmann::json& mJson) const
+	{
+		for (Entity* pEntity : mObjects)
+			pEntity->FillTextureJson(mJson);
+	}
+
+	std::wstring Body::GetName() const
+	{
+		return L"Body_" + std::to_wstring(this->mIndex);
+	}
+
 	std::size_t Body::GetAmountOfObjects() const
 	{
 		std::size_t final_sum = 0;
