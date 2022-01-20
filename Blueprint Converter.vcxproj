@@ -21,9 +21,7 @@
   <ItemGroup>
     <ClCompile Include="Code\Blueprint Converter\Blueprint Writer\BlueprintWriter.cpp" />
     <ClCompile Include="Code\Blueprint Converter\BlueprintConverter.cpp" />
-    <ClCompile Include="Code\Blueprint Converter\Cache Manager\Cache Object\CacheObject.cpp" />
-    <ClCompile Include="Code\Blueprint Converter\Cache Manager\Model Storage\ModelStorage.cpp" />
-    <ClCompile Include="Code\Blueprint Converter\Cache Manager\Object Storage\ObjectStorage.cpp" />
+    <ClCompile Include="Code\Blueprint Converter\Model Storage\ModelStorage.cpp" />
     <ClCompile Include="Code\Blueprint Converter\Convert Settings\ConvertSettings.cpp" />
     <ClCompile Include="Code\Blueprint Converter\Object Definitions\Entity\BlueprintData\BlueprintData.cpp" />
     <ClCompile Include="Code\Blueprint Converter\Object Definitions\Model\BlockModel.cpp" />
@@ -62,9 +60,7 @@
   <ItemGroup>
     <ClInclude Include="Code\Blueprint Converter\Blueprint Writer\BlueprintWriter.h" />
     <ClInclude Include="Code\Blueprint Converter\BlueprintConverter.h" />
-    <ClInclude Include="Code\Blueprint Converter\Cache Manager\Cache Object\CacheObject.h" />
-    <ClInclude Include="Code\Blueprint Converter\Cache Manager\Model Storage\ModelStorage.h" />
-    <ClInclude Include="Code\Blueprint Converter\Cache Manager\Object Storage\ObjectStorage.h" />
+    <ClInclude Include="Code\Blueprint Converter\Model Storage\ModelStorage.h" />
     <ClInclude Include="Code\Blueprint Converter\Convert Settings\ConvertSettings.h" />
     <ClInclude Include="Code\Blueprint Converter\Object Definitions\Entity\BlueprintData\BlueprintData.h" />
     <ClInclude Include="Code\Blueprint Converter\Object Definitions\Model\BlockModel.h" />

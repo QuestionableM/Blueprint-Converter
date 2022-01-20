@@ -25,12 +25,10 @@
     <ClCompile Include="Code\Lib\ConvData\ConvData.cpp" />
     <ClCompile Include="Code\Object Database\Object Data\ObjectData.cpp" />
     <ClCompile Include="Code\Lib\Uuid\Uuid.cpp" />
-    <ClCompile Include="Code\Blueprint Converter\Cache Manager\Cache Object\CacheObject.cpp" />
     <ClCompile Include="Code\Blueprint Converter\Convert Settings\ConvertSettings.cpp" />
     <ClCompile Include="Code\Blueprint Converter\Object Definitions\Entity\Entity.cpp" />
     <ClCompile Include="Code\Blueprint Converter\Object Definitions\Model\Model.cpp" />
-    <ClCompile Include="Code\Blueprint Converter\Cache Manager\Model Storage\ModelStorage.cpp" />
-    <ClCompile Include="Code\Blueprint Converter\Cache Manager\Object Storage\ObjectStorage.cpp" />
+    <ClCompile Include="Code\Blueprint Converter\Model Storage\ModelStorage.cpp" />
     <ClCompile Include="Code\Lib\Color\Color.cpp" />
     <ClCompile Include="Code\Blueprint Converter\Object Definitions\Entity\Block\Block.cpp" />
     <ClCompile Include="Code\Blueprint Converter\Object Definitions\Entity\Body\Body.cpp" />
@@ -67,12 +65,10 @@
     <ClInclude Include="Code\Lib\ConvData\ConvData.h" />
     <ClInclude Include="Code\Object Database\Object Data\ObjectData.h" />
     <ClInclude Include="Code\Lib\Uuid\Uuid.h" />
-    <ClInclude Include="Code\Blueprint Converter\Cache Manager\Cache Object\CacheObject.h" />
     <ClInclude Include="Code\Blueprint Converter\Convert Settings\ConvertSettings.h" />
     <ClInclude Include="Code\Blueprint Converter\Object Definitions\Entity\Entity.h" />
     <ClInclude Include="Code\Blueprint Converter\Object Definitions\Model\Model.h" />
-    <ClInclude Include="Code\Blueprint Converter\Cache Manager\Model Storage\ModelStorage.h" />
-    <ClInclude Include="Code\Blueprint Converter\Cache Manager\Object Storage\ObjectStorage.h" />
+    <ClInclude Include="Code\Blueprint Converter\Model Storage\ModelStorage.h" />
     <ClInclude Include="Code\Lib\Color\Color.h" />
     <ClInclude Include="Code\Blueprint Converter\Object Definitions\Entity\Block\Block.h" />
     <ClInclude Include="Code\Blueprint Converter\Object Definitions\Entity\Body\Body.h" />

@@ -6,7 +6,7 @@
 #include "Lib/String/String.h"
 
 #include "Blueprint Converter/Convert Settings/ConvertSettings.h"
-#include "Blueprint Converter/Cache Manager/Model Storage/ModelStorage.h"
+#include "Blueprint Converter/Model Storage/ModelStorage.h"
 
 #include "Blueprint Converter/Object Definitions/Entity/Joint/Joint.h"
 #include "Blueprint Converter/Object Definitions/Entity/Part/Part.h"
@@ -251,7 +251,7 @@ namespace SMBC
 		if (!File::SafeCreateDir(OutputDirectory))
 		{
 			cError = L"Couldn't create the main directory!";
-			return;
+			return L"";
 		}
 
 		const std::wstring model_dir = OutputDirectory + L"/" + name;
