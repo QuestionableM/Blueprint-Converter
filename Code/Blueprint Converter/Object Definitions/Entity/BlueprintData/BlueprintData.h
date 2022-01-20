@@ -24,8 +24,12 @@ namespace SMBC
 		~BlueprintData();
 
 	private:
+		static glm::vec3 JsonToVec(const nlohmann::json& jObj);
+
 		static void LoadChild(const nlohmann::json& bpChild, Body* pBody, const std::size_t& obj_idx);
 		void LoadObjects(const nlohmann::json& bpJson);
+
+		static void LoadJoint(const nlohmann::json& bpJoint, Body* pBody);
 		void LoadJoints(const nlohmann::json& bpJson);
 		std::size_t GetAmountOfObjects() const;
 

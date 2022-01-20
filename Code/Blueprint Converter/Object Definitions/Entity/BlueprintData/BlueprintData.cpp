@@ -27,52 +27,62 @@ namespace SMBC
 			delete pEntity;
 	}
 
+	glm::vec3 BlueprintData::JsonToVec(const nlohmann::json& jObj)
+	{
+		if (jObj.is_object())
+		{
+			const auto& pos_x = Json::Get(jObj, "x");
+			const auto& pos_y = Json::Get(jObj, "y");
+			const auto& pos_z = Json::Get(jObj, "z");
+
+			if (pos_x.is_number() && pos_y.is_number() && pos_z.is_number())
+				return glm::vec3(pos_x.get<float>(), pos_y.get<float>(), pos_z.get<float>());
+		}
+
+		return glm::vec3(0.0f);
+	}
+
 	void BlueprintData::LoadChild(const nlohmann::json& bpChild, Body* pBody, const std::size_t& obj_idx)
 	{
 		if (!bpChild.is_object()) return;
 
-		const auto& _ShapeId = Json::Get(bpChild, "shapeId");
-		const auto& _Pos = Json::Get(bpChild, "pos");
-		const auto& _XAxis = Json::Get(bpChild, "xaxis");
-		const auto& _ZAxis = Json::Get(bpChild, "zaxis");
-		const auto& _Bounds = Json::Get(bpChild, "bounds");
-		const auto& _Color = Json::Get(bpChild, "color");
+		const auto& mUuid = Json::Get(bpChild, "shapeId");
+		const auto& mColor = Json::Get(bpChild, "color");
+		const auto& xAxis = Json::Get(bpChild, "xaxis");
+		const auto& zAxis = Json::Get(bpChild, "zaxis");
 
-		if (!(_ShapeId.is_string() && _Pos.is_object() && _XAxis.is_number() && _ZAxis.is_number())) return;
-		const auto& _PosX = Json::Get(_Pos, "x");
-		const auto& _PosY = Json::Get(_Pos, "y");
-		const auto& _PosZ = Json::Get(_Pos, "z");
+		const auto& mPos = Json::Get(bpChild, "pos");
+		const auto& mBounds = Json::Get(bpChild, "bounds");
 
-		if (!(_PosX.is_number() && _PosY.is_number() && _PosZ.is_number())) return;
-		glm::vec3 _PosVec(_PosX.get<float>(), _PosY.get<float>(), _PosZ.get<float>());
+		if (!mUuid.is_string() || !mColor.is_string()) return;
 
-		SMBC::Uuid uuid_obj(_ShapeId.get<std::string>());
-		std::string color_str = (_Color.is_string() ? _Color.get<std::string>() : "000000");
-		AxisData mAxisData = { _XAxis.get<short>(), _ZAxis.get<short>() };
+		AxisData mAxisData;
+		mAxisData.x = (xAxis.is_number() ? xAxis.get<short>() : 1);
+		mAxisData.z = (zAxis.is_number() ? zAxis.get<short>() : 3);
 
-		if (_Bounds.is_object())
+		const glm::vec3 pPosVec = BlueprintData::JsonToVec(mPos);
+		SMBC::Uuid mObjUuid = mUuid.get<std::string>();
+		SMBC::Color mObjColor = mColor.get<std::string>();
+
+		if (mBounds.is_object())
 		{
-			const auto& _BoundX = Json::Get(_Bounds, "x");
-			const auto& _BoundY = Json::Get(_Bounds, "y");
-			const auto& _BoundZ = Json::Get(_Bounds, "z");
+			const glm::vec3 mBlockBounds = BlueprintData::JsonToVec(mBounds);
+			if (mBlockBounds.x <= 0.0f || mBlockBounds.y <= 0.0f || mBlockBounds.z <= 0.0f) return;
 
-			if (!(_BoundX.is_number() && _BoundY.is_number() && _BoundZ.is_number())) return;
-			glm::vec3 _BoundsVec(_BoundX.get<float>(), _BoundY.get<float>(), _BoundZ.get<float>());
-
-			const SMBC::BlockData* block_data = Mod::GetBlock(uuid_obj);
+			const SMBC::BlockData* block_data = Mod::GetBlock(mObjUuid);
 			if (!block_data) return;
 
-			pBody->Add(new SMBC::Block(block_data, pBody, _PosVec, _BoundsVec, mAxisData, color_str, obj_idx));
+			pBody->Add(new SMBC::Block(block_data, pBody, pPosVec, mBlockBounds, mAxisData, mObjColor, obj_idx));
 		}
 		else
 		{
-			const SMBC::PartData* part_data = SMBC::Mod::GetPart(uuid_obj);
+			const SMBC::PartData* part_data = Mod::GetPart(mObjUuid);
 			if (!part_data) return;
 
 			SMBC::Model* pModel = ModelStorage::LoadModel(part_data->Path);
 			if (!pModel) return;
 
-			pBody->Add(new SMBC::Part(part_data, pModel, pBody, _PosVec, mAxisData, color_str, obj_idx));
+			pBody->Add(new SMBC::Part(part_data, pModel, pBody, pPosVec, mAxisData, mObjColor, obj_idx));
 		}
 	}
 
@@ -102,6 +112,39 @@ namespace SMBC
 		}
 	}
 
+	void BlueprintData::LoadJoint(const nlohmann::json& bpJoint, Body* pBody)
+	{
+		if (!bpJoint.is_object()) return;
+
+		const auto& jUuid     = Json::Get(bpJoint, "shapeId");
+		const auto& jColor    = Json::Get(bpJoint, "color");
+		const auto& xAxis     = Json::Get(bpJoint, "xaxisA");
+		const auto& zAxis     = Json::Get(bpJoint, "zaxisA");
+		const auto& jPosition = Json::Get(bpJoint, "posA");
+		const auto& jChildA   = Json::Get(bpJoint, "childA");
+
+		if (!jUuid.is_string() || !jColor.is_string()) return;
+
+		const SMBC::Uuid jObjUuid = jUuid.get<std::string>();
+
+		const SMBC::PartData* joint_data = Mod::GetPart(jObjUuid);
+		if (!joint_data) return;
+
+		SMBC::Model* pModel = ModelStorage::LoadModel(joint_data->Path);
+		if (!pModel) return;
+
+		{
+			const glm::vec3 jPosVec = BlueprintData::JsonToVec(jPosition);
+			const SMBC::Color jObjColor = jColor.get<std::string>();
+
+			AxisData jAxisData;
+			jAxisData.x = (xAxis.is_number() ? xAxis.get<short>() : 1);
+			jAxisData.z = (zAxis.is_number() ? zAxis.get<short>() : 3);
+
+			pBody->Add(new SMBC::Joint(joint_data, pBody, pModel, jPosVec, jAxisData, jObjColor));
+		}
+	}
+
 	void BlueprintData::LoadJoints(const nlohmann::json& bpJson)
 	{
 		const auto& jArray = Json::Get(bpJson, "joints");
@@ -112,33 +155,7 @@ namespace SMBC
 		ConvData::SetState(State::GettingJoints, jArray.size());
 		for (const auto& _Joint : jArray)
 		{
-			const auto& _Position = Json::Get(_Joint, "posA");
-			const auto& _XAxis = Json::Get(_Joint, "xaxisA");
-			const auto& _ZAxis = Json::Get(_Joint, "zaxisA");
-			const auto& _ShapeId = Json::Get(_Joint, "shapeId");
-			const auto& _Color = Json::Get(_Joint, "color");
-			const auto& _ChildA = Json::Get(_Joint, "childA");
-
-			if (!(_ShapeId.is_string() && _Position.is_object() && _XAxis.is_number() && _ZAxis.is_number())) continue;
-			const auto& _PosX = Json::Get(_Position, "x");
-			const auto& _PosY = Json::Get(_Position, "y");
-			const auto& _PosZ = Json::Get(_Position, "z");
-
-			if (!(_PosX.is_number() && _PosY.is_number() && _PosZ.is_number())) continue;
-			glm::vec3 _JointPos(_PosX.get<float>(), _PosY.get<float>(), _PosZ.get<float>());
-
-			const SMBC::Uuid uuid_obj(_ShapeId.get<std::string>());
-
-			const SMBC::PartData* joint_data = Mod::GetPart(uuid_obj);
-			if (!joint_data) continue;
-
-			SMBC::Model* pModel = ModelStorage::LoadModel(joint_data->Path);
-			if (!pModel) continue;
-
-			const std::string joint_color = (_Color.is_string() ? _Color.get<std::string>() : "000000");
-			const AxisData mAxisData = { _XAxis.get<short>(), _ZAxis.get<short>() };
-
-			joint_body->Add(new SMBC::Joint(joint_data, joint_body, pModel, _JointPos, mAxisData, joint_color));
+			BlueprintData::LoadJoint(_Joint, joint_body);
 
 			ConvData::ProgressValue++;
 		}
@@ -265,13 +282,11 @@ namespace SMBC
 				cError = L"Blueprint name is invalid!";
 				return L"";
 			}
-			else
+
+			if (!File::SafeCreateDir(model_dir))
 			{
-				if (!File::SafeCreateDir(model_dir))
-				{
-					cError = L"Couldn't create a blueprint output directory!";
-					return L"";
-				}
+				cError = L"Couldn't create a blueprint output directory!";
+				return L"";
 			}
 		}
 
