@@ -19,7 +19,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Code\Blueprint Converter\Blueprint Writer\BlueprintWriter.cpp" />
     <ClCompile Include="Code\Blueprint Converter\BlueprintConverter.cpp" />
     <ClCompile Include="Code\Blueprint Converter\Model Storage\ModelStorage.cpp" />
     <ClCompile Include="Code\Blueprint Converter\Convert Settings\ConvertSettings.cpp" />
@@ -58,7 +57,6 @@
     <ClCompile Include="Code\Lib\Uuid\Uuid.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Code\Blueprint Converter\Blueprint Writer\BlueprintWriter.h" />
     <ClInclude Include="Code\Blueprint Converter\BlueprintConverter.h" />
     <ClInclude Include="Code\Blueprint Converter\Model Storage\ModelStorage.h" />
     <ClInclude Include="Code\Blueprint Converter\Convert Settings\ConvertSettings.h" />

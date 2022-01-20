@@ -48,15 +48,4 @@ namespace SMBC
 		L"Reading Object Database... ",
 		L"Writing Objects Into the File... "
 	};
-
-	/*const static std::vector<std::wstring> ConversionErrorTable = {
-		L"No error. This message should never be seen!",
-		L"Couldn't open the specified blueprint file. Possible reasons: Syntax error, Is not a json file",
-		L"Couldn't write converted blueprint into file!",
-		L"The specified blueprint doesn't have any blocks and parts to convert!",
-		L"The specified blueprint file doesn't contain any blueprint information!",
-		L"Couldn't create \"Converted Models\" directory!",
-		L"Couldn't create a directory with the specified blueprint!",
-		L"Blueprint name is invalid!"
-	};*/
 }
