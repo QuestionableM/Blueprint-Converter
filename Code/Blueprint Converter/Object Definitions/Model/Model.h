@@ -40,7 +40,6 @@ namespace SMBC
 		long long WrittenNormalIdx = -1ll;
 
 	public:
-		Model(const long long& written_uv_idx, const long long& written_normal_idx);
 		Model(const std::wstring& mesh_path);
 		Model(Model&) = delete;
 		Model(Model&&) = delete;

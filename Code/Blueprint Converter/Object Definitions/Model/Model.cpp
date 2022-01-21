@@ -23,12 +23,6 @@ namespace SMBC
 
 
 
-	Model::Model(const long long& written_uv_idx, const long long& written_normal_idx)
-	{
-		this->WrittenUvIdx = written_uv_idx;
-		this->WrittenNormalIdx = written_normal_idx;
-	}
-
 	Model::Model(const std::wstring& mesh_path)
 	{
 		this->meshPath = mesh_path;
@@ -39,8 +33,6 @@ namespace SMBC
 		for (SMBC::SubMeshData*& data_ptr : this->subMeshData)
 			delete data_ptr;
 	}
-
-
 
 	void Model::WriteToFile(std::ofstream& file, const glm::mat4& model_mat, OffsetData& mOffset, const class Entity* pEntity)
 	{
@@ -70,7 +62,8 @@ namespace SMBC
 		}
 
 		long long normal_offset = this->WrittenNormalIdx;
-		if (ConvertSettings::ExportNormals && this->WrittenNormalIdx == -1)
+		const bool normals_are_written = (this->WrittenNormalIdx == -1);
+		if (ConvertSettings::ExportNormals && normals_are_written)
 		{
 			DebugOutL("Writing normals for (", mOffset.Normal, ") -> ", this->meshPath);
 
@@ -125,7 +118,7 @@ namespace SMBC
 
 		mOffset.Vertex += this->vertices.size();
 
-		if (ConvertSettings::ExportNormals && this->WrittenNormalIdx)
+		if (ConvertSettings::ExportNormals && normals_are_written)
 			mOffset.Normal += this->normals.size();
 	}
 

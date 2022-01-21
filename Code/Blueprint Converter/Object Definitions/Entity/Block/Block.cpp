@@ -93,17 +93,14 @@ namespace SMBC
 		const glm::mat4 block_matrix = this->GetTransformMatrix();
 
 		Model new_block(L"BLOCK_INTERNAL");
-
-		//FIX THIS
-		if (mOffset.BlockNormalOffset == -1 && mOffset.BlockUvOffset == -1)
+		if (mOffset.BlockDataWritten)
 		{
-			mOffset.BlockUvOffset = mOffset.Texture;
-			mOffset.BlockNormalOffset = mOffset.Normal;
+			new_block.WrittenNormalIdx = mOffset.BlockNormalOffset;
 		}
 		else
 		{
-			new_block.WrittenNormalIdx = mOffset.BlockNormalOffset;
-			new_block.WrittenUvIdx = mOffset.BlockUvOffset;
+			mOffset.BlockDataWritten = true;
+			mOffset.BlockNormalOffset = mOffset.Normal;
 		}
 
 		BlockModel::CreateBlockModel(new_block, this->mPosition, this->mScale / 2.0f, pParent->Tiling);
