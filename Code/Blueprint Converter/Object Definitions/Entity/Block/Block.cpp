@@ -3,6 +3,7 @@
 #include "Object Database/Rotations/ObjectRotations.hpp"
 #include "Blueprint Converter/Object Definitions/Model/BlockModel.h"
 #include "Blueprint Converter/Convert Settings/ConvertSettings.h"
+#include "Blueprint Converter/OffsetData/OffsetData.h"
 
 #include "Lib/ConvData/ConvData.h"
 #include "Lib/String/String.h"
@@ -92,6 +93,19 @@ namespace SMBC
 		const glm::mat4 block_matrix = this->GetTransformMatrix();
 
 		Model new_block(L"BLOCK_INTERNAL");
+
+		//FIX THIS
+		if (mOffset.BlockNormalOffset == -1 && mOffset.BlockUvOffset == -1)
+		{
+			mOffset.BlockUvOffset = mOffset.Texture;
+			mOffset.BlockNormalOffset = mOffset.Normal;
+		}
+		else
+		{
+			new_block.WrittenNormalIdx = mOffset.BlockNormalOffset;
+			new_block.WrittenUvIdx = mOffset.BlockUvOffset;
+		}
+
 		BlockModel::CreateBlockModel(new_block, this->mPosition, this->mScale / 2.0f, pParent->Tiling);
 
 		new_block.WriteToFile(file, block_matrix, mOffset, this);
