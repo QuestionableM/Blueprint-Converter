@@ -2,6 +2,7 @@
 
 #include "Object Database/Rotations/ObjectRotations.hpp"
 #include "Blueprint Converter/Object Definitions/Model/BlockModel.h"
+#include "Blueprint Converter/Convert Settings/ConvertSettings.h"
 
 #include "Lib/ConvData/ConvData.h"
 #include "Lib/String/String.h"
@@ -35,7 +36,14 @@ namespace SMBC
 
 	std::string Block::GetMtlName(const std::wstring& mat_name, const std::size_t& mIdx) const
 	{
-		return pParent->Uuid.ToString() + " " + mColor.StringHex() + " 1";
+		std::string out_str = pParent->Uuid.ToString();
+
+		if (ConvertSettings::MatByColor)
+			out_str.append(" " + mColor.StringHex());
+
+		out_str.append(" 1");
+
+		return out_str;
 	}
 
 	void Block::FillTextureMap(std::unordered_map<std::string, ObjectTextureData>& tex_map) const

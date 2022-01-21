@@ -222,12 +222,18 @@ namespace SMBC
 		std::ofstream oMtl(path);
 		if (!oMtl.is_open()) return;
 
+		std::string color_data = "0.8 0.8 0.8";
+
 		for (const auto& tDatum : tData)
 		{
 			std::string output_str = "newmtl " + tDatum.first;
+
+			if (ConvertSettings::MatByColor)
+				color_data = tDatum.second.mColor.StringNormalized();
+
 			output_str.append("\nNs 324");
 			output_str.append("\nKa 1 1 1\nKd ");
-			output_str.append(tDatum.second.mColor.StringNormalized());
+			output_str.append(color_data);
 			output_str.append("\nKs 0.5 0.5 0.5");
 			output_str.append("\nKe 0 0 0");
 			output_str.append("\nNi 1.45");

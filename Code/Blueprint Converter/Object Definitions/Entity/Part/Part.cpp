@@ -1,5 +1,6 @@
 #include "Part.h"
 
+#include "Blueprint Converter/Convert Settings/ConvertSettings.h"
 #include "Blueprint Converter/Object Definitions/Model/Model.h"
 #include "Object Database/Rotations/ObjectRotations.hpp"
 #include "Lib/String/String.h"
@@ -26,12 +27,23 @@ namespace SMBC
 
 	std::string Part::GetMtlName(const std::wstring& mat_name, const std::size_t& mIdx) const
 	{
-		return pParent->Uuid.ToString() + " " + mColor.StringHex() + " " + std::to_string(mIdx + 1);
+		std::string out_str = pParent->Uuid.ToString();
+
+		if (ConvertSettings::MatByColor)
+			out_str.append(" " + mColor.StringHex());
+
+		out_str.append(" " + std::to_string(mIdx + 1));
+
+		return out_str;
 	}
 
 	void Part::FillTextureMap(std::unordered_map<std::string, ObjectTextureData>& tex_map) const
 	{
-		const std::string mtl_first_part = pParent->Uuid.ToString() + " " + mColor.StringHex() + " ";
+		std::string mtl_first_part = pParent->Uuid.ToString() + " ";
+
+		if (ConvertSettings::MatByColor)
+			mtl_first_part.append(mColor.StringHex() + " ");
+
 		for (std::size_t a = 0; a < pModel->subMeshData.size(); a++)
 		{
 			const SubMeshData* pSubMesh = pModel->subMeshData[a];
