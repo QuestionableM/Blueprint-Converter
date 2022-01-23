@@ -10,10 +10,9 @@ namespace SMBC
 	class Part : public Entity
 	{
 		const PartData* pParent;
-		const Body* pBody;
 
 	public:
-		Part(const PartData* pParent, Model* pModel, Body* pBody, const glm::vec3& position, const AxisData& mAxisData, const Color& mColor, const std::size_t& obj_idx);
+		Part(const PartData* pParent, Model* pModel, const glm::vec3& position, const AxisData& mAxisData, const Color& mColor, const std::size_t& obj_idx);
 		Part(Part&) = delete;
 		Part(Part&&) = delete;
 		Part(const Part&) = delete;
@@ -26,5 +25,6 @@ namespace SMBC
 		std::wstring GetName() const override;
 
 		glm::mat4 GetTransformMatrix() const override;
+		SMBC::Uuid GetUuid() const override;
 	};
 }

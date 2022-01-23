@@ -13,17 +13,24 @@ namespace SMBC
 
 	class BlueprintData
 	{
-		std::unordered_map<std::string, SMBC::Entity*> mEntityMap = {};
-		std::vector<SMBC::Body*> Objects = {};
 		std::size_t ObjectIndex = 0;
+		std::size_t BodyIndex   = 0;
 
-		void (*CollectionBindFunction)(SMBC::Entity*, OffsetData&) = nullptr;
+		std::unordered_map<std::size_t, Body*> mIndexMap = {};
+		std::unordered_map<std::string, Body*> mCollectionsMap = {};
+		std::vector<Body*> mCollections = {};
 
-		static void Bind_NoSeparation        (SMBC::Entity* pEntity, OffsetData& mOffset);
-		static void Bind_SeparateJoints      (SMBC::Entity* pEntity, OffsetData& mOffset);
-		static void Bind_SeparateUuid        (SMBC::Entity* pEntity, OffsetData& mOffset);
-		static void Bind_SeparateColor       (SMBC::Entity* pEntity, OffsetData& mOffset);
-		static void Bind_SeparateUuidAndColor(SMBC::Entity* pEntity, OffsetData& mOffset);
+		void (*CollectionBindFunction)(BlueprintData*, Entity*) = nullptr;
+
+		static void Bind_NoSeparation        (BlueprintData* bpData, Entity* pEntity);
+		static void Bind_SeparateAll         (BlueprintData* bpData, Entity* pEntity);
+		static void Bind_SeparateJoints      (BlueprintData* bpData, Entity* pEntity);
+		static void Bind_SeparateUuid        (BlueprintData* bpData, Entity* pEntity);
+		static void Bind_SeparateColor       (BlueprintData* bpData, Entity* pEntity);
+		static void Bind_SeparateUuidAndColor(BlueprintData* bpData, Entity* pEntity);
+
+		void CreateAndAddObjToCollection(const std::string& cName, Entity* pEntity);
+		void SelectSeparationMethod();
 
 		BlueprintData() = default;
 
@@ -36,10 +43,10 @@ namespace SMBC
 	private:
 		static glm::vec3 JsonToVec(const nlohmann::json& jObj);
 
-		static void LoadChild(const nlohmann::json& bpChild, Body* pBody, const std::size_t& obj_idx);
+		void LoadChild(const nlohmann::json& bpChild);
 		void LoadObjects(const nlohmann::json& bpJson);
 
-		static void LoadJoint(const nlohmann::json& bpJoint, Body* pBody);
+		void LoadJoint(const nlohmann::json& bpJoint);
 		void LoadJoints(const nlohmann::json& bpJson);
 		std::size_t GetAmountOfObjects() const;
 

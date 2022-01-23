@@ -7,11 +7,13 @@ namespace SMBC
 {
 	class Body : public Entity
 	{
+		friend class BlueprintData;
+
 		std::vector<Entity*> mObjects = {};
-		std::size_t mIndex;
+		std::string mBodyName;
 
 	public:
-		Body(const std::size_t& mIndex);
+		Body(const std::string& mBodyName);
 		Body(Body&) = delete;
 		Body(Body&&) = delete;
 		Body(const Body&) = delete;

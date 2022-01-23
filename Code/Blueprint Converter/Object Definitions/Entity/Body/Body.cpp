@@ -1,10 +1,14 @@
 #include "Body.h"
 
+#include "Blueprint Converter/Convert Settings/ConvertSettings.h"
+
+#include <fstream>
+
 namespace SMBC
 {
-	Body::Body(const std::size_t& mIndex)
+	Body::Body(const std::string& mBodyName)
 	{
-		this->mIndex = mIndex;
+		this->mBodyName = mBodyName;
 	}
 
 	Body::~Body()
@@ -53,6 +57,12 @@ namespace SMBC
 
 	void Body::WriteObjectToFile(std::ofstream& file, OffsetData& mOffset) const
 	{
+		if (ConvertSettings::SeparationMethod != 0)
+		{
+			const std::string cName = "\no " + this->mBodyName;
+			file.write(cName.c_str(), cName.size());
+		}
+
 		for (Entity* pEntity : mObjects)
 			pEntity->WriteObjectToFile(file, mOffset);
 	}

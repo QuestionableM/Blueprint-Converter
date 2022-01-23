@@ -8,10 +8,9 @@ namespace SMBC
 	class Joint : public Entity
 	{
 		const PartData* pParent;
-		const Body* pBody;
 
 	public:
-		Joint(const PartData* pParent, const Body* pBody, Model* pModel, const glm::vec3& pos, const AxisData& mAxis, const Color& mColor);
+		Joint(const PartData* pParent, Model* pModel, const glm::vec3& pos, const AxisData& mAxis, const Color& mColor, const std::size_t& mChildIdx);
 		Joint(const Joint&) = delete;
 		Joint(Joint&&) = delete;
 		Joint(Joint&) = delete;
@@ -24,5 +23,6 @@ namespace SMBC
 		std::wstring GetName() const override;
 
 		glm::mat4 GetTransformMatrix() const override;
+		SMBC::Uuid GetUuid() const override;
 	};
 }

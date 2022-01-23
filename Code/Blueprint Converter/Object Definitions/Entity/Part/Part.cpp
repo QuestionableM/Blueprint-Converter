@@ -9,11 +9,10 @@
 
 namespace SMBC
 {
-	Part::Part(const PartData* pParent, Model* pModel, Body* pBody, const glm::vec3& position, const AxisData& mAxisData, const Color& mColor, const std::size_t& obj_idx)
+	Part::Part(const PartData* pParent, Model* pModel, const glm::vec3& position, const AxisData& mAxisData, const Color& mColor, const std::size_t& obj_idx)
 	{
 		this->pParent = pParent;
 		this->pModel = pModel;
-		this->pBody = pBody;
 		this->mPosition = position;
 		this->mAxis = mAxisData;
 		this->mColor = mColor;
@@ -87,5 +86,10 @@ namespace SMBC
 		model_matrix *= glm::translate(pParent->Bounds / 2.0f);
 
 		return model_matrix;
+	}
+
+	SMBC::Uuid Part::GetUuid() const
+	{
+		return pParent->Uuid;
 	}
 }

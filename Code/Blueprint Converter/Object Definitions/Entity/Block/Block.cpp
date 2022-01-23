@@ -14,7 +14,6 @@ namespace SMBC
 {
 	Block::Block(
 		const BlockData* pParent,
-		const Body* pBody,
 		const glm::vec3& position,
 		const glm::vec3& size,
 		const AxisData& mAxisData,
@@ -22,7 +21,6 @@ namespace SMBC
 		const std::size_t& obj_idx)
 	{
 		this->pParent = pParent;
-		this->pBody = pBody;
 		this->mPosition = position;
 		this->mScale = size;
 		this->mAxis = mAxisData;
@@ -98,5 +96,10 @@ namespace SMBC
 		new_block.WriteToFile(file, block_matrix, mOffset, this);
 
 		ConvData::ProgressValue++;
+	}
+
+	SMBC::Uuid Block::GetUuid() const
+	{
+		return pParent->Uuid;
 	}
 }

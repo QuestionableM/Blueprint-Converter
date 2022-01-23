@@ -31,4 +31,19 @@ namespace SMBC
 
 		ConvData::ProgressValue++;
 	}
+
+	std::size_t Entity::GetIndex() const
+	{
+		return this->mIndex;
+	}
+
+	SMBC::Color Entity::GetColor() const
+	{
+		return this->mColor;
+	}
+
+	SMBC::Uuid Entity::GetUuid() const
+	{
+		return SMBC::Uuid();
+	}
 }

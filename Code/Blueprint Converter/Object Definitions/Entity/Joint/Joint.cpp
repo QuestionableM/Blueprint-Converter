@@ -9,14 +9,14 @@
 
 namespace SMBC
 {
-	Joint::Joint(const PartData* pParent, const Body* pBody, Model* pModel, const glm::vec3& pos, const AxisData& mAxis, const Color& mColor)
+	Joint::Joint(const PartData* pParent, Model* pModel, const glm::vec3& pos, const AxisData& mAxis, const Color& mColor, const std::size_t& mChildIdx)
 	{
 		this->pParent = pParent;
-		this->pBody = pBody;
 		this->pModel = pModel;
 		this->mPosition = pos;
 		this->mAxis = mAxis;
 		this->mColor = mColor;
+		this->mIndex = mChildIdx;
 	}
 
 
@@ -91,5 +91,10 @@ namespace SMBC
 		model_matrix *= glm::translate(pParent->Bounds / 2.0f);
 
 		return model_matrix;
+	}
+
+	SMBC::Uuid Joint::GetUuid() const
+	{
+		return pParent->Uuid;
 	}
 }

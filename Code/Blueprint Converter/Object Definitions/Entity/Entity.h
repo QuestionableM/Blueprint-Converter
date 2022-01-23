@@ -54,5 +54,9 @@ namespace SMBC
 		virtual glm::mat4 GetTransformMatrix() const;
 		virtual std::size_t GetAmountOfObjects() const;
 		virtual void WriteObjectToFile(std::ofstream& file, OffsetData& mOffset) const;
+
+		std::size_t GetIndex() const;
+		SMBC::Color GetColor() const;
+		virtual SMBC::Uuid GetUuid() const;
 	};
 }

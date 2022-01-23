@@ -13,6 +13,7 @@
 #include "Blueprint Converter/Object Definitions/Entity/Block/Block.h"
 #include "Blueprint Converter/Object Definitions/Entity/Body/Body.h"
 #include "Blueprint Converter/OffsetData/OffsetData.h"
+#include "Blueprint Converter/BlueprintConverter.h"
 
 #include "DebugCon.h"
 
@@ -21,10 +22,115 @@ namespace fs = std::filesystem;
 
 namespace SMBC
 {
+	void BlueprintData::Bind_NoSeparation(BlueprintData* bpData, Entity* pEntity)
+	{
+		SMBC::Body* cCollection = nullptr;
+
+		if (bpData->mCollections.size() == 0)
+		{
+			cCollection = new SMBC::Body("UnseparatedCollection");
+			bpData->mCollections.push_back(cCollection);
+		}
+		else
+		{
+			cCollection = bpData->mCollections[0];
+		}
+
+		cCollection->Add(pEntity);
+	}
+
+	void BlueprintData::Bind_SeparateAll(BlueprintData* bpData, Entity* pEntity)
+	{
+		bpData->CreateAndAddObjToCollection("Object_" + std::to_string(bpData->ObjectIndex + 1), pEntity);
+	}
+
+	void BlueprintData::Bind_SeparateJoints(BlueprintData* bpData, Entity* pEntity)
+	{
+		if (pEntity->Type() == EntityType::Joint)
+		{
+			const std::size_t mChildIdx = pEntity->GetIndex();
+
+			if (bpData->mIndexMap.find(mChildIdx) != bpData->mIndexMap.end())
+			{
+				bpData->mIndexMap.at(mChildIdx)->Add(pEntity);
+			}
+			else
+			{
+				bpData->CreateAndAddObjToCollection("Joints", pEntity);
+			}
+		}
+		else
+		{
+			bpData->CreateAndAddObjToCollection("Objects_" + std::to_string(bpData->BodyIndex + 1), pEntity);
+		}
+	}
+
+	void BlueprintData::Bind_SeparateUuid(BlueprintData* bpData, Entity* pEntity)
+	{
+		bpData->CreateAndAddObjToCollection(pEntity->GetUuid().ToString(), pEntity);
+	}
+
+	void BlueprintData::Bind_SeparateColor(BlueprintData* bpData, Entity* pEntity)
+	{
+		bpData->CreateAndAddObjToCollection(pEntity->GetColor().StringHex(), pEntity);
+	}
+
+	void BlueprintData::Bind_SeparateUuidAndColor(BlueprintData* bpData, Entity* pEntity)
+	{
+		bpData->CreateAndAddObjToCollection(pEntity->GetUuid().ToString() + "_" + pEntity->GetColor().StringHex(), pEntity);
+	}
+
+	void BlueprintData::CreateAndAddObjToCollection(const std::string& cName, Entity* pEntity)
+	{
+		SMBC::Body* cCollection = nullptr;
+
+		if (mCollectionsMap.find(cName) != mCollectionsMap.end())
+		{
+			cCollection = mCollectionsMap.at(cName);
+		}
+		else
+		{
+			cCollection = new SMBC::Body(cName);
+
+			DebugOutL("Created a new collection: ", cName);
+
+			mCollectionsMap.insert(std::make_pair(cName, cCollection));
+			mCollections.push_back(cCollection);
+		}
+
+		cCollection->Add(pEntity);
+		mIndexMap.insert(std::make_pair(pEntity->GetIndex(), cCollection));
+	}
+
+	void BlueprintData::SelectSeparationMethod()
+	{
+		switch (ConvertSettings::SeparationMethod)
+		{
+		case Sep_Blocks:
+			CollectionBindFunction = BlueprintData::Bind_SeparateAll;
+			break;
+		case Sep_Joints:
+			CollectionBindFunction = BlueprintData::Bind_SeparateJoints;
+			break;
+		case Sep_Uuid:
+			CollectionBindFunction = BlueprintData::Bind_SeparateUuid;
+			break;
+		case Sep_Color:
+			CollectionBindFunction = BlueprintData::Bind_SeparateColor;
+			break;
+		case Sep_UuidAndColor:
+			CollectionBindFunction = BlueprintData::Bind_SeparateUuidAndColor;
+			break;
+		default:
+			CollectionBindFunction = BlueprintData::Bind_NoSeparation;
+			break;
+		}
+	}
+
 	BlueprintData::~BlueprintData()
 	{
-		for (Entity* pEntity : this->Objects)
-			delete pEntity;
+		for (Body* pBody : this->mCollections)
+			delete pBody;
 	}
 
 	glm::vec3 BlueprintData::JsonToVec(const nlohmann::json& jObj)
@@ -42,7 +148,7 @@ namespace SMBC
 		return glm::vec3(0.0f);
 	}
 
-	void BlueprintData::LoadChild(const nlohmann::json& bpChild, Body* pBody, const std::size_t& obj_idx)
+	void BlueprintData::LoadChild(const nlohmann::json& bpChild)
 	{
 		if (!bpChild.is_object()) return;
 
@@ -72,7 +178,7 @@ namespace SMBC
 			const SMBC::BlockData* block_data = Mod::GetBlock(mObjUuid);
 			if (!block_data) return;
 
-			pBody->Add(new SMBC::Block(block_data, pBody, pPosVec, mBlockBounds, mAxisData, mObjColor, obj_idx));
+			this->CollectionBindFunction(this, new Block(block_data, pPosVec, mBlockBounds, mAxisData, mObjColor, this->ObjectIndex));
 		}
 		else
 		{
@@ -82,7 +188,7 @@ namespace SMBC
 			SMBC::Model* pModel = ModelStorage::LoadModel(part_data->Path);
 			if (!pModel) return;
 
-			pBody->Add(new SMBC::Part(part_data, pModel, pBody, pPosVec, mAxisData, mObjColor, obj_idx));
+			this->CollectionBindFunction(this, new Part(part_data, pModel, pPosVec, mAxisData, mObjColor, this->ObjectIndex));
 		}
 	}
 
@@ -97,22 +203,20 @@ namespace SMBC
 			const auto& _Childs = Json::Get(_Body, "childs");
 			if (!_Childs.is_array()) continue;
 
-			SMBC::Body* new_body = new SMBC::Body(this->Objects.size());
-
 			ConvData::ProgressMax += _Childs.size();
 			for (const auto& _Child : _Childs)
 			{
-				BlueprintData::LoadChild(_Child, new_body, this->ObjectIndex);
+				this->LoadChild(_Child);
 				
 				this->ObjectIndex++;
 				ConvData::ProgressValue++;
 			}
 
-			this->Objects.push_back(new_body);
+			this->BodyIndex++;
 		}
 	}
 
-	void BlueprintData::LoadJoint(const nlohmann::json& bpJoint, Body* pBody)
+	void BlueprintData::LoadJoint(const nlohmann::json& bpJoint)
 	{
 		if (!bpJoint.is_object()) return;
 
@@ -123,7 +227,7 @@ namespace SMBC
 		const auto& jPosition = Json::Get(bpJoint, "posA");
 		const auto& jChildA   = Json::Get(bpJoint, "childA");
 
-		if (!jUuid.is_string() || !jColor.is_string()) return;
+		if (!jUuid.is_string() || !jColor.is_string() || !jChildA.is_number()) return;
 
 		const SMBC::Uuid jObjUuid = jUuid.get<std::string>();
 
@@ -134,6 +238,7 @@ namespace SMBC
 		if (!pModel) return;
 
 		{
+			const std::size_t jChildIdx = jChildA.get<std::size_t>();
 			const glm::vec3 jPosVec = BlueprintData::JsonToVec(jPosition);
 			const SMBC::Color jObjColor = jColor.get<std::string>();
 
@@ -141,7 +246,7 @@ namespace SMBC
 			jAxisData.x = (xAxis.is_number() ? xAxis.get<short>() : 1);
 			jAxisData.z = (zAxis.is_number() ? zAxis.get<short>() : 3);
 
-			pBody->Add(new SMBC::Joint(joint_data, pBody, pModel, jPosVec, jAxisData, jObjColor));
+			this->CollectionBindFunction(this, new Joint(joint_data, pModel, jPosVec, jAxisData, jObjColor, jChildIdx));
 		}
 	}
 
@@ -150,24 +255,21 @@ namespace SMBC
 		const auto& jArray = Json::Get(bpJson, "joints");
 		if (!jArray.is_array()) return;
 
-		SMBC::Body* joint_body = new SMBC::Body(this->Objects.size());
-
 		ConvData::SetState(State::GettingJoints, jArray.size());
 		for (const auto& _Joint : jArray)
 		{
-			BlueprintData::LoadJoint(_Joint, joint_body);
+			this->LoadJoint(_Joint);
 
+			this->ObjectIndex++;
 			ConvData::ProgressValue++;
 		}
-
-		this->Objects.push_back(joint_body);
 	}
 
 	std::size_t BlueprintData::GetAmountOfObjects() const
 	{
 		std::size_t obj_sum = 0;
 
-		for (SMBC::Entity* pEntity : this->Objects)
+		for (SMBC::Body* pEntity : this->mCollections)
 			obj_sum += pEntity->GetAmountOfObjects();
 
 		return obj_sum;
@@ -201,6 +303,8 @@ namespace SMBC
 		if (cError) return nullptr;
 
 		BlueprintData* new_bp_data = new BlueprintData();
+		new_bp_data->SelectSeparationMethod();
+
 		new_bp_data->LoadObjects(bpJson);
 		new_bp_data->LoadJoints (bpJson);
 
@@ -212,7 +316,7 @@ namespace SMBC
 		if (!ConvertSettings::ApplyTextures) return;
 
 		std::unordered_map<std::string, ObjectTextureData> tData;
-		for (const SMBC::Entity* pEntity : this->Objects)
+		for (const SMBC::Entity* pEntity : this->mCollections)
 		{
 			pEntity->FillTextureMap(tData);
 
@@ -261,7 +365,7 @@ namespace SMBC
 		if (!ConvertSettings::TextureList) return;
 
 		nlohmann::json tList = nlohmann::json::object();
-		for (const SMBC::Entity* pEntity : this->Objects)
+		for (const SMBC::Entity* pEntity : this->mCollections)
 			pEntity->FillTextureJson(tList);
 
 		Json::WriteToFile(path, tList);
@@ -306,7 +410,7 @@ namespace SMBC
 		const std::size_t object_count = this->GetAmountOfObjects();
 		SMBC::ConvData::SetState(SMBC::State::WritingObjects, object_count);
 
-		for (SMBC::Entity* pEntity : this->Objects)
+		for (SMBC::Entity* pEntity : this->mCollections)
 			pEntity->WriteObjectToFile(mOutput, mOffsetData);
 	}
 

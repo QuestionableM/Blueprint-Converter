@@ -9,13 +9,11 @@ namespace SMBC
 	class Block : public Entity
 	{
 		const SMBC::BlockData* pParent;
-		const SMBC::Body* pBody;
 		glm::vec3 mScale;
 
 	public:
 		Block(
 			const BlockData* pParent,
-			const Body* pBody,
 			const glm::vec3& position,
 			const glm::vec3& size,
 			const AxisData& mAxisData,
@@ -35,5 +33,6 @@ namespace SMBC
 
 		glm::mat4 GetTransformMatrix() const override;
 		void WriteObjectToFile(std::ofstream& file, OffsetData& mOffset) const override;
+		SMBC::Uuid GetUuid() const override;
 	};
 }
