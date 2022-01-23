@@ -18,9 +18,6 @@ namespace SMBC
 		std::size_t Normal  = 0;
 		std::size_t Texture = 0;
 
-		glm::vec3   pt_sum   = { 0.0f, 0.0f, 0.0f };
-		std::size_t pt_count = 0;
-
-		void UpdateValues(const glm::vec3& val);
+		glm::vec3 PointOffset = { 0.0f, 0.0f, 0.0f };
 	};
 }

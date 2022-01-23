@@ -10,6 +10,8 @@
 
 #include <gtx/transform.hpp>
 
+#include "DebugCon.h"
+
 namespace SMBC
 {
 	Block::Block(
@@ -70,6 +72,16 @@ namespace SMBC
 	std::wstring Block::GetName() const
 	{
 		return pParent->Name + L" (" + pParent->ModPtr->Name + L": " + pParent->Uuid.ToWstring() + L")";
+	}
+
+	glm::vec3 Block::GetCenterPoint() const
+	{
+		Model new_block(L"BLOCK_INTERNAL");
+		BlockModel::CreateBlockModel(new_block, this->mPosition, this->mScale / 2.0f, pParent->Tiling);
+
+		const glm::mat4 model_mat = this->GetTransformMatrix();
+
+		return model_mat * glm::vec4(new_block.mCenterPoint, 1.0f);
 	}
 
 

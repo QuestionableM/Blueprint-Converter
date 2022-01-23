@@ -35,6 +35,7 @@ namespace SMBC
 		std::vector<SMBC::SubMeshData*> subMeshData;
 
 		std::wstring meshPath;
+		glm::vec3 mCenterPoint;
 
 	public:
 		Model(const std::wstring& mesh_path);
@@ -43,7 +44,8 @@ namespace SMBC
 		Model(const Model&) = delete;
 		~Model();
 
-		void WriteToFile(std::ofstream& file, const glm::mat4& model_mat, OffsetData& mOffset, const class Entity* pEntity);
+		void WriteToFile(std::ofstream& file, const glm::mat4& model_mat, OffsetData& mOffset, const class Entity* pEntity) const;
+		glm::vec3 GetCenterPoint() const;
 
 		bool IsEmpty();
 	};

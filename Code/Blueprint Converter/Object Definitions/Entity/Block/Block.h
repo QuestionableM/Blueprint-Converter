@@ -30,6 +30,7 @@ namespace SMBC
 		void FillTextureMap(std::unordered_map<std::string, ObjectTextureData>& tex_map) const override;
 		void FillTextureJson(nlohmann::json& mJson) const override;
 		std::wstring GetName() const override;
+		glm::vec3 GetCenterPoint() const override;
 
 		glm::mat4 GetTransformMatrix() const override;
 		void WriteObjectToFile(std::ofstream& file, OffsetData& mOffset) const override;

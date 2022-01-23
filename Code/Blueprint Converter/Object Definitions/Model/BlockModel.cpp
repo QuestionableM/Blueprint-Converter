@@ -124,9 +124,22 @@ namespace SMBC
 		pModel.uvs[8] += _Off5;
 	}
 
+	void BlockModel::CalculateCenterPoint(Model& pModel)
+	{
+		glm::vec3 pCenter(0.0f);
+
+		const std::size_t mVertexAmount = pModel.vertices.size();
+		for (std::size_t a = 0; a < mVertexAmount; a++)
+			pCenter += pModel.vertices[a];
+
+		pModel.mCenterPoint = pCenter / (float)mVertexAmount;
+	}
+
 	void BlockModel::CreateBlockModel(Model& pModel, const glm::vec3& pos, const glm::vec3& scale, const int& tiling)
 	{
 		BlockModel::FillBlockData(pModel, scale);
 		BlockModel::FillBlockUvs (pModel, scale, pos, tiling);
+
+		BlockModel::CalculateCenterPoint(pModel);
 	}
 }

@@ -59,6 +59,7 @@ namespace SMBC
 		void WriteTexPaths(const std::wstring& path) const;
 
 		std::wstring PrepareForWrite(const std::wstring& name, ConvertError& cError) const;
+		glm::vec3 CalcCenterPoint() const;
 		void WriteObjects(std::ofstream& mOutput) const;
 		void WriteToFile(const std::wstring& name, ConvertError& cError) const;
 	};

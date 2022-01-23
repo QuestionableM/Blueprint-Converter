@@ -34,7 +34,7 @@ namespace SMBC
 			delete data_ptr;
 	}
 
-	void Model::WriteToFile(std::ofstream& file, const glm::mat4& model_mat, OffsetData& mOffset, const class Entity* pEntity)
+	void Model::WriteToFile(std::ofstream& file, const glm::mat4& model_mat, OffsetData& mOffset, const class Entity* pEntity) const
 	{
 		std::vector<glm::vec3> translated_vertices = {};
 		std::vector<glm::vec3> translated_normals = {};
@@ -45,7 +45,9 @@ namespace SMBC
 		for (std::size_t a = 0; a < this->vertices.size(); a++)
 		{
 			const glm::vec3& vertex = this->vertices[a];
-			const glm::vec3 pVertPos = model_mat * glm::vec4(vertex, 1.0f);
+
+			const glm::vec3 pVertRes = model_mat * glm::vec4(vertex, 1.0f);
+			const glm::vec3 pVertPos = pVertRes - mOffset.PointOffset;
 
 			translated_vertices[a] = pVertPos;
 
@@ -146,6 +148,11 @@ namespace SMBC
 				file.write(_f_str.c_str(), _f_str.size());
 			}
 		}
+	}
+
+	glm::vec3 Model::GetCenterPoint() const
+	{
+		return mCenterPoint;
 	}
 
 	bool Model::IsEmpty()

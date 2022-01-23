@@ -101,6 +101,17 @@ namespace SMBC
 		}
 	}
 
+	void ModelStorage::CalculateMeshCenter(Model*& model)
+	{
+		glm::vec3 pCenter(0.0f);
+
+		const std::size_t mVertexAmount = model->vertices.size();
+		for (std::size_t pVertId = 0; pVertId < mVertexAmount; pVertId++)
+			pCenter += model->vertices[pVertId];
+
+		model->mCenterPoint = pCenter / (float)mVertexAmount;
+	}
+
 	Model* ModelStorage::LoadModel(const std::wstring& path)
 	{
 		if (CachedModels.find(path) != CachedModels.end())
@@ -110,7 +121,9 @@ namespace SMBC
 		if (ModelScene && ModelScene->HasMeshes())
 		{
 			Model* newModel = new Model(path);
+
 			ModelStorage::LoadSubMeshes(ModelScene, newModel);
+			ModelStorage::CalculateMeshCenter(newModel);
 
 			CachedModels.insert(std::make_pair(path, newModel));
 			Importer.FreeScene();

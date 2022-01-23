@@ -33,7 +33,6 @@
     <ClCompile Include="Code\Blueprint Converter\Object Definitions\Entity\Body\Body.cpp" />
     <ClCompile Include="Code\Blueprint Converter\Object Definitions\Entity\Joint\Joint.cpp" />
     <ClCompile Include="Code\Blueprint Converter\Object Definitions\Entity\Part\Part.cpp" />
-    <ClCompile Include="Code\Blueprint Converter\OffsetData\OffsetData.cpp" />
     <ClCompile Include="Code\Blueprint Converter\Object Definitions\Entity\BlueprintData\BlueprintData.cpp" />
     <ClCompile Include="Code\Object Database\Rotations\ObjectRotations.cpp" />
     <ClCompile Include="Code\Blueprint Converter\Object Definitions\Model\BlockModel.cpp" />

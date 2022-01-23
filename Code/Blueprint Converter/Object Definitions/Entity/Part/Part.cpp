@@ -76,6 +76,16 @@ namespace SMBC
 		return pParent->Name + L" (" + pParent->ModPtr->Name + L": " + pParent->Uuid.ToWstring() + L")";
 	}
 
+	glm::vec3 Part::GetCenterPoint() const
+	{
+		const glm::vec3 pModelCenter = pModel->GetCenterPoint();
+		const glm::mat4 model_mat = this->GetTransformMatrix();
+
+		return model_mat * glm::vec4(pModelCenter, 1.0f);
+	}
+
+
+
 	glm::mat4 Part::GetTransformMatrix() const
 	{
 		const glm::mat4 axis_rotation = Rotations::GetRotationMatrix(this->mAxis);

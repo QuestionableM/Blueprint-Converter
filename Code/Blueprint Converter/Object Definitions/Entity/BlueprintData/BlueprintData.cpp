@@ -403,9 +403,20 @@ namespace SMBC
 		return model_dir;
 	}
 
+	glm::vec3 BlueprintData::CalcCenterPoint() const
+	{
+		glm::vec3 pCenter(0.0f);
+
+		for (Entity* pEntity : mCollections)
+			pCenter += pEntity->GetCenterPoint();
+
+		return pCenter / (float)mCollections.size();
+	}
+
 	void BlueprintData::WriteObjects(std::ofstream& mOutput) const
 	{
 		OffsetData mOffsetData;
+		mOffsetData.PointOffset = this->CalcCenterPoint();
 
 		const std::size_t object_count = this->GetAmountOfObjects();
 		SMBC::ConvData::SetState(SMBC::State::WritingObjects, object_count);

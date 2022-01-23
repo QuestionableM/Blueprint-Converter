@@ -45,6 +45,18 @@ namespace SMBC
 		return L"Body_" + std::to_wstring(this->mIndex);
 	}
 
+	glm::vec3 Body::GetCenterPoint() const
+	{
+		glm::vec3 pCenter(0.0f);
+
+		for (Entity* pEntity : mObjects)
+			pCenter += pEntity->GetCenterPoint();
+
+		return pCenter / (float)mObjects.size();
+	}
+
+
+
 	std::size_t Body::GetAmountOfObjects() const
 	{
 		std::size_t final_sum = 0;

@@ -30,7 +30,6 @@
     <ClCompile Include="Code\Blueprint Converter\Object Definitions\Entity\Joint\Joint.cpp" />
     <ClCompile Include="Code\Blueprint Converter\Object Definitions\Entity\Entity.cpp" />
     <ClCompile Include="Code\Blueprint Converter\Object Definitions\Entity\Part\Part.cpp" />
-    <ClCompile Include="Code\Blueprint Converter\OffsetData\OffsetData.cpp" />
     <ClCompile Include="Code\DebugCon.cpp" />
     <ClCompile Include="Code\Gui\Implementation\GeneratorSettings.cpp" />
     <ClCompile Include="Code\Gui\Implementation\About.cpp" />
