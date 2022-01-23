@@ -36,9 +36,6 @@ namespace SMBC
 
 		std::wstring meshPath;
 
-		long long WrittenUvIdx = -1ll;
-		long long WrittenNormalIdx = -1ll;
-
 	public:
 		Model(const std::wstring& mesh_path);
 		Model(Model&) = delete;

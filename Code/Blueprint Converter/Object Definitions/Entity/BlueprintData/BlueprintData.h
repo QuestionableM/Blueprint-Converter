@@ -1,7 +1,8 @@
 #pragma once
 
-#include "Blueprint Converter/Object Definitions/Entity/Entity.h"
+#include "Blueprint Converter/Object Definitions/Entity/Body/Body.h"
 
+#include <unordered_map>
 #include <vector>
 #include <string>
 
@@ -12,8 +13,17 @@ namespace SMBC
 
 	class BlueprintData
 	{
-		std::vector<SMBC::Entity*> Objects = {};
+		std::unordered_map<std::string, SMBC::Entity*> mEntityMap = {};
+		std::vector<SMBC::Body*> Objects = {};
 		std::size_t ObjectIndex = 0;
+
+		void (*CollectionBindFunction)(SMBC::Entity*, OffsetData&) = nullptr;
+
+		static void Bind_NoSeparation        (SMBC::Entity* pEntity, OffsetData& mOffset);
+		static void Bind_SeparateJoints      (SMBC::Entity* pEntity, OffsetData& mOffset);
+		static void Bind_SeparateUuid        (SMBC::Entity* pEntity, OffsetData& mOffset);
+		static void Bind_SeparateColor       (SMBC::Entity* pEntity, OffsetData& mOffset);
+		static void Bind_SeparateUuidAndColor(SMBC::Entity* pEntity, OffsetData& mOffset);
 
 		BlueprintData() = default;
 

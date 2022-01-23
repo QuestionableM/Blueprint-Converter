@@ -93,16 +93,6 @@ namespace SMBC
 		const glm::mat4 block_matrix = this->GetTransformMatrix();
 
 		Model new_block(L"BLOCK_INTERNAL");
-		if (mOffset.BlockDataWritten)
-		{
-			new_block.WrittenNormalIdx = mOffset.BlockNormalOffset;
-		}
-		else
-		{
-			mOffset.BlockDataWritten = true;
-			mOffset.BlockNormalOffset = mOffset.Normal;
-		}
-
 		BlockModel::CreateBlockModel(new_block, this->mPosition, this->mScale / 2.0f, pParent->Tiling);
 
 		new_block.WriteToFile(file, block_matrix, mOffset, this);
