@@ -124,6 +124,13 @@ void SetGui::ModRemSelected_Click(System::Object^ sender, System::EventArgs^ e)
 
 	this->ModList->Items->RemoveAt(_CurIdx);
 
+	if (this->ModList->Items->Count > 0)
+	{
+		const bool is_last = (this->ModList->Items->Count == _CurIdx);
+
+		this->ModList->SelectedIndex = (is_last ? _CurIdx - 1 : _CurIdx);
+	}
+
 	bool _TablesEqual = !this->AreTablesEqual(SMBC::Settings::ModFolders, this->ModList);
 	this->ChangeSetting(SETTING_MOD_LIST, _TablesEqual);
 }
@@ -152,6 +159,13 @@ void SetGui::BlueprintRemSelected_Click(System::Object^ sender, System::EventArg
 	if (_CurIdx <= -1) return;
 
 	this->BlueprintList->Items->RemoveAt(_CurIdx);
+
+	if (this->BlueprintList->Items->Count > 0)
+	{
+		const bool is_last = (this->BlueprintList->Items->Count == _CurIdx);
+
+		this->BlueprintList->SelectedIndex = (is_last ? _CurIdx - 1 : _CurIdx);
+	}
 
 	bool _TablesEqual = !this->AreTablesEqual(SMBC::Settings::BlueprintFolders, this->BlueprintList);
 	this->ChangeSetting(SETTING_BLUEPRINT, _TablesEqual);
