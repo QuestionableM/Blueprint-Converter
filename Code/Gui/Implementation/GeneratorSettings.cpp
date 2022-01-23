@@ -4,6 +4,8 @@
 #include "Lib/GuiLib/GuiLib.h"
 #include "Lib/OtherFunc/OtherFunc.h"
 
+#include "Blueprint Converter/Convert Settings/ConvertSettings.h"
+
 #include <msclr/marshal_cppstd.h>
 
 typedef BlueprintConverter::GeneratorSettings GenSet;
@@ -13,6 +15,14 @@ GenSet::GeneratorSettings(const std::wstring& blueprint_name)
 	this->InitializeComponent();
 	this->SeparationType_CB->SelectedIndex = 0;
 	this->BlueprintName_TB->Text = gcnew System::String(blueprint_name.c_str());
+
+	this->SeparationType_CB->SelectedIndex = SMBC::ConvertSettings::SeparationMethod;
+	this->ExportTexPaths_CB->Checked = SMBC::ConvertSettings::TextureList;
+	this->ApplyTextures_CB->Checked = SMBC::ConvertSettings::ApplyTextures && SMBC::ConvertSettings::ExportUvs;
+	this->MaterialsByColor_CB->Checked = SMBC::ConvertSettings::MatByColor && SMBC::ConvertSettings::ApplyTextures;
+
+	this->ExportUVs_CB->Checked = SMBC::ConvertSettings::ExportUvs;
+	this->ExportNormals_CB->Checked = SMBC::ConvertSettings::ExportNormals;
 }
 
 GenSet::~GeneratorSettings()

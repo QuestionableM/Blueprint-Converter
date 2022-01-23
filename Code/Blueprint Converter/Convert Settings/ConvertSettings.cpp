@@ -3,10 +3,10 @@
 namespace SMBC
 {
 	bool ConvertSettings::TextureList	= false;
-	bool ConvertSettings::ApplyTextures = false;
-	bool ConvertSettings::ExportUvs		= false;
-	bool ConvertSettings::ExportNormals = false;
-	bool ConvertSettings::MatByColor	= false;
+	bool ConvertSettings::ApplyTextures = true;
+	bool ConvertSettings::ExportUvs		= true;
+	bool ConvertSettings::ExportNormals = true;
+	bool ConvertSettings::MatByColor	= true;
 
 	int  ConvertSettings::SeparationMethod = 0;
 }
