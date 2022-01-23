@@ -4,24 +4,29 @@
 
 namespace SMBC
 {
+	void Uuid::StringToUuid(const std::string& str)
+	{
+		this->data = uuids::uuid::from_string(str);
+	}
+
 	Uuid::Uuid(const std::string& uuid)
 	{
-		this->data = uuid;
+		this->StringToUuid(uuid);
 	}
 
 	void Uuid::operator=(const std::string& uuid)
 	{
-		this->data = uuid;
+		this->StringToUuid(uuid);
 	}
 
 	std::string Uuid::ToString() const
 	{
-		return this->data;
+		return uuids::to_string(this->data);
 	}
 
 	std::wstring Uuid::ToWstring() const
 	{
-		return String::ToWide(this->data);
+		return uuids::to_wstring(this->data);
 	}
 
 	bool operator==(const Uuid& lhs, const Uuid& rhs) noexcept

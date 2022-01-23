@@ -1,14 +1,16 @@
 #pragma once
 
-#include <string>
+#include <stduuid/uuid.h>
 
 namespace SMBC
 {
 	class Uuid
 	{
-		std::string data;
+		uuids::uuid data;
 
 		friend bool operator==(const Uuid& lhs, const Uuid& rhs) noexcept;
+
+		void StringToUuid(const std::string& str);
 	public:
 		Uuid(const std::string& uuid);
 		Uuid() = default;
