@@ -1,9 +1,12 @@
 #include "ProgramSettings.h"
-#include "Lib/OtherFunc/OtherFunc.h"
+
 #include "Lib/String/String.h"
 #include "Lib/File/FileFunc.h"
+
 #include "Object Database/Keyword Replacer/KeywordReplacer.h"
 #include "Object Database/Mod Data/ModData.h"
+
+#include "DebugCon.h"
 
 #include <filesystem>
 #include <msclr/marshal_cppstd.h>
@@ -21,175 +24,94 @@ namespace SMBC
 	std::wstring Settings::PathToSM = L"";
 	bool Settings::OpenLinksInSteam = false;
 
-	void Settings::LoadJsonWstrArray(
-		const nlohmann::json& file,
-		const std::string& keyword,
-		std::vector<std::wstring>& _array
-	) {
-		const auto& jArray = Json::Get(file, keyword);
-		if (!jArray.is_array()) return;
+	void Settings::JsonStrArrayToVector(const nlohmann::json& pJson, const std::string& pKey, std::vector<std::wstring>& pWstrVec)
+	{
+		const auto& pArray = Json::Get(pJson, pKey);
+		if (!pArray.is_array()) return;
 
-		for (auto& _wstr : jArray) {
-			if (!_wstr.is_string()) continue;
+		for (const auto& pValue : pArray)
+		{
+			if (!pValue.is_string()) continue;
 
-			std::wstring _WstrPath = String::ToWide(_wstr.get<std::string>());
-			_WstrPath = PathReplacer::ReplaceKey(_WstrPath);
+			std::wstring wstr_path = String::ToWide(pValue.get<std::string>());
+			wstr_path = PathReplacer::ReplaceKey(wstr_path);
 
-			_array.push_back(_WstrPath);
+			pWstrVec.push_back(wstr_path);
 		}
 	}
 
-	void Settings::AddArrayPath(
-		const std::wstring& element,
-		std::vector<std::wstring>& _array
-	) {
-		for (std::wstring& _wstr : _array) {
-			if (_wstr == element || File::IsEquivalent(_wstr, element))
+	void Settings::WstrVecToJsonArray(nlohmann::json& out_json, std::vector<std::wstring>& mWstrVec, const std::string& pKey)
+	{
+		nlohmann::json str_array = nlohmann::json::array();
+
+		for (const std::wstring& mWstrPath : mWstrVec)
+			str_array.push_back(String::ToUtf8(mWstrPath));
+
+		out_json[pKey] = str_array;
+	}
+
+	void Settings::AddToStrVec(std::vector<std::wstring>& mWstrVec, const std::wstring& mWstr)
+	{
+		for (const std::wstring& wstr_data : mWstrVec)
+		{
+			if (wstr_data == mWstr || File::IsEquivalent(wstr_data, mWstr))
 				return;
 		}
 
-		_array.push_back(element);
+		mWstrVec.push_back(mWstr);
 	}
 
-	void Settings::ClearSettings()
+
+
+	void Settings::ReadProgramSettings(const nlohmann::json& config_json)
 	{
-		Settings::BlueprintFolders.clear();
-		Settings::ModFolders.clear();
-		Settings::PathToSM.clear();
-		Settings::VanillaLanguagePaths.clear();
-		Settings::OpenLinksInSteam = false;
-		Settings::SMDirDatabase.clear();
+		const auto& pSettings = Json::Get(config_json, "ProgramSettings");
+		if (!pSettings.is_object()) return;
 
-		PathReplacer::ClearData();
-		Mod::ClearMods();
-	}
-
-	void Settings::LoadUserSettings(const nlohmann::json& jSettings)
-	{
-		const auto& jUserSettings = Json::Get(jSettings, "UserSettings");
-		if (!jUserSettings.is_object()) return;
-
-		const auto& _SMPath		 = Json::Get(jUserSettings, "ScrapPath");
-		const auto& _OpenInSteam = Json::Get(jUserSettings, "OpenLinksInSteam");
-
-		Settings::LoadJsonWstrArray(jUserSettings, "BlueprintPaths", Settings::BlueprintFolders);
-		Settings::LoadJsonWstrArray(jUserSettings, "ScrapModsPath",  Settings::ModFolders);
-
-		if (_SMPath.is_string())
-			Settings::PathToSM = String::ToWide(_SMPath.get<std::string>());
-
-		if (_OpenInSteam.is_boolean())
-			Settings::OpenLinksInSteam = _OpenInSteam.get<bool>();
-	}
-
-	void Settings::LoadResourceUpgrades(const nlohmann::json& jProgramSettings)
-	{
-		std::vector<std::wstring> _UpgradeFiles = {};
-		Settings::LoadJsonWstrArray(jProgramSettings, "ResourceUpgradeFiles", _UpgradeFiles);
-
-		for (std::wstring& fPath : _UpgradeFiles)
-			PathReplacer::ReadResourceUpgrades(fPath);
-	}
-
-	void Settings::LoadKeywords(const nlohmann::json& jProgramSettings)
-	{
-		const auto& _KeyWords = Json::Get(jProgramSettings, "Keywords");
-		if (!_KeyWords.is_object()) return;
-
-		for (auto& keyword : _KeyWords.items())
+		const auto& pKeywords = Json::Get(pSettings, "Keywords");
+		if (pKeywords.is_object())
 		{
-			if (!keyword.value().is_string()) continue;
+			for (const auto& keyword : pKeywords.items())
+			{
+				if (!keyword.value().is_string()) continue;
 
-			std::wstring _WstrKey = String::ToWide(keyword.key());
-			std::wstring _WstrRepl = String::ToWide(keyword.value().get<std::string>());
-			_WstrRepl = PathReplacer::ReplaceKey(_WstrRepl);
+				std::wstring wstr_key = String::ToWide(keyword.key());
+				std::wstring wstr_key_repl = String::ToWide(keyword.value().get<std::string>());
 
-			PathReplacer::Add(_WstrKey, _WstrRepl);
-		}
-	}
-
-	void Settings::LoadProgramSettings(const nlohmann::json& jSettings)
-	{
-		const auto& jProgramSettings = Json::Get(jSettings, "ProgramSettings");
-		if (!jProgramSettings.is_object()) return;
-
-		Settings::LoadKeywords(jProgramSettings);
-		Settings::LoadResourceUpgrades(jProgramSettings);
-
-		Settings::LoadJsonWstrArray(jProgramSettings, "ScrapObjectDatabase", Settings::SMDirDatabase);
-		Settings::LoadJsonWstrArray(jProgramSettings, "LanguageDirectories", Settings::VanillaLanguagePaths);
-	}
-
-	void Settings::InitMainKeyword()
-	{
-		Settings::AddRegistryPathAndSave();
-		if (!Settings::PathToSM.empty())
-			PathReplacer::Add(L"$GAME_FOLDER", Settings::PathToSM);
-	}
-
-	void Settings::LoadSettingsFile()
-	{
-		nlohmann::json jConfigFile = Json::LoadParseJson(Settings::ConfigPath.data());
-		if (!jConfigFile.is_object())
-			return;
-
-		Settings::ClearSettings();
-		Settings::LoadUserSettings(jConfigFile);
-		Settings::InitMainKeyword();
-		Settings::LoadProgramSettings(jConfigFile);
-	}
-
-	void Settings::SaveSettingsFile(
-		const bool sm_path,
-		const bool bp_list,
-		const bool mod_list,
-		const bool open_in_steam
-	) {
-		nlohmann::json _JsonOutput = Json::LoadParseJson(Settings::ConfigPath.data());
-
-		File::SafeCreateDir(L"./Resources");
-		std::ofstream _ConfigJson(Settings::ConfigPath.data());
-		if (!_ConfigJson.is_open()) return;
-
-		nlohmann::json jUserSettings = {};
-
-		if (_JsonOutput.find("UserSettings") != _JsonOutput.end())
-		{
-			const auto& user_settings = Json::Get(_JsonOutput, "UserSettings");
-			if (user_settings.is_object())
-				jUserSettings = user_settings;
+				PathReplacer::Add(wstr_key, PathReplacer::ReplaceKey(wstr_key_repl));
+			}
 		}
 
-		if (sm_path)
-			jUserSettings["ScrapPath"] = String::ToUtf8(Settings::PathToSM);
-
-		if (bp_list)
 		{
-			nlohmann::json _BlueprintList = {};
+			std::vector<std::wstring> pUpgradeArray = {};
+			Settings::JsonStrArrayToVector(pSettings, "ResourceUpgradeFiles", pUpgradeArray);
 
-			for (std::wstring& _bp_obj : Settings::BlueprintFolders)
-				_BlueprintList.push_back(String::ToUtf8(_bp_obj));
-
-			jUserSettings["BlueprintPaths"] = _BlueprintList;
+			for (const std::wstring& pUpgradePath : pUpgradeArray)
+				PathReplacer::ReadResourceUpgrades(pUpgradePath);
 		}
 
-		if (mod_list)
-		{
-			nlohmann::json _ModList = {};
+		Settings::JsonStrArrayToVector(pSettings, "LanguageDirectories", Settings::VanillaLanguagePaths);
+		Settings::JsonStrArrayToVector(pSettings, "ScrapObjectDatabase", Settings::SMDirDatabase);
+	}
 
-			for (std::wstring& _mod_obj : Settings::ModFolders)
-				_ModList.push_back(String::ToUtf8(_mod_obj));
+	bool Settings::GetStaemPaths(std::wstring& game_path, std::wstring& workshop_path)
+	{
+		std::wstring steam_path = String::ReadRegistryKey(L"SOFTWARE\\Valve\\Steam", L"SteamPath");
+		if (steam_path.empty() || !File::Exists(steam_path))
+			steam_path = String::ReadRegistryKey(L"SOFTWARE\\WOW6432Node\\Valve\\Steam", L"SteamPath");
 
-			jUserSettings["ScrapModsPath"] = _ModList;
-		}
+		if (steam_path.empty() || !File::Exists(steam_path)) return false;
 
-		if (open_in_steam)
-			jUserSettings["OpenLinksInSteam"] = Settings::OpenLinksInSteam;
+		const std::wstring sm_path = steam_path + L"/steamapps/common/scrap mechanic";
+		const std::wstring ws_path = steam_path + L"/steamapps/workshop/content/387990";
 
-		_JsonOutput["UserSettings"] = jUserSettings;
+		if (File::Exists(sm_path))
+			game_path = sm_path;
 
-		_ConfigJson << std::setfill('\t') << std::setw(1) << _JsonOutput;
-		_ConfigJson.close();
+		if (File::Exists(ws_path))
+			workshop_path = ws_path;
+
+		return true;
 	}
 
 	void Settings::FindLocalUsers()
@@ -210,39 +132,183 @@ namespace SMBC
 			std::wstring ModPath = dir.path().wstring() + L"\\Mods";
 
 			if (File::Exists(BPPath))
-				Settings::AddArrayPath(BPPath, Settings::BlueprintFolders);
+				Settings::AddToStrVec(Settings::BlueprintFolders, BPPath);
 
 			if (File::Exists(ModPath))
-				Settings::AddArrayPath(ModPath, Settings::ModFolders);
+				Settings::AddToStrVec(Settings::ModFolders, ModPath);
 		}
 	}
 
-	void Settings::FindSteamAndSteamWorkshop()
+	void Settings::FindGamePath(nlohmann::json& config_json, bool& should_write)
 	{
-		std::wstring _Path = Other::ReadRegistryKey(L"SOFTWARE\\Valve\\Steam", L"SteamPath");
-		if (_Path.empty() || !File::Exists(_Path))
-			_Path = Other::ReadRegistryKey(L"SOFTWARE\\WOW6432Node\\Valve\\Steam", L"SteamPath");
-
-		if (_Path.empty() || !File::Exists(_Path)) return;
-
-		std::wstring _ScrapPath = _Path + L"/steamapps/common/scrap mechanic";
-		std::wstring _ScrapWorkshop = _Path + L"/steamapps/workshop/content/387990";
-
-		if (File::Exists(_ScrapPath)) Settings::PathToSM = _ScrapPath;
-		if (File::Exists(_ScrapWorkshop))
+		if (Settings::PathToSM.empty() || !File::Exists(Settings::PathToSM))
 		{
-			Settings::AddArrayPath(_ScrapWorkshop, Settings::ModFolders);
-			Settings::AddArrayPath(_ScrapWorkshop, Settings::BlueprintFolders);
+			std::wstring game_path, ws_path;
+
+			if (Settings::GetStaemPaths(game_path, ws_path))
+			{
+				{
+					nlohmann::json user_settings = Json::Get(config_json, "UserSettings");
+
+					//user_settings["ScrapPath"] = String::ToUtf8(game_path);
+					//Settings::PathToSM = game_path;
+
+					DebugOutL("Found a game path from the registry: ", Settings::PathToSM);
+
+					config_json["UserSettings"] = user_settings;
+				}
+
+				{
+					Settings::FindLocalUsers();
+
+					Settings::AddToStrVec(Settings::BlueprintFolders, ws_path);
+					Settings::AddToStrVec(Settings::ModFolders, ws_path);
+				}
+				
+				should_write = true;
+			}
+			else
+			{
+				return;
+			}
+		}
+
+		PathReplacer::Add(L"$GAME_FOLDER", Settings::PathToSM);
+	}
+
+	void Settings::FillUserSettings(nlohmann::json& config_json, bool& should_write)
+	{
+		nlohmann::json user_settings = Json::Get(config_json, "UserSettings");
+
+		const bool no_mod_folders = (user_settings.find("ScrapModsPath") == user_settings.end());
+		const bool no_bp_folders = (user_settings.find("BlueprintPaths") == user_settings.end());
+
+		if (no_mod_folders || no_bp_folders)
+		{
+			if (no_mod_folders) Settings::WstrVecToJsonArray(user_settings, Settings::ModFolders,       "ScrapModsPath" );
+			if (no_bp_folders)  Settings::WstrVecToJsonArray(user_settings, Settings::BlueprintFolders, "BlueprintPaths");
+
+			config_json["UserSettings"] = user_settings;
+			should_write = true;
 		}
 	}
 
-	void Settings::AddRegistryPathAndSave()
+	void Settings::ReadUserSettings(nlohmann::json& config_json, bool& should_write)
 	{
-		if (!Settings::PathToSM.empty()) return;
+		const auto& user_settings = Json::Get(config_json, "UserSettings");
+		if (user_settings.is_object())
+		{
+			const auto& game_path = Json::Get(user_settings, "ScrapPath");
+			if (game_path.is_string())
+			{
+				const std::string sm_path = game_path.get<std::string>();
+				Settings::PathToSM = String::ToWide(sm_path);
 
-		Settings::FindLocalUsers();
-		Settings::FindSteamAndSteamWorkshop();
+				DebugOutL("Game Path: ", Settings::PathToSM);
+			}
 
-		Settings::SaveSettingsFile(true, true, true);
+			Settings::JsonStrArrayToVector(user_settings, "BlueprintPaths", Settings::BlueprintFolders);
+			Settings::JsonStrArrayToVector(user_settings, "ScrapModsPath", Settings::ModFolders);
+
+			const auto& open_in_steam = Json::Get(user_settings, "OpenLinksInSteam");
+			Settings::OpenLinksInSteam = (open_in_steam.is_boolean() ? open_in_steam.get<bool>() : false);
+		}
+
+		Settings::FindGamePath    (config_json, should_write);
+		Settings::FillUserSettings(config_json, should_write);
+	}
+
+	nlohmann::json Settings::GetConfigJson(bool* should_write)
+	{
+		nlohmann::json cfgData = Json::LoadParseJson(Settings::ConfigPath.data());
+		if (!cfgData.is_object())
+		{
+			cfgData = nlohmann::json::object();
+		}
+
+		if (!cfgData.contains("ProgramSettings"))
+		{
+			nlohmann::json pSet = nlohmann::json::object();
+
+			nlohmann::json pKeywords = nlohmann::json::object();
+			pKeywords["$CHALLENGE_DATA"] = "$GAME_FOLDER/ChallengeData";
+			pKeywords["$GAME_DATA"] = "$GAME_FOLDER/Data";
+			pKeywords["$SURVIVAL_DATA"] = "$GAME_FOLDER/Survival";
+
+			nlohmann::json pLangDirs = nlohmann::json::array();
+			pLangDirs.push_back("$GAME_DATA/Gui/Language/English");
+			pLangDirs.push_back("$SURVIVAL_DATA/Gui/Language/English");
+			pLangDirs.push_back("$CHALLENGE_DATA/Gui/Language/English");
+
+			nlohmann::json pResourceUpgrades = nlohmann::json::array();
+			pResourceUpgrades.push_back("$GAME_DATA/upgrade_resources.json");
+
+			nlohmann::json pObjectDatabase = nlohmann::json::array();
+			pObjectDatabase.push_back("$CHALLENGE_DATA/Objects/Database/ShapeSets");
+			pObjectDatabase.push_back("$SURVIVAL_DATA/Objects/Database/ShapeSets");
+			pObjectDatabase.push_back("$GAME_DATA/Objects/Database/ShapeSets");
+
+			pSet["Keywords"] = pKeywords;
+			pSet["LanguageDirectories"] = pLangDirs;
+			pSet["ResourceUpgradeFiles"] = pResourceUpgrades;
+			pSet["ScrapObjectDatabase"] = pObjectDatabase;
+
+			cfgData["ProgramSettings"] = pSet;
+
+			if (should_write != nullptr)
+				*should_write = true;
+		}
+
+		return cfgData;
+	}
+
+	void Settings::ClearData()
+	{
+		Settings::BlueprintFolders.clear();
+		Settings::ModFolders.clear();
+		Settings::SMDirDatabase.clear();
+		Settings::VanillaLanguagePaths.clear();
+
+		Settings::PathToSM.clear();
+		Settings::OpenLinksInSteam = false;
+
+		PathReplacer::ClearData();
+		Mod::ClearMods();
+	}
+
+	void Settings::SaveConfig()
+	{
+		nlohmann::json cfgData = Settings::GetConfigJson();
+
+		{
+			nlohmann::json user_settings = nlohmann::json::object();
+
+			user_settings["GamePath"] = String::ToUtf8(Settings::PathToSM);
+			user_settings["OpenLinksInSteam"] = Settings::OpenLinksInSteam;
+			Settings::WstrVecToJsonArray(user_settings, Settings::ModFolders, "ScrapModsPath");
+			Settings::WstrVecToJsonArray(user_settings, Settings::BlueprintFolders, "BlueprintPaths");
+
+			cfgData["UserSettings"] = user_settings;
+		}
+
+		DebugOutL("Saving a new config...");
+		Json::WriteToFile(Settings::ConfigPath.data(), cfgData);
+	}
+
+	void Settings::ReadConfig()
+	{
+		Settings::ClearData();
+
+		bool should_write = false;
+		nlohmann::json cfgData = Settings::GetConfigJson(&should_write);
+
+		Settings::ReadUserSettings(cfgData, should_write);
+		Settings::ReadProgramSettings(cfgData);
+
+		if (should_write)
+		{
+			DebugOutL("Writing a new Config.json...");
+			Json::WriteToFile(Settings::ConfigPath.data(), cfgData);
+		}
 	}
 }

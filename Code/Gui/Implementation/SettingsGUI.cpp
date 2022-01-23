@@ -95,7 +95,7 @@ void SetGui::Save_BTN_Click(System::Object^ sender, System::EventArgs^ e)
 		this->mod_paths_changed = true;
 	}
 
-	SMBC::Settings::SaveSettingsFile(_SSMP, _SBlueprint, _SMods, _SSteam);
+	SMBC::Settings::SaveConfig();
 	this->BinChanges = 0x0000;
 }
 

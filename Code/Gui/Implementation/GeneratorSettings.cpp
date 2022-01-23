@@ -2,7 +2,7 @@
 
 #include "Lib/File/FileFunc.h"
 #include "Lib/GuiLib/GuiLib.h"
-#include "Lib/OtherFunc/OtherFunc.h"
+#include "Lib/String/String.h"
 
 #include "Blueprint Converter/Convert Settings/ConvertSettings.h"
 
@@ -62,7 +62,7 @@ void GenSet::BlueprintName_TB_TextChanged(System::Object^ sender, System::EventA
 
 void GenSet::BlueprintName_TB_KeyPress(System::Object^ sender, System::Windows::Forms::KeyPressEventArgs^ e)
 {
-	if (!SMBC::Other::IsLetterAllowed(e->KeyChar) && e->KeyChar != 0x8 && e->KeyChar != 0x1)
+	if (!SMBC::String::IsLetterAllowed(e->KeyChar) && e->KeyChar != 0x8 && e->KeyChar != 0x1)
 		e->Handled = true;
 }
 

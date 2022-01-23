@@ -17,6 +17,9 @@ namespace SMBC {
 		std::wstring Replace(const std::wstring& orig_str, const wchar_t& to_replace, const wchar_t& replacer);
 
 		std::string FloatVecToString(const float* f, const std::size_t& amount, const std::string& separator = " ");
+		bool IsLetterAllowed(const wchar_t& ch);
+
+		std::wstring ReadRegistryKey(const std::wstring& main_key, const std::wstring& sub_key);
 
 		void Combine(std::string& mainStr, const std::string& curArg);
 		void Combine(std::string& mainStr, const char* curArg);

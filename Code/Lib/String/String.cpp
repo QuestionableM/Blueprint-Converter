@@ -1,6 +1,7 @@
 #include "String.h"
 
 #include <Windows.h>
+#include <vector>
 #include <locale>
 #include <cwctype>
 
@@ -79,6 +80,37 @@ namespace SMBC
 			}
 
 			return out;
+		}
+
+		const static std::vector<wchar_t> _allowed_letters = { L'(', L')', L'.', L' ', L'_', 0x32, L'[', L']', L'-' };
+		bool IsLetterAllowed(const wchar_t& ch)
+		{
+			if (System::Char::IsLetterOrDigit(ch)) return true;
+
+			for (const wchar_t& _c : _allowed_letters)
+				if (ch == _c) return true;
+
+			return false;
+		}
+
+		std::wstring ReadRegistryKey(const std::wstring& main_key, const std::wstring& sub_key) {
+			wchar_t _Data[255] = {};
+			DWORD _BufSz = 8196;
+
+			LSTATUS _Status = RegGetValueW(
+				HKEY_CURRENT_USER,
+				main_key.c_str(),
+				sub_key.c_str(),
+				RRF_RT_REG_SZ,
+				NULL,
+				(PVOID)&_Data,
+				&_BufSz
+			);
+
+			if (_Status == ERROR_SUCCESS)
+				return std::wstring(_Data);
+
+			return L"";
 		}
 
 		void Combine(std::string& mainStr, const std::string& curArg)

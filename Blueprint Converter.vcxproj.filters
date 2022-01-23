@@ -13,7 +13,6 @@
     <ClCompile Include="Code\Lib\File\FileFunc.cpp" />
     <ClCompile Include="Code\Lib\GuiLib\GuiLib.cpp" />
     <ClCompile Include="Code\Lib\Json\JsonFunc.cpp" />
-    <ClCompile Include="Code\Lib\OtherFunc\OtherFunc.cpp" />
     <ClCompile Include="Code\Lib\ProgramSettings.cpp" />
     <ClCompile Include="Code\Gui\Implementation\ModList.cpp" />
     <ClCompile Include="Code\Object Database\Database Loader\DatabaseLoader.cpp" />
@@ -49,7 +48,6 @@
     <ClInclude Include="Code\Lib\File\FileFunc.h" />
     <ClInclude Include="Code\Lib\GuiLib\GuiLib.h" />
     <ClInclude Include="Code\Lib\Json\JsonFunc.h" />
-    <ClInclude Include="Code\Lib\OtherFunc\OtherFunc.h" />
     <ClInclude Include="Code\Lib\ProgramSettings.h" />
     <ClInclude Include="Code\Lib\Bit.h" />
     <ClInclude Include="Code\Gui\ModList.h" />

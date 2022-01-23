@@ -19,7 +19,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	std::setlocale(LC_CTYPE, "en_US.UTF-8");
 	CoUninitialize();
 
-	SMBC::Settings::LoadSettingsFile();
+	SMBC::Settings::ReadConfig();
 	SMBC::Rotations::InitializeRotations();
 
 	SMBC::Application::EnableVisualStyles();

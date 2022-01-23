@@ -37,8 +37,12 @@ _MainGUI::MainGUI()
 	this->BlueprintImage->WaitOnLoad = true;
 	this->ActionProgress->Minimum = 0;
 	this->GuiUpdater->Start();
-	this->LoadDatabase();
-	this->LoadBlueprints();
+
+	if (!SMBC::Settings::PathToSM.empty())
+	{
+		this->LoadDatabase();
+		this->LoadBlueprints();
+	}
 
 	SendMessage(
 		static_cast<HWND>(this->SearchTB->Handle.ToPointer()),
@@ -511,7 +515,7 @@ void _MainGUI::OpenOptionsGUI()
 		this->TempBPTable->clear();
 		this->Blueprints->clear();
 
-		SMBC::Settings::LoadSettingsFile();
+		SMBC::Settings::ReadConfig();
 
 		this->GuiUpdater->Start();
 		this->LoadDatabase();

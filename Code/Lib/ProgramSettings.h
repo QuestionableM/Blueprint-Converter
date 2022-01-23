@@ -18,36 +18,24 @@ namespace SMBC {
 		static std::wstring PathToSM;
 		static bool OpenLinksInSteam;
 
-	private:
-		static void LoadJsonWstrArray(
-			const nlohmann::json& file,
-			const std::string& keyword,
-			std::vector<std::wstring>& _array
-		);
-		static void AddArrayPath(const std::wstring& element, std::vector<std::wstring>& _array);
+		static void JsonStrArrayToVector(const nlohmann::json& pJson, const std::string& pKey, std::vector<std::wstring>& pWstrVec);
+		static void WstrVecToJsonArray(nlohmann::json& out_json, std::vector<std::wstring>& mWstrVec, const std::string& pKey);
+		static void AddToStrVec(std::vector<std::wstring>& mWstrVec, const std::wstring& mWstr);
 
-		static void ClearSettings();
-		static void LoadUserSettings(const nlohmann::json& jSettings);
 
-		static void LoadResourceUpgrades(const nlohmann::json& jProgramSettings);
-		static void LoadKeywords(const nlohmann::json& jProgramSettings);
-		static void LoadProgramSettings(const nlohmann::json& jSettings);
-		static void InitMainKeyword();
+		static void ReadProgramSettings(const nlohmann::json& config_json);
 
-	public:
-		static void LoadSettingsFile();
-		static void SaveSettingsFile(
-			const bool sm_path = false,
-			const bool bp_list = false,
-			const bool mod_list = false,
-			const bool open_in_steam = false
-		);
-
-	private:
+		static bool GetStaemPaths(std::wstring& game_path, std::wstring& workshop_path);
 		static void FindLocalUsers();
-		static void FindSteamAndSteamWorkshop();
+		static void FindGamePath(nlohmann::json& config_json, bool& should_write);
+		static void FillUserSettings(nlohmann::json& config_json, bool& should_write);
+		static void ReadUserSettings(nlohmann::json& config_json, bool& should_write);
 
+
+		static nlohmann::json GetConfigJson(bool* should_write = nullptr);
+		static void ClearData();
 	public:
-		static void AddRegistryPathAndSave();
+		static void SaveConfig();
+		static void ReadConfig();
 	};
 }

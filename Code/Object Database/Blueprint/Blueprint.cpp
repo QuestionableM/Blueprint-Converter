@@ -1,6 +1,5 @@
 #include "Blueprint.h"
 
-#include "Lib/OtherFunc/OtherFunc.h"
 #include "Lib/File/FileFunc.h"
 #include "Lib/Json/JsonFunc.h"
 #include "Lib/String/String.h"
@@ -26,7 +25,7 @@ namespace SMBC
 
 		for (const wchar_t& _Letter : name)
 		{
-			if (Other::IsLetterAllowed(_Letter))
+			if (String::IsLetterAllowed(_Letter))
 				_Output += _Letter;
 		}
 
