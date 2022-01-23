@@ -150,8 +150,8 @@ namespace SMBC
 				{
 					nlohmann::json user_settings = Json::Get(config_json, "UserSettings");
 
-					//user_settings["ScrapPath"] = String::ToUtf8(game_path);
-					//Settings::PathToSM = game_path;
+					user_settings["ScrapPath"] = String::ToUtf8(game_path);
+					Settings::PathToSM = game_path;
 
 					DebugOutL("Found a game path from the registry: ", Settings::PathToSM);
 
