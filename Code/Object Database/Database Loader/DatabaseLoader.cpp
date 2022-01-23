@@ -69,7 +69,7 @@ namespace SMBC
 	{
 		Mod::ClearMods();
 
-		ConvData::SetState(State::ReadingDatabase);
+		ConvData::SetState(ConvState::DB_ReadingDatabase, 0);
 
 		DatabaseLoader::LoadGameDatabase();
 		DatabaseLoader::LoadModDatabase();

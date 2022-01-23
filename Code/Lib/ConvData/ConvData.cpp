@@ -18,14 +18,65 @@ namespace SMBC
 	}
 
 
-	State ConvData::State = State::None;
+
+	ConvState ConvData::State = ConvState::None;
 	std::size_t ConvData::ProgressMax = 0ull;
 	std::size_t ConvData::ProgressValue = 0ull;
 
-	void ConvData::SetState(const SMBC::State& state, const std::size_t& MaxValue)
+	void ConvData::SetState(const ConvState& state, const std::size_t& MaxValue)
 	{
 		ConvData::State = state;
+
 		ConvData::ProgressValue = 0;
 		ConvData::ProgressMax = MaxValue;
+	}
+
+	void ConvData::SetState(const ConvState& state)
+	{
+		ConvData::State = state;
+	}
+
+	struct StateData
+	{
+		std::wstring Description;
+		bool DisplayNumbers;
+	};
+
+	const static std::vector<StateData> ActionTable =
+	{
+		{ L"Reading Object Database... ",            true  },
+		{ L"Reading Blueprint JSON...",              false },
+		{ L"Reading Blueprint Blocks and Parts... ", true  },
+		{ L"Reading Blueprint Joints...",            true  },
+		{ L"Clearing Blueprint Data...",             false },
+		{ L"Writing Objects to the File... ",        true  },
+		{ L"Writing Mtl File... ",                   false },
+		{ L"Writing Texture File... ",               false },
+
+		{ L"Success!",         false },
+		{ L"Conversion Error", false }
+	};
+
+
+	std::wstring ConvData::GetStateString()
+	{
+		const std::size_t state_idx = static_cast<std::size_t>(ConvData::State);
+		if (state_idx > 0)
+		{
+			return ActionTable[state_idx - 1].Description;
+		}
+
+		return L"NO_STATE";
+	}
+
+	bool ConvData::StateHasNumbers()
+	{
+		const std::size_t state_idx = static_cast<std::size_t>(ConvData::State);
+		if (state_idx > 0)
+		{
+			return ActionTable[state_idx - 1].DisplayNumbers;
+		}
+
+		return false;
 	}
 }

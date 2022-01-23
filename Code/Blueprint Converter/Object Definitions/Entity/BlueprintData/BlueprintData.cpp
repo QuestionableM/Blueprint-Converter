@@ -197,7 +197,7 @@ namespace SMBC
 		const auto& bArray = SMBC::Json::Get(bpJson, "bodies");
 		if (!bArray.is_array()) return;
 
-		ConvData::SetState(State::GettingObjects);
+		ConvData::SetState(ConvState::BP_ReadingObjects, 0);
 		for (const auto& _Body : bArray)
 		{
 			const auto& _Childs = Json::Get(_Body, "childs");
@@ -255,7 +255,7 @@ namespace SMBC
 		const auto& jArray = Json::Get(bpJson, "joints");
 		if (!jArray.is_array()) return;
 
-		ConvData::SetState(State::GettingJoints, jArray.size());
+		ConvData::SetState(ConvState::BP_ReadingJoints, jArray.size());
 		for (const auto& _Joint : jArray)
 		{
 			this->LoadJoint(_Joint);
@@ -277,7 +277,7 @@ namespace SMBC
 
 	nlohmann::json BlueprintData::LoadAndCheckBlueprint(const std::wstring& path, ConvertError& cError)
 	{
-		SMBC::ConvData::SetState(SMBC::State::ReadingJson);
+		ConvData::SetState(ConvState::BP_ReadingJson);
 		nlohmann::json bpJson = Json::LoadParseJson(path);
 		if (!bpJson.is_object())
 		{
@@ -308,6 +308,7 @@ namespace SMBC
 		new_bp_data->LoadObjects(bpJson);
 		new_bp_data->LoadJoints (bpJson);
 
+		ConvData::SetState(ConvState::BP_ClearingJson, 0);
 		return new_bp_data;
 	}
 
@@ -315,13 +316,11 @@ namespace SMBC
 	{
 		if (!ConvertSettings::ApplyTextures) return;
 
+		ConvData::SetState(ConvState::BP_WritingMtl, 0);
+
 		std::unordered_map<std::string, ObjectTextureData> tData;
 		for (const SMBC::Entity* pEntity : this->mCollections)
-		{
 			pEntity->FillTextureMap(tData);
-
-			ConvData::ProgressMax = tData.size();
-		}
 
 		std::ofstream oMtl(path);
 		if (!oMtl.is_open()) return;
@@ -363,6 +362,8 @@ namespace SMBC
 	void BlueprintData::WriteTexPaths(const std::wstring& path) const
 	{
 		if (!ConvertSettings::TextureList) return;
+
+		ConvData::SetState(ConvState::BP_WritingTextures, 0);
 
 		nlohmann::json tList = nlohmann::json::object();
 		for (const SMBC::Entity* pEntity : this->mCollections)
@@ -419,9 +420,9 @@ namespace SMBC
 		mOffsetData.PointOffset = this->CalcCenterPoint();
 
 		const std::size_t object_count = this->GetAmountOfObjects();
-		SMBC::ConvData::SetState(SMBC::State::WritingObjects, object_count);
+		ConvData::SetState(ConvState::BP_WritingObjects, object_count);
 
-		for (SMBC::Entity* pEntity : this->mCollections)
+		for (Entity* pEntity : this->mCollections)
 			pEntity->WriteObjectToFile(mOutput, mOffsetData);
 	}
 

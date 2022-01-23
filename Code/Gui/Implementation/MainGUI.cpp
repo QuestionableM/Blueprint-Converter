@@ -204,24 +204,28 @@ void _MainGUI::ObjectGenerator_DoWork(System::Object^ sender, System::ComponentM
 
 void _MainGUI::GuiUpdater_Tick(System::Object^ sender, System::EventArgs^ e)
 {
-	long _State = static_cast<long>(SMBC::ConvData::State);
-	if (_State < 0l) return;
+	if (SMBC::ConvData::State == SMBC::ConvState::None) return;
 
-	std::size_t _MaxValue = SMBC::ConvData::ProgressMax;
-	std::size_t _Value = SMBC::ConvData::ProgressValue;
+	std::wstring state_output = SMBC::ConvData::GetStateString();
+	if (SMBC::ConvData::StateHasNumbers())
+	{
+		std::size_t max_value = SMBC::ConvData::ProgressMax;
+		std::size_t cur_value = SMBC::ConvData::ProgressValue;
 
-	this->ActionProgress->Maximum = (int)_MaxValue;
+		this->ActionProgress->Maximum = (int)max_value;
 
-	std::size_t _MaxCast = this->ActionProgress->Maximum;
-	if (_MaxCast < _Value) _Value = _MaxCast;
+		std::size_t max_cast = this->ActionProgress->Maximum;
+		if (max_cast < cur_value)
+		{
+			cur_value = max_cast;
+		}
 
-	this->ActionProgress->Value = (int)_Value;
+		this->ActionProgress->Value = (int)cur_value;
 
-	std::wstring _ProgressValue = SMBC::ActionTable[_State];
-	if (_State != 0l)
-		SMBC::String::Combine(_ProgressValue, L"(", _Value, L" / ", _MaxValue, L")");
+		state_output += (L"(" + std::to_wstring(cur_value) + L" / " + std::to_wstring(max_value) + L")");
+	}
 
-	this->ActionLabel->Text = gcnew System::String(_ProgressValue.c_str());
+	this->ActionLabel->Text = gcnew System::String(state_output.c_str());
 }
 
 void _MainGUI::ObjectGenerator_RunWorkerCompleted(System::Object^ sender, System::ComponentModel::RunWorkerCompletedEventArgs^ e)
@@ -229,17 +233,23 @@ void _MainGUI::ObjectGenerator_RunWorkerCompleted(System::Object^ sender, System
 	this->GuiUpdater->Stop();
 	this->GuiUpdater_Tick(nullptr, nullptr);
 
+	this->ActionProgress->Value = this->ActionProgress->Maximum;
+
 	System::Array^ res_array = safe_cast<System::Array^>(e->Result);
 	const bool has_errors = safe_cast<bool>(res_array->GetValue((int)0));
 
 	if (has_errors)
 	{
+		SMBC::ConvData::SetState(SMBC::ConvState::CV_Failure, 0);
+
 		System::String^ mErrorMsg = safe_cast<System::String^>(res_array->GetValue((int)1));
 
 		SMBC::Gui::Error("Conversion Error", mErrorMsg);
 	}
 	else
 	{
+		SMBC::ConvData::SetState(SMBC::ConvState::CV_Success, 0);
+
 		SMBC::Gui::Message(
 			"Success",
 			"Successfully finished generating a 3D model!",
@@ -248,10 +258,10 @@ void _MainGUI::ObjectGenerator_RunWorkerCompleted(System::Object^ sender, System
 		);
 	}
 
-	SMBC::ConvData::SetState(SMBC::State::None);
 	this->ChangeGUIState(true, true, true);
 	this->ActionProgress->Value = 0;
-	this->ActionLabel->Text = "No Action";
+
+	this->GuiUpdater_Tick(nullptr, nullptr);
 }
 
 void _MainGUI::DatabaseLoader_DoWork(System::Object^ sender, System::ComponentModel::DoWorkEventArgs^ e)
@@ -261,9 +271,11 @@ void _MainGUI::DatabaseLoader_DoWork(System::Object^ sender, System::ComponentMo
 
 void _MainGUI::DatabaseLoader_RunWorkerCompleted(System::Object^ sender, System::ComponentModel::RunWorkerCompletedEventArgs^ e)
 {
-	SMBC::ConvData::SetState(SMBC::State::None);
+	SMBC::ConvData::SetState(SMBC::ConvState::None, 0);
+
 	this->GuiUpdater->Stop();
 	this->ActionProgress->Value = 0;
+
 	this->ActionLabel->Text = gcnew System::String((L"Successfully loaded " + std::to_wstring(SMBC::Mod::GetObjectCount()) + L" objects from " + std::to_wstring(SMBC::Mod::GetModCount()) + L" mods").c_str());
 	this->ChangeGUIState(this->LoadedBP, true, true);
 }

@@ -67,6 +67,8 @@ namespace SMBC
 
 		if (mJson.find(mNameStr) == mJson.end())
 			mJson[mNameStr] = pParent->TextureList.ToJson();
+
+		ConvData::ProgressValue++;
 	}
 
 	std::wstring Block::GetName() const

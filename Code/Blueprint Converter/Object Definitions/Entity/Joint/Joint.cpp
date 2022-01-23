@@ -2,8 +2,11 @@
 
 #include "Blueprint Converter/Convert Settings/ConvertSettings.h"
 #include "Blueprint Converter/Object Definitions/Model/Model.h"
-#include "Object Database/Rotations/ObjectRotations.hpp"
+
 #include "Lib/String/String.h"
+#include "Lib/ConvData/ConvData.h"
+
+#include "Object Database/Rotations/ObjectRotations.hpp"
 
 #include <gtx/transform.hpp>
 
@@ -71,6 +74,8 @@ namespace SMBC
 
 		if (mJson.find(mNameStr) == mJson.end())
 			mJson[mNameStr] = pParent->TextureList.ToJson();
+
+		ConvData::ProgressValue++;
 	}
 
 	std::wstring Joint::GetName() const
