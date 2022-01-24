@@ -4,6 +4,8 @@
 #include "Lib/Json/JsonFunc.h"
 #include "Lib/ProgramSettings.h"
 
+#include "DebugCon.h"
+
 namespace SMBC
 {
 	std::unordered_map<std::wstring, std::wstring> MaterialManager::MatStorage = {};
@@ -31,6 +33,8 @@ namespace SMBC
 	{
 		if (MatStorage.find(mat_name) != MatStorage.end())
 			return L"m" + MatStorage.at(mat_name);
+
+		DebugErrorL("Couldn't find the specifieid material: ", mat_name);
 
 		return L"m1";
 	}
