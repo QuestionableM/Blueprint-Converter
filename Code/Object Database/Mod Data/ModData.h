@@ -26,6 +26,7 @@ namespace SMBC
 		Uuid Uuid;
 
 	private:
+		static void GetBlockMaterials(const nlohmann::json& block, Texture::TextureList& tex);
 		static bool GetBlockTextures(const nlohmann::json& block, Texture::TextureList& tex);
 		void LoadBlocks(const nlohmann::json& fJson);
 

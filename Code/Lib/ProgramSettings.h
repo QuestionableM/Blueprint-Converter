@@ -10,6 +10,7 @@ namespace SMBC {
 	public:
 		constexpr static const std::wstring_view ConfigPath = L"./Resources/Config.json";
 		constexpr static const std::wstring_view RotSetPath = L"./Resources/RotationSettings.json";
+		constexpr static const std::wstring_view MaterialMapPath = L"./Resources/MaterialIds.json";
 
 		static std::vector<std::wstring> BlueprintFolders;
 		static std::vector<std::wstring> ModFolders;

@@ -3,10 +3,11 @@
 #include "Blueprint Converter/Convert Settings/ConvertSettings.h"
 #include "Blueprint Converter/Object Definitions/Model/Model.h"
 
-#include "Lib/String/String.h"
-#include "Lib/ConvData/ConvData.h"
-
+#include "Object Database/Material Manager/MaterialManager.h"
 #include "Object Database/Rotations/ObjectRotations.hpp"
+
+#include "Lib/ConvData/ConvData.h"
+#include "Lib/String/String.h"
 
 #include <gtx/transform.hpp>
 
@@ -32,11 +33,26 @@ namespace SMBC
 	std::string Joint::GetMtlName(const std::wstring& mat_name, const std::size_t& mIdx) const
 	{
 		std::string out_str = pParent->Uuid.ToString();
+		
+		{
+			if (ConvertSettings::MatByColor)
+				out_str.append(" " + mColor.StringHex());
 
-		if (ConvertSettings::MatByColor)
-			out_str.append(" " + mColor.StringHex());
+			out_str.append(" " + std::to_string(mIdx + 1));
+		}
 
-		out_str.append(" " + std::to_string(mIdx + 1));
+		{
+			const SubMeshData* pSubMesh = pModel->subMeshData[mIdx];
+			const std::wstring tex_name = pParent->TextureList.PickString(mIdx, mat_name);
+
+			std::string material_idx = "m1";
+
+			ObjectTextureData oTexData;
+			if (pParent->TextureList.GetEntry(tex_name, oTexData.mTextures))
+				material_idx = MaterialManager::GetMaterialA(oTexData.mTextures.material);
+
+			out_str.append(" " + material_idx);
+		}
 
 		return out_str;
 	}
@@ -58,7 +74,8 @@ namespace SMBC
 			{
 				oTexData.mColor = this->mColor;
 
-				const std::string mtl_name = mtl_first_part + std::to_string(a + 1);
+				const std::string mat_idx = MaterialManager::GetMaterialA(oTexData.mTextures.material);
+				const std::string mtl_name = mtl_first_part + std::to_string(a + 1) + " " + mat_idx;
 				
 				if (tex_map.find(mtl_name) != tex_map.end())
 					continue;

@@ -35,6 +35,7 @@
     <ClCompile Include="Code\Blueprint Converter\Object Definitions\Entity\BlueprintData\BlueprintData.cpp" />
     <ClCompile Include="Code\Object Database\Rotations\ObjectRotations.cpp" />
     <ClCompile Include="Code\Blueprint Converter\Object Definitions\Model\BlockModel.cpp" />
+    <ClCompile Include="Code\Object Database\Material Manager\MaterialManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Code\Blueprint Converter\BlueprintConverter.h" />
@@ -74,5 +75,6 @@
     <ClInclude Include="Code\Object Database\Rotations\ObjectRotations.hpp" />
     <ClInclude Include="Code\Blueprint Converter\Object Definitions\Model\BlockModel.h" />
     <ClInclude Include="Code\BuildConfig.hpp" />
+    <ClInclude Include="Code\Object Database\Material Manager\MaterialManager.h" />
   </ItemGroup>
 </Project>

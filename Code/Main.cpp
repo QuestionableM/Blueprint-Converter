@@ -1,11 +1,13 @@
 #include <Windows.h>
-#include <locale>
+
+#include "Object Database/Rotations/ObjectRotations.hpp"
+#include "Object Database/Material Manager/MaterialManager.h"
 
 #include "Gui/MainGUI.h"
 #include "Lib/ProgramSettings.h"
-
-#include "Object Database/Rotations/ObjectRotations.hpp"
 #include "DebugCon.h"
+
+#include <locale>
 
 namespace SMBC
 {
@@ -20,6 +22,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	CoUninitialize();
 
 	SMBC::Settings::ReadConfig();
+	SMBC::MaterialManager::Initialize();
 	SMBC::Rotations::InitializeRotations();
 
 	SMBC::Application::EnableVisualStyles();

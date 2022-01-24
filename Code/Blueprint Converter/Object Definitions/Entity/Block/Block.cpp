@@ -1,9 +1,11 @@
 #include "Block.h"
 
-#include "Object Database/Rotations/ObjectRotations.hpp"
 #include "Blueprint Converter/Object Definitions/Model/BlockModel.h"
 #include "Blueprint Converter/Convert Settings/ConvertSettings.h"
 #include "Blueprint Converter/OffsetData/OffsetData.h"
+
+#include "Object Database/Material Manager/MaterialManager.h"
+#include "Object Database/Rotations/ObjectRotations.hpp"
 
 #include "Lib/ConvData/ConvData.h"
 #include "Lib/String/String.h"
@@ -42,7 +44,8 @@ namespace SMBC
 		if (ConvertSettings::MatByColor)
 			out_str.append(" " + mColor.StringHex());
 
-		out_str.append(" 1");
+		const std::string mat_idx = MaterialManager::GetMaterialA(pParent->TextureList.material);
+		out_str.append(" 1 " + mat_idx);
 
 		return out_str;
 	}

@@ -14,6 +14,24 @@ namespace SMBC
 	std::unordered_map<Uuid, ObjectData*> Mod::AllObjects = {};
 	std::unordered_map<Uuid, Mod*>        Mod::Mods       = {};
 
+	void Mod::GetBlockMaterials(const nlohmann::json& block, Texture::TextureList& tex)
+	{
+		const auto& bGlass = Json::Get(block, "glass");
+		const auto& bAlpha = Json::Get(block, "alpha");
+
+		if (bGlass.is_boolean() && bGlass.get<bool>())
+		{
+			tex.material = L"BlockGlass";
+		}
+		else
+		{
+			tex.material = L"BlockDifAsgNor";
+
+			if (bAlpha.is_boolean() && bAlpha.get<bool>())
+				tex.material.append(L"Alpha");
+		}
+	}
+
 	static const std::string blkTexNames[3] = { "dif", "asg", "nor" };
 	bool Mod::GetBlockTextures(const nlohmann::json& block, Texture::TextureList& tex)
 	{
@@ -57,6 +75,7 @@ namespace SMBC
 
 			Texture::TextureList tex_list;
 			if (!Mod::GetBlockTextures(lBlock, tex_list)) continue;
+			Mod::GetBlockMaterials(lBlock, tex_list);
 
 			int tiling_value = (bTiling.is_number() ? bTiling.get<int>() : 4);
 			if (tiling_value > 16 || tiling_value <= 0) tiling_value = 4;
@@ -100,6 +119,9 @@ namespace SMBC
 
 		Texture::TextureList new_entry;
 		Mod::LoadTextureList(sTexList, new_entry);
+
+		const auto& sMaterial = Json::Get(subMesh, "material");
+		new_entry.material = (sMaterial.is_string() ? String::ToWide(sMaterial.get<std::string>()) : L"DifAsgNor");
 
 		tex.AddEntry(idx, new_entry);
 	}

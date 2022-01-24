@@ -21,6 +21,8 @@ namespace SMBC
 			std::wstring asg;
 			std::wstring nor;
 
+			std::wstring material;
+
 			TextureList(const std::wstring& dif, const std::wstring& asg, const std::wstring& nor);
 			TextureList() = default;
 

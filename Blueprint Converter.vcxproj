@@ -47,6 +47,7 @@
     <ClCompile Include="Code\Object Database\Blueprint\Blueprint.cpp" />
     <ClCompile Include="Code\Object Database\Keyword Replacer\KeywordReplacer.cpp" />
     <ClCompile Include="Code\Object Database\Language Database\LanguageDatabase.cpp" />
+    <ClCompile Include="Code\Object Database\Material Manager\MaterialManager.cpp" />
     <ClCompile Include="Code\Object Database\Mod Data\ModData.cpp" />
     <ClCompile Include="Code\Object Database\Database Loader\DatabaseLoader.cpp" />
     <ClCompile Include="Code\Object Database\Object Data\ObjectData.cpp" />
@@ -96,6 +97,7 @@
     <ClInclude Include="Code\Object Database\Blueprint\Blueprint.h" />
     <ClInclude Include="Code\Object Database\Keyword Replacer\KeywordReplacer.h" />
     <ClInclude Include="Code\Object Database\Language Database\LanguageDatabase.h" />
+    <ClInclude Include="Code\Object Database\Material Manager\MaterialManager.h" />
     <ClInclude Include="Code\Object Database\Mod Data\ModData.h" />
     <ClInclude Include="Code\Object Database\Database Loader\DatabaseLoader.h" />
     <ClInclude Include="Code\Object Database\Object Data\ObjectData.h" />
