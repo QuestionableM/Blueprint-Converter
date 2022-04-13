@@ -1,10 +1,10 @@
 #include "ProgramSettings.h"
 
-#include "Lib/String/String.h"
-#include "Lib/File/FileFunc.h"
+#include "Lib\FileFunc.h"
+#include "Lib\String.h"
 
-#include "Object Database/Keyword Replacer/KeywordReplacer.h"
-#include "Object Database/Mod Data/ModData.h"
+#include "ObjectDatabase\KeywordReplacer.h"
+#include "ObjectDatabase\ModData.h"
 
 #include "DebugCon.h"
 

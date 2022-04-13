@@ -1,7 +1,7 @@
 #include <Windows.h>
 
-#include "Object Database/Rotations/ObjectRotations.hpp"
-#include "Object Database/Material Manager/MaterialManager.h"
+#include "ObjectDatabase\ObjectRotations.hpp"
+#include "ObjectDatabase\MaterialManager.h"
 
 #include "Gui/MainGUI.h"
 #include "Lib/ProgramSettings.h"

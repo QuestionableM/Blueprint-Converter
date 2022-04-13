@@ -2,12 +2,12 @@
 #include <msclr/marshal_cppstd.h>
 #include <filesystem>
 
-#include "Gui/SettingsGUI.h"
-#include "Lib/ProgramSettings.h"
-#include "Lib/GuiLib/GuiLib.h"
-#include "Lib/Bit.h"
-#include "Lib/File/FileFunc.h"
-#include "Lib/File/FileFunc.h"
+#include "Lib\ProgramSettings.h"
+#include "Gui\SettingsGUI.h"
+#include "Lib\FileFunc.h"
+#include "Lib\FileFunc.h"
+#include "Lib\GuiLib.h"
+#include "Lib\Bit.h"
 
 namespace SMBC {
 	using namespace BlueprintConverter;

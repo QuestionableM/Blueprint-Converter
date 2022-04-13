@@ -3,7 +3,7 @@
 #include <vector>
 #include <string>
 
-#include "Lib/Json/JsonFunc.h"
+#include "Lib\JsonFunc.h"
 
 namespace SMBC {
 	class Settings {

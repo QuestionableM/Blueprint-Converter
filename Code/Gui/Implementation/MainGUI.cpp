@@ -2,24 +2,24 @@
 #include <filesystem>
 #include <cwctype>
 
+#include "BlueprintConverter\BlueprintConverter.h"
+#include "BlueprintConverter\ConvertSettings.h"
+
+#include "ObjectDatabase\KeywordReplacer.h"
+#include "ObjectDatabase\DatabaseLoader.h"
+
+#include "Lib\ProgramSettings.h"
+#include "Lib\ConvData.h"
+#include "Lib\FileFunc.h"
+#include "Lib\JsonFunc.h"
+#include "Lib\GuiLib.h"
+#include "Lib\String.h"
+
+#include "Gui/GeneratorSettings.h"
+#include "Gui/SettingsGUI.h"
+#include "Gui/ModList.h"
 #include "Gui/MainGUI.h"
 #include "Gui/About.h"
-#include "Gui/SettingsGUI.h"
-#include "Gui/GeneratorSettings.h"
-#include "Gui/ModList.h"
-
-#include "Object Database/Keyword Replacer/KeywordReplacer.h"
-#include "Object Database/Database Loader/DatabaseLoader.h"
-
-#include "Lib/ConvData/ConvData.h"
-#include "Lib/GuiLib/GuiLib.h"
-#include "Lib/File/FileFunc.h"
-#include "Lib/Json/JsonFunc.h"
-#include "Lib/String/String.h"
-#include "Lib/ProgramSettings.h"
-
-#include "Blueprint Converter/BlueprintConverter.h"
-#include "Blueprint Converter/Convert Settings/ConvertSettings.h"
 
 namespace SMBC
 {

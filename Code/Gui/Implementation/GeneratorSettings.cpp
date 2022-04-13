@@ -1,10 +1,10 @@
 #include "Gui/GeneratorSettings.h"
 
-#include "Lib/File/FileFunc.h"
-#include "Lib/GuiLib/GuiLib.h"
-#include "Lib/String/String.h"
+#include "Lib\FileFunc.h"
+#include "Lib\GuiLib.h"
+#include "Lib\String.h"
 
-#include "Blueprint Converter/Convert Settings/ConvertSettings.h"
+#include "BlueprintConverter\ConvertSettings.h"
 
 #include <msclr/marshal_cppstd.h>
 

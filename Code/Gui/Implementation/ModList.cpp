@@ -1,11 +1,12 @@
 #include "Gui/ModList.h"
 
-#include "Lib/Json/JsonFunc.h"
-#include "Lib/File/FileFunc.h"
-#include "Lib/GuiLib/GuiLib.h"
-#include "Lib/ProgramSettings.h"
-#include "Lib/String/String.h"
-#include "Object Database/Keyword Replacer/KeywordReplacer.h"
+#include "Lib\ProgramSettings.h"
+#include "Lib\JsonFunc.h"
+#include "Lib\FileFunc.h"
+#include "Lib\GuiLib.h"
+#include "Lib\String.h"
+
+#include "ObjectDatabase\KeywordReplacer.h"
 
 #include <msclr/marshal_cppstd.h>
 

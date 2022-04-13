@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Object Database/Mod Data/ModData.h"
-#include "Object Database/Blueprint/Blueprint.h"
+#include "ObjectDatabase\Blueprint.h"
+#include "ObjectDatabase\ModData.h"
 
 namespace BlueprintConverter
 {
