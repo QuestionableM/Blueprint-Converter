@@ -1,7 +1,5 @@
 #include "GuiLib.h"
 
-namespace _GUI = SMBC::Gui;
-
 namespace SMBC
 {
 	std::wstring Gui::OpenFileName(
@@ -73,7 +71,7 @@ namespace SMBC
 
 	WForms::DialogResult Gui::Error(System::String^ title, System::String^ description)
 	{
-		WForms::DialogResult _result = _GUI::Message(
+		WForms::DialogResult _result = Gui::Message(
 			title, description,
 			WForms::MessageBoxButtons::OK,
 			WForms::MessageBoxIcon::Error
@@ -84,7 +82,7 @@ namespace SMBC
 
 	WForms::DialogResult Gui::Warning(System::String^ title, System::String^ description)
 	{
-		WForms::DialogResult _result = _GUI::Message(
+		WForms::DialogResult _result = Gui::Message(
 			title, description,
 			WForms::MessageBoxButtons::OK,
 			WForms::MessageBoxIcon::Warning
@@ -95,7 +93,7 @@ namespace SMBC
 
 	WForms::DialogResult Gui::Question(System::String^ title, System::String^ description)
 	{
-		WForms::DialogResult _result = _GUI::Message(
+		WForms::DialogResult _result = Gui::Message(
 			title, description,
 			WForms::MessageBoxButtons::YesNo,
 			WForms::MessageBoxIcon::Question

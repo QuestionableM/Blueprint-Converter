@@ -498,6 +498,7 @@ namespace BlueprintConverter
 		this->OpenOutputFolder_BTN->Enabled = dpandbp;
 		this->reloadBlueprintListToolStripMenuItem->Enabled = bplandbp;
 		this->reloadObjectDatabaseToolStripMenuItem->Enabled = dpandbp;
+		this->settingsToolStripMenuItem1->Enabled = bploaded && databaseloaded && bpgenerated;
 		this->menuStrip1->Enabled = bpgenerated;
 
 		bool _BothLoaded = (dpandbp && bplandbp);

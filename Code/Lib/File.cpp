@@ -47,16 +47,17 @@ namespace SMBC
 	bool File::SafeCreateDir(const std::wstring& path)
 	{
 		std::error_code mError;
-		const bool isDirectory = fs::is_directory(path, mError);
-		if (mError) return false;
 
 		const bool isExists = fs::exists(path, mError);
-		if (mError) return false;
-
-		if (isExists && !isDirectory)
-			fs::remove(path, mError);
+		if (!mError && isExists)
+		{
+			const bool isDirectory = fs::is_directory(path, mError);
+			if (!mError && !isDirectory)
+				fs::remove(path, mError);
+		}
 
 		fs::create_directory(path, mError);
+
 		return true;
 	}
 
