@@ -4,6 +4,8 @@
 #include "Lib\File.h"
 #include "Lib\Json.h"
 
+#include "DebugCon.h"
+
 #include <filesystem>
 
 namespace fs = std::filesystem;
@@ -36,9 +38,16 @@ namespace SMBC
 	{
 		if (!File::Exists(this->Folder) || !this->ImagePath.empty()) return;
 
-		fs::directory_iterator dir_iter(this->Folder, fs::directory_options::skip_permission_denied);
+		std::error_code mError;
+		fs::directory_iterator dir_iter(this->Folder, fs::directory_options::skip_permission_denied, mError);
 		for (const auto& dir : dir_iter)
 		{
+			if (mError)
+			{
+				DebugErrorL("Couldn't get an item in: ", this->Folder);
+				continue;
+			}
+
 			if (!dir.is_regular_file()) continue;
 
 			const fs::path& imgPath = dir.path();

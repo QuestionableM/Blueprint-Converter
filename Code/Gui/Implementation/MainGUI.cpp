@@ -294,13 +294,21 @@ namespace BlueprintConverter
 
 	void MainGUI::BlueprintLoader_DoWork(System::Object^ sender, System::ComponentModel::DoWorkEventArgs^ e)
 	{
+		std::error_code mError;
+
 		for (const std::wstring& BlueprintFolder : SMBC::Settings::BlueprintFolders)
 		{
 			if (!SMBC::File::Exists(BlueprintFolder)) continue;
 
-			fs::directory_iterator BPDirIter(BlueprintFolder, fs::directory_options::skip_permission_denied);
+			fs::directory_iterator BPDirIter(BlueprintFolder, fs::directory_options::skip_permission_denied, mError);
 			for (const auto& Folder : BPDirIter)
 			{
+				if (mError)
+				{
+					DebugErrorL("Couldn't get an item in: ", BlueprintFolder);
+					continue;
+				}
+
 				if (!Folder.is_directory()) continue;
 
 				SMBC::Blueprint* new_blueprint = SMBC::Blueprint::CreateBlueprintFromDirectory(Folder.path().wstring());

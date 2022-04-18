@@ -40,13 +40,21 @@ namespace SMBC
 	{
 		if (Settings::ModFolders.empty()) return;
 
+		std::error_code mError;
+
 		for (const std::wstring& _ModDirectory : Settings::ModFolders)
 		{
 			if (!File::Exists(_ModDirectory)) continue;
 
-			fs::directory_iterator _DirIter(_ModDirectory, fs::directory_options::skip_permission_denied);
+			fs::directory_iterator _DirIter(_ModDirectory, fs::directory_options::skip_permission_denied, mError);
 			for (const auto& dir : _DirIter)
 			{
+				if (mError)
+				{
+					DebugErrorL("Couldn't get an item in: ", _ModDirectory);
+					continue;
+				}
+
 				if (!dir.is_directory()) continue;
 
 				const std::wstring mModDir = dir.path().wstring();
