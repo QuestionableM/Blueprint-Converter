@@ -4,7 +4,7 @@
 
 #ifdef SMBC_DEBUG_CONSOLE_ENABLED
 
-#include <Windows.h>
+#include "Lib\WinInclude.h"
 #include <string>
 
 namespace SMBC

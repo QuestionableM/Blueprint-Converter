@@ -1,6 +1,7 @@
 #include "String.h"
 
-#include <Windows.h>
+#include "Lib\WinInclude.h"
+
 #include <vector>
 #include <locale>
 #include <cwctype>

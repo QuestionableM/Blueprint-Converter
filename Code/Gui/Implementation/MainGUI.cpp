@@ -531,6 +531,8 @@ namespace BlueprintConverter
 			this->TempBPTable->clear();
 			this->Blueprints->clear();
 
+			SMBC::Settings::ReadConfig();
+
 			this->GuiUpdater->Start();
 			this->LoadDatabase();
 			this->LoadBlueprints();

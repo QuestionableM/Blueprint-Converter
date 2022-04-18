@@ -1,8 +1,8 @@
 #include "Gui/About.h"
 
 #include "Lib/BuildVersion.h"
+#include "Lib\WinInclude.h"
 
-#include <Windows.h>
 #include <string>
 
 namespace BlueprintConverter

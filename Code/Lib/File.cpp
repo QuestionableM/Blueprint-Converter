@@ -1,6 +1,6 @@
 #include "File.h"
 
-#include <Windows.h>
+#include "Lib\WinInclude.h"
 #include <ShlObj.h>
 
 #include <filesystem>

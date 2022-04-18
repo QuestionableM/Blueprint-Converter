@@ -34,6 +34,8 @@ namespace SMBC
 
 			_VanillaParts->LoadObjectsFromDirectory(data_path);
 		}
+
+		DebugOutL("Loaded ", ConCol::YELLOW_INT, _VanillaParts->Name, ConCol::WHITE, " (Objects: ", ConCol::YELLOW_INT, _VanillaParts->Objects.size(), ConCol::WHITE, ")");
 	}
 
 	void DatabaseLoader::LoadModDatabase()
@@ -69,6 +71,8 @@ namespace SMBC
 
 				PathReplacer::SetModData(NewMod->Path, NewMod->Uuid);
 				NewMod->LoadObjectsFromDirectory(mDatabasePath);
+
+				DebugOutL("Loaded: ", ConCol::YELLOW_INT , NewMod->Name, ConCol::WHITE, " (Objects: ", ConCol::YELLOW_INT, NewMod->Objects.size(), ConCol::WHITE, ")");
 			}
 		}
 	}

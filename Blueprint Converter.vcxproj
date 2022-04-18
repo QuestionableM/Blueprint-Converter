@@ -93,6 +93,7 @@
     <ClInclude Include="Code\Lib\Json.h" />
     <ClInclude Include="Code\Lib\ProgramSettings.h" />
     <ClInclude Include="Code\Lib\String.h" />
+    <ClInclude Include="Code\Lib\WinInclude.h" />
     <ClInclude Include="Code\ObjectDatabase\Blueprint.h" />
     <ClInclude Include="Code\ObjectDatabase\KeywordReplacer.h" />
     <ClInclude Include="Code\ObjectDatabase\LanguageDatabase.h" />

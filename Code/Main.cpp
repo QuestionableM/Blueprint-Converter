@@ -1,4 +1,4 @@
-#include <Windows.h>
+#include "Lib\WinInclude.h"
 
 #include "Gui/MainGUI.h"
 #include "DebugCon.h"

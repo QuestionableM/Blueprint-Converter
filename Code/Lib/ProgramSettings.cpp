@@ -258,6 +258,7 @@ namespace SMBC
 
 	void Settings::UpdatePathReplacement()
 	{
+		DebugOutL("Set $GAME_FOLDER to ", Settings::PathToSM);
 		PathReplacer::SetReplacement(L"$GAME_FOLDER", Settings::PathToSM);
 	}
 
@@ -286,7 +287,6 @@ namespace SMBC
 	bool Settings::ReadConfig()
 	{
 		DebugOutL(ConCol::CYAN, "Reading the program config...");
-
 		Settings::ClearData();
 
 		bool should_write = false;

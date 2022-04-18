@@ -336,7 +336,7 @@ namespace SMBC
 		std::error_code mError;
 		fs::directory_iterator dir_iter(dir, fs::directory_options::skip_permission_denied, mError);
 
-		for (const auto& dir : dir_iter)
+		for (const auto& mCurDir : dir_iter)
 		{
 			if (mError)
 			{
@@ -344,9 +344,9 @@ namespace SMBC
 				continue;
 			}
 
-			if (!dir.is_regular_file()) continue;
+			if (!mCurDir.is_regular_file()) continue;
 
-			const fs::path& fPath = dir.path();
+			const fs::path& fPath = mCurDir.path();
 
 			if (fPath.has_filename() && fPath.has_extension() && fPath.extension() == ".json")
 				this->LoadObjectFile(fPath.wstring());
@@ -468,8 +468,6 @@ namespace SMBC
 		NewMod->Name = name;
 		NewMod->WorkshopId = workshop_id;
 		NewMod->Path = dir;
-
-		DebugOutL("Loaded a new mod: ", ConCol::YELLOW_INT, NewMod->Name);
 
 		Mods.insert(std::make_pair(uuid, NewMod));
 		return NewMod;

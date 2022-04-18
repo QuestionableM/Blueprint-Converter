@@ -75,5 +75,6 @@
     <ClInclude Include="Code\BlueprintConverter\ObjectDefinitions\BlockModel.h" />
     <ClInclude Include="Code\BuildConfig.hpp" />
     <ClInclude Include="Code\ObjectDatabase\MaterialManager.h" />
+    <ClInclude Include="Code\Lib\WinInclude.h" />
   </ItemGroup>
 </Project>
