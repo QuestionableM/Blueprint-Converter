@@ -15,7 +15,7 @@ namespace SMBC
 	bool File::IsDirectory(const std::wstring& path)
 	{
 		std::error_code mError;
-		const bool isDirectory = fs::is_directory(path);
+		const bool isDirectory = fs::is_directory(path, mError);
 
 		return (!mError && isDirectory);
 	}
@@ -31,7 +31,7 @@ namespace SMBC
 	bool File::Exists(const std::wstring& path)
 	{
 		std::error_code mError;
-		const bool isExists = fs::exists(path);
+		const bool isExists = fs::exists(path, mError);
 
 		return (!mError && isExists);
 	}
