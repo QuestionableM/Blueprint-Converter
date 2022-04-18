@@ -100,9 +100,9 @@ namespace BlueprintConverter {
 				static_cast<System::Byte>(0)));
 			this->Version_LBL->Location = System::Drawing::Point(12, 164);
 			this->Version_LBL->Name = L"Version_LBL";
-			this->Version_LBL->Size = System::Drawing::Size(87, 16);
+			this->Version_LBL->Size = System::Drawing::Size(86, 16);
 			this->Version_LBL->TabIndex = 6;
-			this->Version_LBL->Text = L"Version: 1.1.0";
+			this->Version_LBL->Text = L"Version: 1.1.1";
 			this->Version_LBL->TextAlign = System::Drawing::ContentAlignment::MiddleLeft;
 			// 
 			// GitHubRepo_LL
@@ -114,7 +114,7 @@ namespace BlueprintConverter {
 			this->GitHubRepo_LL->Location = System::Drawing::Point(316, 159);
 			this->GitHubRepo_LL->Margin = System::Windows::Forms::Padding(3, 0, 3, 5);
 			this->GitHubRepo_LL->Name = L"GitHubRepo_LL";
-			this->GitHubRepo_LL->Size = System::Drawing::Size(112, 16);
+			this->GitHubRepo_LL->Size = System::Drawing::Size(111, 16);
 			this->GitHubRepo_LL->TabIndex = 7;
 			this->GitHubRepo_LL->TabStop = true;
 			this->GitHubRepo_LL->Text = L"GitHub repository";

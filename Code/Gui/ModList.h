@@ -23,7 +23,7 @@ namespace BlueprintConverter
 	public:
 		int selected_mod = -1;
 		ModList(const SMBC::Blueprint* blueprint);
-		std::unordered_map<SMBC::Uuid, ModListData*>* UsedModData = nullptr;
+		std::unordered_map<std::string, ModListData*>* UsedModData = nullptr;
 		std::vector<ModListData*>* UsedModVector = nullptr;
 
 	protected:

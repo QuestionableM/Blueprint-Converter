@@ -21,7 +21,7 @@ namespace BlueprintConverter
 
 		ProgressCounter = 0;
 		ProgressMaxCounter = 0;
-		this->UsedModData   = new std::unordered_map<SMBC::Uuid, ModListData*>();
+		this->UsedModData   = new std::unordered_map<std::string, ModListData*>();
 		this->UsedModVector = new std::vector<ModListData*>();
 		this->BPName_LBL->Text = gcnew System::String((L"Blueprint Name: " + blueprint->Name).c_str());
 
@@ -131,21 +131,19 @@ namespace BlueprintConverter
 			return;
 		}
 
-		this->ModList_LB->BeginUpdate();
-		for (const auto& mod_item : *this->UsedModData)
 		{
-			const ModListData* mod_list = mod_item.second;
+			this->ModList_LB->BeginUpdate();
 
-			std::wstring _ModName = L"UNKNOWN_MOD";
+			for (const ModListData* mod_list : *this->UsedModVector)
+			{
+				std::wstring mModName = (mod_list->ptr != nullptr) ? mod_list->ptr->Name : L"UNKNOWN_MOD";
 
-			if (mod_list->ptr != nullptr)
-				_ModName = mod_list->ptr->Name;
+				this->ModList_LB->Items->Add(gcnew System::String((mModName + L" (" + std::to_wstring(mod_list->used_parts) + L")").c_str()));
+			}
 
-			this->ModList_LB->Items->Add(gcnew System::String((_ModName + L" (" + std::to_wstring(mod_list->used_parts) + L")").c_str()));
+			this->ModList_LB->EndUpdate();
+			this->ModList_LB->Enabled = true;
 		}
-		this->ModList_LB->EndUpdate();
-
-		this->ModList_LB->Enabled = true;
 	}
 
 	void ModList::GuiUpdater_Tick(System::Object^ sender, System::EventArgs^ e)
@@ -171,9 +169,11 @@ namespace BlueprintConverter
 
 	void ModList::AddModToList(SMBC::Mod* ModData)
 	{
-		if (this->UsedModData->find(ModData->Uuid) != this->UsedModData->end())
+		const std::string mUuidStr = (ModData != nullptr) ? ModData->Uuid.ToString() : "UnknownMod";
+
+		if (this->UsedModData->find(mUuidStr) != this->UsedModData->end())
 		{
-			ModListData*& lData_Ptr = this->UsedModData->at(ModData->Uuid);
+			ModListData*& lData_Ptr = this->UsedModData->at(mUuidStr);
 			lData_Ptr->used_parts++;
 
 			return;
@@ -183,7 +183,7 @@ namespace BlueprintConverter
 		new_listData->ptr = ModData;
 		new_listData->used_parts = 1;
 
-		this->UsedModData->insert(std::make_pair(ModData->Uuid, new_listData));
+		this->UsedModData->insert(std::make_pair(mUuidStr, new_listData));
 		this->UsedModVector->push_back(new_listData);
 	}
 
