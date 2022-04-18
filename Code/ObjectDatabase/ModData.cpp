@@ -4,8 +4,9 @@
 #include "ObjectDatabase\DatabaseLoader.h"
 
 #include "Lib\ConvData.h"
-#include "Lib\FileFunc.h"
 #include "Lib\String.h"
+#include "Lib\File.h"
+#include "Lib\Json.h"
 
 #include "DebugCon.h"
 
@@ -14,9 +15,6 @@ namespace fs = std::filesystem;
 
 namespace SMBC
 {
-	std::unordered_map<Uuid, ObjectData*> Mod::AllObjects = {};
-	std::unordered_map<Uuid, Mod*>        Mod::Mods       = {};
-
 	void Mod::GetBlockMaterials(const nlohmann::json& block, Texture::TextureList& tex)
 	{
 		const auto& bGlass = Json::Get(block, "glass");
@@ -452,11 +450,11 @@ namespace SMBC
 		const SMBC::Uuid& uuid,
 		const std::wstring& name,
 		const std::wstring& workshop_id,
-		const std::wstring& dir
-	) {
+		const std::wstring& dir)
+	{
 		if (Mods.find(uuid) != Mods.end())
 		{
-			DebugErrorL("The specified uuid is already in use by the other mod: ", Mods.at(uuid)->Name, " (", uuid.ToString(), ")");
+			DebugWarningL("Uuid conflict between 2 mods: \"", name, "\" and \"", Mods.at(uuid)->Name, "\" (", uuid.ToString(), ")");
 			return nullptr;
 		}
 

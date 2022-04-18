@@ -1,8 +1,8 @@
 #include "Blueprint.h"
 
-#include "Lib\FileFunc.h"
-#include "Lib\JsonFunc.h"
 #include "Lib\String.h"
+#include "Lib\File.h"
+#include "Lib\Json.h"
 
 #include <filesystem>
 

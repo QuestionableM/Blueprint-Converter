@@ -7,7 +7,8 @@ namespace SMBC
 {
 	class MaterialManager
 	{
-		static std::unordered_map<std::wstring, std::wstring> MatStorage;
+		inline static std::unordered_map<std::wstring, std::wstring> MatStorage = {};
+
 	public:
 		static void Initialize();
 

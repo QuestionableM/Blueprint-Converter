@@ -10,9 +10,9 @@
     <ClCompile Include="Code\ObjectDatabase\KeywordReplacer.cpp" />
     <ClCompile Include="Code\ObjectDatabase\LanguageDatabase.cpp" />
     <ClCompile Include="Code\ObjectDatabase\TextureDatabase.cpp" />
-    <ClCompile Include="Code\Lib\FileFunc.cpp" />
+    <ClCompile Include="Code\Lib\File.cpp" />
     <ClCompile Include="Code\Lib\GuiLib.cpp" />
-    <ClCompile Include="Code\Lib\JsonFunc.cpp" />
+    <ClCompile Include="Code\Lib\Json.cpp" />
     <ClCompile Include="Code\Lib\ProgramSettings.cpp" />
     <ClCompile Include="Code\Gui\Implementation\ModList.cpp" />
     <ClCompile Include="Code\ObjectDatabase\DatabaseLoader.cpp" />
@@ -45,9 +45,9 @@
     <ClInclude Include="Code\ObjectDatabase\KeywordReplacer.h" />
     <ClInclude Include="Code\ObjectDatabase\LanguageDatabase.h" />
     <ClInclude Include="Code\ObjectDatabase\TextureDatabase.h" />
-    <ClInclude Include="Code\Lib\FileFunc.h" />
+    <ClInclude Include="Code\Lib\File.h" />
     <ClInclude Include="Code\Lib\GuiLib.h" />
-    <ClInclude Include="Code\Lib\JsonFunc.h" />
+    <ClInclude Include="Code\Lib\Json.h" />
     <ClInclude Include="Code\Lib\ProgramSettings.h" />
     <ClInclude Include="Code\Lib\Bit.h" />
     <ClInclude Include="Code\Gui\ModList.h" />

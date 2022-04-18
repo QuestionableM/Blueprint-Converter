@@ -2,10 +2,13 @@
 
 #include <fstream>
 #include <string>
+
 #include <nlohmann/json.hpp>
 
-namespace SMBC {
-	namespace Json {
+namespace SMBC
+{
+	namespace Json
+	{
 		std::string ReadWholeFile(std::ifstream& input);
 		nlohmann::json LoadParseJson(const std::wstring& path, const bool& _stringify = false);
 

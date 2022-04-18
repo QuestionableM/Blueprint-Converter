@@ -15,8 +15,9 @@ namespace SMBC
 {
 	class Mod
 	{
-		static std::unordered_map<Uuid, ObjectData*> AllObjects;
-		static std::unordered_map<Uuid, Mod*> Mods;
+		inline static std::unordered_map<Uuid, ObjectData*> AllObjects = {};
+		inline static std::unordered_map<Uuid, Mod*> Mods              = {};
+
 	public:
 		std::unordered_map<Uuid, ObjectData*> Objects;
 		LangDB LanguageDB;

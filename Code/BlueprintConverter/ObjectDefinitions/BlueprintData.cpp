@@ -1,9 +1,9 @@
 #include "BlueprintData.h"
 
-#include "Lib\JsonFunc.h"
 #include "Lib\ConvData.h"
-#include "Lib\FileFunc.h"
 #include "Lib\String.h"
+#include "Lib\File.h"
+#include "Lib\Json.h"
 
 #include "BlueprintConverter\BlueprintConverter.h"
 #include "BlueprintConverter\ConvertSettings.h"

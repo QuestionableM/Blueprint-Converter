@@ -5,7 +5,7 @@
 
 #include "Lib\ProgramSettings.h"
 #include "Lib\ConvData.h"
-#include "Lib\FileFunc.h"
+#include "Lib\File.h"
 #include "Lib\String.h"
 
 #include <filesystem>

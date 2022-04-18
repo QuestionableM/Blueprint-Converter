@@ -1,8 +1,8 @@
 #include "KeywordReplacer.h"
 
-#include "Lib\JsonFunc.h"
 #include "Lib\String.h"
-#include "Lib\FileFunc.h"
+#include "Lib\Json.h"
+#include "Lib\File.h"
 
 #include "DebugCon.h"
 

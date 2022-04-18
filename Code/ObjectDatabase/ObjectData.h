@@ -9,7 +9,11 @@
 
 namespace SMBC
 {
-	enum class ObjectType { Block, Part };
+	enum class ObjectType
+	{
+		Block,
+		Part
+	};
 	
 	class BlockData;
 	class PartData;

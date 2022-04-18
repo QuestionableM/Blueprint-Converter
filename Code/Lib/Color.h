@@ -9,6 +9,7 @@ namespace SMBC
 		unsigned char bytes[3];
 
 		void SetColorInternal(const std::string& color);
+
 	public:
 		Color(const std::string& color);
 		Color(const unsigned char& r, const unsigned char& g, const unsigned char& b);

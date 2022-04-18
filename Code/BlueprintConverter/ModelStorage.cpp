@@ -8,9 +8,6 @@
 
 namespace SMBC
 {
-	std::unordered_map<std::wstring, Model*> ModelStorage::CachedModels = {};
-	Assimp::Importer ModelStorage::Importer = Assimp::Importer();
-
 	const aiScene* ModelStorage::LoadScene(const std::wstring& path)
 	{
 		return Importer.ReadFile(

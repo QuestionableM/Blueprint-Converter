@@ -1,6 +1,6 @@
 #include "ProgramSettings.h"
 
-#include "Lib\FileFunc.h"
+#include "Lib\File.h"
 #include "Lib\String.h"
 
 #include "ObjectDatabase\KeywordReplacer.h"
@@ -50,7 +50,14 @@ namespace SMBC
 				return;
 		}
 
-		mWstrVec.push_back(mWstr);
+		{
+			std::wstring mFinalString = mWstr;
+
+			String::ToLowerR(mFinalString);
+			String::ReplaceR(mFinalString, L'\\', L'/');
+
+			mWstrVec.push_back(mFinalString);
+		}
 	}
 
 
@@ -109,16 +116,23 @@ namespace SMBC
 
 	void Settings::FindLocalUsers()
 	{
-		System::String^ app_data_path = System::Environment::GetFolderPath(System::Environment::SpecialFolder::ApplicationData);
+		std::wstring SMLocalData;
+		if (!File::GetAppDataPath(SMLocalData)) return;
 
-		std::wstring SMLocalData = msclr::interop::marshal_as<std::wstring>(app_data_path);
 		SMLocalData.append(L"\\Axolot Games\\Scrap Mechanic\\User");
-
 		if (!File::Exists(SMLocalData)) return;
 
-		fs::directory_iterator DirIter(SMLocalData, fs::directory_options::skip_permission_denied);
-		for (auto& dir : DirIter)
+		std::error_code mError;
+		fs::directory_iterator DirIter(SMLocalData, fs::directory_options::skip_permission_denied, mError);
+
+		for (const auto& dir : DirIter)
 		{
+			if (mError)
+			{
+				DebugErrorL("Couldn't read an item in the directory: ", SMLocalData);
+				continue;
+			}
+
 			if (!dir.is_directory()) continue;
 
 			std::wstring BPPath = dir.path().wstring() + L"\\Blueprints";
@@ -132,7 +146,7 @@ namespace SMBC
 		}
 	}
 
-	void Settings::FindGamePath(nlohmann::json& config_json, bool& should_write)
+	void Settings::FindGamePath(const nlohmann::json& config_json, bool& should_write)
 	{
 		if (Settings::PathToSM.empty() || !File::Exists(Settings::PathToSM))
 		{
@@ -140,53 +154,20 @@ namespace SMBC
 
 			if (Settings::GetStaemPaths(game_path, ws_path))
 			{
-				{
-					nlohmann::json user_settings = Json::Get(config_json, "UserSettings");
+				Settings::PathToSM = game_path;
+				DebugOutL("Found a game path from the registry: ", ConCol::YELLOW_INT, Settings::PathToSM);
 
-					user_settings["GamePath"] = String::ToUtf8(game_path);
-					Settings::PathToSM = game_path;
-
-					DebugOutL("Found a game path from the registry: ", Settings::PathToSM);
-
-					config_json["UserSettings"] = user_settings;
-				}
-
-				{
-					Settings::FindLocalUsers();
-
-					Settings::AddToStrVec(Settings::BlueprintFolders, ws_path);
-					Settings::AddToStrVec(Settings::ModFolders, ws_path);
-				}
+				Settings::AddToStrVec(Settings::BlueprintFolders, ws_path);
+				Settings::AddToStrVec(Settings::ModFolders, ws_path);
 				
 				should_write = true;
 			}
-			else
-			{
-				return;
-			}
-		}
 
-		PathReplacer::SetReplacement(L"$GAME_FOLDER", Settings::PathToSM);
-	}
-
-	void Settings::FillUserSettings(nlohmann::json& config_json, bool& should_write)
-	{
-		nlohmann::json user_settings = Json::Get(config_json, "UserSettings");
-
-		const bool no_mod_folders = (user_settings.find("ScrapModsPath") == user_settings.end());
-		const bool no_bp_folders = (user_settings.find("BlueprintPaths") == user_settings.end());
-
-		if (no_mod_folders || no_bp_folders)
-		{
-			if (no_mod_folders) Settings::WstrVecToJsonArray(user_settings, Settings::ModFolders,       "ScrapModsPath" );
-			if (no_bp_folders)  Settings::WstrVecToJsonArray(user_settings, Settings::BlueprintFolders, "BlueprintPaths");
-
-			config_json["UserSettings"] = user_settings;
-			should_write = true;
+			Settings::FindLocalUsers();
 		}
 	}
 
-	void Settings::ReadUserSettings(nlohmann::json& config_json, bool& should_write)
+	void Settings::ReadUserSettings(const nlohmann::json& config_json, bool& should_write)
 	{
 		const auto& user_settings = Json::Get(config_json, "UserSettings");
 		if (user_settings.is_object())
@@ -207,8 +188,7 @@ namespace SMBC
 			Settings::OpenLinksInSteam = (open_in_steam.is_boolean() ? open_in_steam.get<bool>() : false);
 		}
 
-		Settings::FindGamePath    (config_json, should_write);
-		Settings::FillUserSettings(config_json, should_write);
+		Settings::FindGamePath(config_json, should_write);
 	}
 
 	nlohmann::json Settings::GetConfigJson(bool* should_write)
@@ -221,32 +201,39 @@ namespace SMBC
 
 		if (!cfgData.contains("ProgramSettings"))
 		{
-			nlohmann::json pSet = nlohmann::json::object();
-
-			nlohmann::json pKeywords = nlohmann::json::object();
-			pKeywords["$CHALLENGE_DATA"] = "$GAME_FOLDER/ChallengeData";
-			pKeywords["$GAME_DATA"] = "$GAME_FOLDER/Data";
-			pKeywords["$SURVIVAL_DATA"] = "$GAME_FOLDER/Survival";
-
-			nlohmann::json pLangDirs = nlohmann::json::array();
-			pLangDirs.push_back("$GAME_DATA/Gui/Language/English");
-			pLangDirs.push_back("$SURVIVAL_DATA/Gui/Language/English");
-			pLangDirs.push_back("$CHALLENGE_DATA/Gui/Language/English");
-
-			nlohmann::json pResourceUpgrades = nlohmann::json::array();
-			pResourceUpgrades.push_back("$GAME_DATA/upgrade_resources.json");
-
-			nlohmann::json pObjectDatabase = nlohmann::json::array();
-			pObjectDatabase.push_back("$CHALLENGE_DATA/Objects/Database/ShapeSets");
-			pObjectDatabase.push_back("$SURVIVAL_DATA/Objects/Database/ShapeSets");
-			pObjectDatabase.push_back("$GAME_DATA/Objects/Database/ShapeSets");
-
-			pSet["Keywords"] = pKeywords;
-			pSet["LanguageDirectories"] = pLangDirs;
-			pSet["ResourceUpgradeFiles"] = pResourceUpgrades;
-			pSet["ScrapObjectDatabase"] = pObjectDatabase;
-
-			cfgData["ProgramSettings"] = pSet;
+			cfgData["ProgramSettings"] =
+			{
+				{
+					"Keywords",
+					{
+						{ "$CHALLENGE_DATA", "$GAME_FOLDER/ChallengeData" },
+						{ "$GAME_DATA"     , "$GAME_FOLDER/Data"          },
+						{ "$SURVIVAL_DATA" , "$GAME_FOLDER/Survival"      }
+					}
+				},
+				{
+					"LanguageDirectories",
+					{
+						"$GAME_DATA/Gui/Language/English",
+						"$SURVIVAL_DATA/Gui/Language/English",
+						"$CHALLENGE_DATA/Gui/Language/English"
+					}
+				},
+				{
+					"ResourceUpgradeFiles",
+					{
+						"$GAME_DATA/upgrade_resources.json"
+					}
+				},
+				{
+					"ScrapObjectDatabase",
+					{
+						"$CHALLENGE_DATA/Objects/Database/ShapeSets",
+						"$SURVIVAL_DATA/Objects/Database/ShapeSets",
+						"$GAME_DATA/Objects/Database/ShapeSets"
+					}
+				}
+			};
 
 			if (should_write != nullptr)
 				*should_write = true;
@@ -269,6 +256,11 @@ namespace SMBC
 		Mod::ClearMods();
 	}
 
+	void Settings::UpdatePathReplacement()
+	{
+		PathReplacer::SetReplacement(L"$GAME_FOLDER", Settings::PathToSM);
+	}
+
 	void Settings::SaveConfig()
 	{
 		nlohmann::json cfgData = Settings::GetConfigJson();
@@ -284,24 +276,30 @@ namespace SMBC
 			cfgData["UserSettings"] = user_settings;
 		}
 
-		DebugOutL("Saving a new config...");
+		DebugOutL(ConCol::CYAN, "Saving a new config...");
 		Json::WriteToFile(Settings::ConfigPath.data(), cfgData);
+
+		//Update the game path keyword in case the path was updated
+		Settings::UpdatePathReplacement();
 	}
 
-	void Settings::ReadConfig()
+	bool Settings::ReadConfig()
 	{
+		DebugOutL(ConCol::CYAN, "Reading the program config...");
+
 		Settings::ClearData();
 
 		bool should_write = false;
 		nlohmann::json cfgData = Settings::GetConfigJson(&should_write);
 
 		Settings::ReadUserSettings(cfgData, should_write);
+
+		//Stop reading the config if the path to the game is invalid
+		if (Settings::PathToSM.empty()) return false;
+
+		Settings::UpdatePathReplacement();
 		Settings::ReadProgramSettings(cfgData);
 
-		if (should_write)
-		{
-			DebugOutL("Writing a new Config.json...");
-			Json::WriteToFile(Settings::ConfigPath.data(), cfgData);
-		}
+		return should_write;
 	}
 }

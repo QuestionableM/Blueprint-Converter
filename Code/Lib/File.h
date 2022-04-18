@@ -2,8 +2,10 @@
 
 #include <string>
 
-namespace SMBC {
-	namespace File {
+namespace SMBC
+{
+	namespace File
+	{
 		bool IsDirectory(const std::wstring& path);
 		bool IsBadPath(const std::wstring& path);
 
@@ -12,5 +14,7 @@ namespace SMBC {
 		bool SafeCreateDir(const std::wstring& path);
 		bool GetCanonicalPath(std::wstring& path);
 		std::wstring GetCanonicalPathW(const std::wstring& path);
+
+		bool GetAppDataPath(std::wstring& mPath);
 	}
 }

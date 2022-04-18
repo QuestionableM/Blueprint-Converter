@@ -4,106 +4,103 @@ namespace _GUI = SMBC::Gui;
 
 namespace SMBC
 {
-	namespace Gui
+	std::wstring Gui::OpenFileName(
+		const std::wstring& title,
+		FILEOPENDIALOGOPTIONS options,
+		LPCWSTR filter,
+		HWND owner)
 	{
-		std::wstring OpenFileName(
-			const std::wstring& title,
-			FILEOPENDIALOGOPTIONS options,
-			LPCWSTR filter,
-			HWND owner
-		) {
-			std::wstring _Output = L"";
+		std::wstring _Output = L"";
 
-			HRESULT hr = CoInitializeEx(NULL, COINIT_DISABLE_OLE1DDE | COINIT_APARTMENTTHREADED);
+		HRESULT hr = CoInitializeEx(NULL, COINIT_DISABLE_OLE1DDE | COINIT_APARTMENTTHREADED);
+
+		if (SUCCEEDED(hr))
+		{
+			IFileOpenDialog* pFileOpen;
+
+			hr = CoCreateInstance(CLSID_FileOpenDialog, NULL, CLSCTX_ALL,
+				IID_IFileOpenDialog, reinterpret_cast<void**>(&pFileOpen));
 
 			if (SUCCEEDED(hr))
 			{
-				IFileOpenDialog* pFileOpen;
-
-				hr = CoCreateInstance(CLSID_FileOpenDialog, NULL, CLSCTX_ALL,
-					IID_IFileOpenDialog, reinterpret_cast<void**>(&pFileOpen));
+				pFileOpen->SetOptions(options);
+				pFileOpen->SetTitle(title.c_str());
+				hr = pFileOpen->Show(owner);
 
 				if (SUCCEEDED(hr))
 				{
-					pFileOpen->SetOptions(options);
-					pFileOpen->SetTitle(title.c_str());
-					hr = pFileOpen->Show(owner);
-
+					IShellItem* pItem;
+					hr = pFileOpen->GetResult(&pItem);
 					if (SUCCEEDED(hr))
 					{
-						IShellItem* pItem;
-						hr = pFileOpen->GetResult(&pItem);
+						PWSTR pszFilePath;
+						hr = pItem->GetDisplayName(SIGDN_FILESYSPATH, &pszFilePath);
+
 						if (SUCCEEDED(hr))
 						{
-							PWSTR pszFilePath;
-							hr = pItem->GetDisplayName(SIGDN_FILESYSPATH, &pszFilePath);
-
-							if (SUCCEEDED(hr))
-							{
-								_Output = std::wstring(pszFilePath);
-								CoTaskMemFree(pszFilePath);
-							}
-
-							pItem->Release();
+							_Output = std::wstring(pszFilePath);
+							CoTaskMemFree(pszFilePath);
 						}
+
+						pItem->Release();
 					}
-					pFileOpen->Release();
 				}
-				CoUninitialize();
+				pFileOpen->Release();
 			}
-
-			return _Output;
+			CoUninitialize();
 		}
 
-		void OpenFolderInExplorer(const std::wstring& path)
-		{
-			System::Diagnostics::Process::Start("explorer.exe", gcnew System::String(path.c_str()));
-		}
+		return _Output;
+	}
 
-		WForms::DialogResult Message(
-			System::String^ title,
-			System::String^ description,
-			WForms::MessageBoxButtons buttons,
-			WForms::MessageBoxIcon icon
-		) {
-			WForms::DialogResult _result = WForms::MessageBox::Show(
-				description, title, buttons, icon
-			);
+	void Gui::OpenFolderInExplorer(const std::wstring& path)
+	{
+		System::Diagnostics::Process::Start("explorer.exe", gcnew System::String(path.c_str()));
+	}
 
-			return _result;
-		}
+	WForms::DialogResult Gui::Message(
+		System::String^ title,
+		System::String^ description,
+		WForms::MessageBoxButtons buttons,
+		WForms::MessageBoxIcon icon)
+	{
+		WForms::DialogResult _result = WForms::MessageBox::Show(
+			description, title, buttons, icon
+		);
 
-		WForms::DialogResult Error(System::String^ title, System::String^ description)
-		{
-			WForms::DialogResult _result = _GUI::Message(
-				title, description,
-				WForms::MessageBoxButtons::OK,
-				WForms::MessageBoxIcon::Error
-			);
+		return _result;
+	}
 
-			return _result;
-		}
+	WForms::DialogResult Gui::Error(System::String^ title, System::String^ description)
+	{
+		WForms::DialogResult _result = _GUI::Message(
+			title, description,
+			WForms::MessageBoxButtons::OK,
+			WForms::MessageBoxIcon::Error
+		);
 
-		WForms::DialogResult Warning(System::String^ title, System::String^ description)
-		{
-			WForms::DialogResult _result = _GUI::Message(
-				title, description,
-				WForms::MessageBoxButtons::OK,
-				WForms::MessageBoxIcon::Warning
-			);
+		return _result;
+	}
 
-			return _result;
-		}
+	WForms::DialogResult Gui::Warning(System::String^ title, System::String^ description)
+	{
+		WForms::DialogResult _result = _GUI::Message(
+			title, description,
+			WForms::MessageBoxButtons::OK,
+			WForms::MessageBoxIcon::Warning
+		);
 
-		WForms::DialogResult Question(System::String^ title, System::String^ description)
-		{
-			WForms::DialogResult _result = _GUI::Message(
-				title, description,
-				WForms::MessageBoxButtons::YesNo,
-				WForms::MessageBoxIcon::Question
-			);
+		return _result;
+	}
 
-			return _result;
-		}
+	WForms::DialogResult Gui::Question(System::String^ title, System::String^ description)
+	{
+		WForms::DialogResult _result = _GUI::Message(
+			title, description,
+			WForms::MessageBoxButtons::YesNo,
+			WForms::MessageBoxIcon::Question
+		);
+
+		return _result;
 	}
 }

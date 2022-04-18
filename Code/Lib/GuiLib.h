@@ -6,14 +6,17 @@
 
 namespace WForms = System::Windows::Forms;
 
-namespace SMBC {
-	namespace Gui {
+namespace SMBC
+{
+	namespace Gui
+	{
 		std::wstring OpenFileName(
 			const std::wstring& title,
 			FILEOPENDIALOGOPTIONS options = 0,
 			LPCWSTR filter = L"All Files (*.*)\0*.*\0",
 			HWND owner = NULL
 		);
+
 		void OpenFolderInExplorer(const std::wstring& path);
 		
 		WForms::DialogResult Message(

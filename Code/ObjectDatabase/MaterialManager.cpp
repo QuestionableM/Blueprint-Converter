@@ -1,15 +1,13 @@
 #include "MaterialManager.h"
 
 #include "Lib\ProgramSettings.h"
-#include "Lib\JsonFunc.h"
 #include "Lib\String.h"
+#include "Lib\Json.h"
 
 #include "DebugCon.h"
 
 namespace SMBC
 {
-	std::unordered_map<std::wstring, std::wstring> MaterialManager::MatStorage = {};
-
 	void MaterialManager::Initialize()
 	{
 		nlohmann::json pMatMap = Json::LoadParseJson(Settings::MaterialMapPath.data());

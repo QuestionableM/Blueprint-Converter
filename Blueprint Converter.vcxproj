@@ -37,9 +37,9 @@
     <ClCompile Include="Code\Gui\Implementation\ModList.cpp" />
     <ClCompile Include="Code\Lib\Color.cpp" />
     <ClCompile Include="Code\Lib\ConvData.cpp" />
-    <ClCompile Include="Code\Lib\FileFunc.cpp" />
+    <ClCompile Include="Code\Lib\File.cpp" />
     <ClCompile Include="Code\Lib\GuiLib.cpp" />
-    <ClCompile Include="Code\Lib\JsonFunc.cpp" />
+    <ClCompile Include="Code\Lib\Json.cpp" />
     <ClCompile Include="Code\Lib\ProgramSettings.cpp" />
     <ClCompile Include="Code\Lib\String.cpp" />
     <ClCompile Include="Code\Main.cpp" />
@@ -88,9 +88,9 @@
     <ClInclude Include="Code\Lib\BuildVersion.h" />
     <ClInclude Include="Code\Lib\Color.h" />
     <ClInclude Include="Code\Lib\ConvData.h" />
-    <ClInclude Include="Code\Lib\FileFunc.h" />
+    <ClInclude Include="Code\Lib\File.h" />
     <ClInclude Include="Code\Lib\GuiLib.h" />
-    <ClInclude Include="Code\Lib\JsonFunc.h" />
+    <ClInclude Include="Code\Lib\Json.h" />
     <ClInclude Include="Code\Lib\ProgramSettings.h" />
     <ClInclude Include="Code\Lib\String.h" />
     <ClInclude Include="Code\ObjectDatabase\Blueprint.h" />

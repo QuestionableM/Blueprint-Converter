@@ -3,7 +3,8 @@
 #include "BlueprintConverter\ObjectDefinitions\Entity.h"
 
 #include "Lib\ProgramSettings.h"
-#include "Lib\JsonFunc.h"
+#include "Lib\Json.h"
+
 #include "DebugCon.h"
 
 #include <string>

@@ -19,10 +19,6 @@ namespace SMBC
 
 
 
-	ConvState ConvData::State = ConvState::None;
-	std::size_t ConvData::ProgressMax = 0ull;
-	std::size_t ConvData::ProgressValue = 0ull;
-
 	void ConvData::SetState(const ConvState& state, const std::size_t& MaxValue)
 	{
 		ConvData::State = state;

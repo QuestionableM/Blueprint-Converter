@@ -2,8 +2,8 @@
 
 #include "ObjectDatabase\KeywordReplacer.h"
 
-#include "Lib\JsonFunc.h"
 #include "Lib\String.h"
+#include "Lib\Json.h"
 
 namespace SMBC
 {

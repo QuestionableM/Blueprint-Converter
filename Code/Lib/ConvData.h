@@ -39,9 +39,9 @@ namespace SMBC
 	class ConvData
 	{
 	public:
-		static ConvState State;
-		static std::size_t ProgressMax;
-		static std::size_t ProgressValue;
+		inline static ConvState State           = ConvState::None;
+		inline static std::size_t ProgressMax   = 0;
+		inline static std::size_t ProgressValue = 0;
 
 		static void SetState(const ConvState& state, const std::size_t& MaxValue);
 		static void SetState(const ConvState& state);

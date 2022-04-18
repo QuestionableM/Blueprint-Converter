@@ -1,12 +1,14 @@
 #pragma once
 
-#include <string>
-#include <unordered_map>
-
 #include "Lib\Uuid.h"
 
-namespace SMBC {
-	class LangDB {
+#include <unordered_map>
+#include <string>
+
+namespace SMBC
+{
+	class LangDB
+	{
 	public:
 		std::unordered_map<Uuid, std::wstring> Translations;
 

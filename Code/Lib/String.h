@@ -2,8 +2,10 @@
 
 #include <string>
 
-namespace SMBC {
-	namespace String {
+namespace SMBC
+{
+	namespace String
+	{
 		std::string ToUtf8(const std::wstring& wstr);
 		std::wstring ToWide(const std::string& str);
 

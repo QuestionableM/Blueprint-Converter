@@ -1,10 +1,12 @@
 #include "Gui/About.h"
+
 #include "Lib/BuildVersion.h"
-#include <string>
 
 #include <Windows.h>
+#include <string>
 
-namespace BlueprintConverter {
+namespace BlueprintConverter
+{
 	About::About()
 	{
 		this->InitializeComponent();

@@ -8,18 +8,15 @@
 
 namespace SMBC
 {
-	namespace BPFunction
+	void BPFunction::ConvertBlueprintToObj(const std::wstring& bp_path, const std::wstring& bp_name, ConvertError& cError)
 	{
-		void ConvertBlueprintToObj(const std::wstring& bp_path, const std::wstring& bp_name, ConvertError& cError)
-		{
-			BlueprintData* bpData = BlueprintData::LoadFromFile(bp_path, cError);
-			if (cError || !bpData) return;
+		BlueprintData* bpData = BlueprintData::LoadFromFile(bp_path, cError);
+		if (cError || !bpData) return;
 
-			bpData->WriteToFile(bp_name, cError);
+		bpData->WriteToFile(bp_name, cError);
 
-			delete bpData;
+		delete bpData;
 
-			SMBC::ModelStorage::ClearStorage();
-		}
+		SMBC::ModelStorage::ClearStorage();
 	}
 }

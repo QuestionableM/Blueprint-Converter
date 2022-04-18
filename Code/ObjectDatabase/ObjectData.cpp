@@ -1,7 +1,5 @@
 #include "ObjectData.h"
 
-#include "DebugCon.h"
-
 namespace SMBC
 {
 	ObjectType BlockData::Type() const
@@ -13,8 +11,8 @@ namespace SMBC
 		const SMBC::Uuid& uuid,
 		const std::wstring& name,
 		SMBC::Texture::TextureList& textures,
-		const int& tiling
-	) {
+		const int& tiling)
+	{
 		this->Uuid = uuid;
 		this->Name = name;
 		this->Tiling = tiling;
@@ -31,8 +29,8 @@ namespace SMBC
 		const std::wstring& path,
 		const std::wstring& name,
 		SMBC::Texture::Texture& textures,
-		const glm::vec3& bounds
-	) {
+		const glm::vec3& bounds)
+	{
 		this->Uuid = uuid;
 		this->Path = path;
 		this->Name = name;

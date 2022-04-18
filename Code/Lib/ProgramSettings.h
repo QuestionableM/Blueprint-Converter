@@ -3,10 +3,12 @@
 #include <vector>
 #include <string>
 
-#include "Lib\JsonFunc.h"
+#include "Lib\Json.h"
 
-namespace SMBC {
-	class Settings {
+namespace SMBC
+{
+	class Settings
+	{
 	public:
 		constexpr static const std::wstring_view ConfigPath = L"./Resources/Config.json";
 		constexpr static const std::wstring_view RotSetPath = L"./Resources/RotationSettings.json";
@@ -27,15 +29,17 @@ namespace SMBC {
 
 		static bool GetStaemPaths(std::wstring& game_path, std::wstring& workshop_path);
 		static void FindLocalUsers();
-		static void FindGamePath(nlohmann::json& config_json, bool& should_write);
-		static void FillUserSettings(nlohmann::json& config_json, bool& should_write);
-		static void ReadUserSettings(nlohmann::json& config_json, bool& should_write);
+		static void FindGamePath(const nlohmann::json& config_json, bool& should_write);
+		static void ReadUserSettings(const nlohmann::json& config_json, bool& should_write);
 
 
 		static nlohmann::json GetConfigJson(bool* should_write = nullptr);
 		static void ClearData();
+
+		static void UpdatePathReplacement();
+
 	public:
 		static void SaveConfig();
-		static void ReadConfig();
+		static bool ReadConfig();
 	};
 }
