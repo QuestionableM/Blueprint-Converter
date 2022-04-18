@@ -1,2 +1,2 @@
 #pragma once
-#define SMBC_BUILD_VERSION 714
+#define SMBC_BUILD_VERSION 717
