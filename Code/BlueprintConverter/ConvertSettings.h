@@ -5,12 +5,12 @@ namespace SMBC
 	class ConvertSettings
 	{
 	public:
-		static bool TextureList;
-		static bool ApplyTextures;
-		static bool ExportUvs;
-		static bool ExportNormals;
-		static bool MatByColor;
+		inline static bool TextureList   = false;
+		inline static bool ApplyTextures = true;
+		inline static bool ExportUvs     = true;
+		inline static bool ExportNormals = true;
+		inline static bool MatByColor    = true;
 
-		static int SeparationMethod;
+		inline static int SeparationMethod = 0;
 	};
 }

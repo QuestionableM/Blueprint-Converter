@@ -16,14 +16,6 @@ namespace fs = std::filesystem;
 
 namespace SMBC
 {
-	std::vector<std::wstring> Settings::BlueprintFolders = {};
-	std::vector<std::wstring> Settings::ModFolders = {};
-	std::vector<std::wstring> Settings::SMDirDatabase = {};
-	std::vector<std::wstring> Settings::VanillaLanguagePaths = {};
-
-	std::wstring Settings::PathToSM = L"";
-	bool Settings::OpenLinksInSteam = false;
-
 	void Settings::JsonStrArrayToVector(const nlohmann::json& pJson, const std::string& pKey, std::vector<std::wstring>& pWstrVec)
 	{
 		const auto& pArray = Json::Get(pJson, pKey);
@@ -77,8 +69,9 @@ namespace SMBC
 
 				std::wstring wstr_key = String::ToWide(keyword.key());
 				std::wstring wstr_key_repl = String::ToWide(keyword.value().get<std::string>());
+				PathReplacer::ReplaceKeyR(wstr_key_repl);
 
-				PathReplacer::Add(wstr_key, PathReplacer::ReplaceKey(wstr_key_repl));
+				PathReplacer::SetReplacement(wstr_key, wstr_key_repl);
 			}
 		}
 
@@ -87,7 +80,7 @@ namespace SMBC
 			Settings::JsonStrArrayToVector(pSettings, "ResourceUpgradeFiles", pUpgradeArray);
 
 			for (const std::wstring& pUpgradePath : pUpgradeArray)
-				PathReplacer::ReadResourceUpgrades(pUpgradePath);
+				PathReplacer::LoadResourceUpgrades(pUpgradePath);
 		}
 
 		Settings::JsonStrArrayToVector(pSettings, "LanguageDirectories", Settings::VanillaLanguagePaths);
@@ -150,7 +143,7 @@ namespace SMBC
 				{
 					nlohmann::json user_settings = Json::Get(config_json, "UserSettings");
 
-					user_settings["ScrapPath"] = String::ToUtf8(game_path);
+					user_settings["GamePath"] = String::ToUtf8(game_path);
 					Settings::PathToSM = game_path;
 
 					DebugOutL("Found a game path from the registry: ", Settings::PathToSM);
@@ -173,7 +166,7 @@ namespace SMBC
 			}
 		}
 
-		PathReplacer::Add(L"$GAME_FOLDER", Settings::PathToSM);
+		PathReplacer::SetReplacement(L"$GAME_FOLDER", Settings::PathToSM);
 	}
 
 	void Settings::FillUserSettings(nlohmann::json& config_json, bool& should_write)
@@ -198,7 +191,7 @@ namespace SMBC
 		const auto& user_settings = Json::Get(config_json, "UserSettings");
 		if (user_settings.is_object())
 		{
-			const auto& game_path = Json::Get(user_settings, "ScrapPath");
+			const auto& game_path = Json::Get(user_settings, "GamePath");
 			if (game_path.is_string())
 			{
 				const std::string sm_path = game_path.get<std::string>();
@@ -272,7 +265,7 @@ namespace SMBC
 		Settings::PathToSM.clear();
 		Settings::OpenLinksInSteam = false;
 
-		PathReplacer::ClearData();
+		PathReplacer::Clear();
 		Mod::ClearMods();
 	}
 

@@ -12,17 +12,16 @@ namespace SMBC {
 		constexpr static const std::wstring_view RotSetPath = L"./Resources/RotationSettings.json";
 		constexpr static const std::wstring_view MaterialMapPath = L"./Resources/MaterialIds.json";
 
-		static std::vector<std::wstring> BlueprintFolders;
-		static std::vector<std::wstring> ModFolders;
-		static std::vector<std::wstring> SMDirDatabase;
-		static std::vector<std::wstring> VanillaLanguagePaths;
-		static std::wstring PathToSM;
-		static bool OpenLinksInSteam;
+		inline static std::vector<std::wstring> BlueprintFolders = {};
+		inline static std::vector<std::wstring> ModFolders = {};
+		inline static std::vector<std::wstring> SMDirDatabase = {};
+		inline static std::vector<std::wstring> VanillaLanguagePaths = {};
+		inline static std::wstring PathToSM = L"";
+		inline static bool OpenLinksInSteam = false;
 
 		static void JsonStrArrayToVector(const nlohmann::json& pJson, const std::string& pKey, std::vector<std::wstring>& pWstrVec);
 		static void WstrVecToJsonArray(nlohmann::json& out_json, std::vector<std::wstring>& mWstrVec, const std::string& pKey);
 		static void AddToStrVec(std::vector<std::wstring>& mWstrVec, const std::wstring& mWstr);
-
 
 		static void ReadProgramSettings(const nlohmann::json& config_json);
 

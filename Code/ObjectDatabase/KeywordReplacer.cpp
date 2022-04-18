@@ -4,124 +4,130 @@
 #include "Lib\String.h"
 #include "Lib\FileFunc.h"
 
+#include "DebugCon.h"
+
 namespace SMBC
 {
-	std::unordered_map<std::wstring, std::wstring> PathReplacer::PathReplacements = {};
-	std::unordered_map<std::wstring, std::wstring> PathReplacer::KeyReplacements  = {};
-
-	bool PathReplacer::ReplaceKeyInternal(std::wstring& path)
-	{
-		for (const auto& k_ReplData : PathReplacer::KeyReplacements)
-			if (path.find(k_ReplData.first) != std::wstring::npos)
-			{
-				path = (k_ReplData.second + path.substr(k_ReplData.first.size()));
-				return true;
-			}
-
-		return false;
-	}
-
-	void PathReplacer::ReadResourceUpgrades(const std::wstring& path)
-	{
-		nlohmann::json _json = Json::LoadParseJson(path);
-		if (!_json.is_object()) return;
-
-		const auto& upgrades = Json::Get(_json, "upgrade");
-		if (!upgrades.is_array()) return;
-
-		for (auto& upgrade_list : upgrades)
-		{
-			if (!upgrade_list.is_array()) continue;
-
-			for (auto& upgrade_item : upgrade_list)
-			{
-				if (!upgrade_item.is_array()) continue;
-
-				const auto& key = Json::Get(upgrade_item, 0);
-				const auto& replacement = Json::Get(upgrade_item, 1);
-
-				if (!key.is_string() || !replacement.is_string()) continue;
-
-				std::wstring key_wstr  = String::ToWide(key.get<std::string>());
-				std::wstring repl_wstr = String::ToWide(replacement.get<std::string>());
-
-				PathReplacer::CreateKey(key_wstr, repl_wstr);
-				PathReplacer::PathReplacements.insert(std::make_pair(key_wstr, repl_wstr));
-			}
-		}
-	}
-
-	std::wstring PathReplacer::GetResourceUpgrade(const std::wstring& path)
-	{
-		std::wstring _path_cpy = String::ToLower(path);
-		String::ReplaceR(_path_cpy, L'\\', L'/');
-
-		if (PathReplacements.find(_path_cpy) != PathReplacements.end())
-			return PathReplacements.at(_path_cpy);
-
-		return _path_cpy;
-	}
-
-	void PathReplacer::CreateKey(std::wstring& key, std::wstring& value)
+	void PathReplacer::CreateKey(std::wstring& key, std::wstring& replacement)
 	{
 		String::ToLowerR(key);
-		String::ToLowerR(value);
+		String::ToLowerR(replacement);
 
 		String::ReplaceR(key, L'\\', L'/');
-		String::ReplaceR(value, L'\\', L'/');
+		String::ReplaceR(replacement, L'\\', L'/');
 	}
 
-	void PathReplacer::Add(const std::wstring& key, const std::wstring& value)
+	void PathReplacer::SetReplacement(const std::wstring& key, const std::wstring& replacement)
 	{
-		std::wstring key_cpy = key;
-		std::wstring val_cpy = value;
+		std::wstring mLowerKey = key;
+		std::wstring mLowerVal = replacement;
 
-		PathReplacer::CreateKey(key_cpy, val_cpy);
+		PathReplacer::CreateKey(mLowerKey, mLowerVal);
 
-		if (KeyReplacements.find(key_cpy) == KeyReplacements.end())
-			KeyReplacements.insert(std::make_pair(key_cpy, val_cpy));
+		if (m_KeyReplacements.find(mLowerKey) != m_KeyReplacements.end())
+		{
+			m_KeyReplacements.at(mLowerKey) = mLowerVal;
+			return;
+		}
+
+		m_KeyReplacements.insert(std::make_pair(mLowerKey, mLowerVal));
 	}
-
-	void PathReplacer::ClearData()
-	{
-		PathReplacer::PathReplacements.clear();
-		PathReplacer::KeyReplacements.clear();
-	}
-
+	
 	void PathReplacer::SetModData(const std::wstring& path, const SMBC::Uuid& uuid)
 	{
-		if (KeyReplacements.find(L"$mod_data") != KeyReplacements.end())
+		const std::wstring mContentKey = String::ToWide("$content_" + uuid.ToString());
+
+		PathReplacer::SetReplacement(mContentKey, path);
+		PathReplacer::SetReplacement(L"$mod_data", path);
+	}
+	
+	void PathReplacer::UpgradeResource(const std::wstring& mPath, std::wstring& mOutput)
+	{
+		std::wstring mLowerPath = mPath;
+
 		{
-			KeyReplacements.at(L"$mod_data") = path;
+			String::ToLowerR(mLowerPath);
+			String::ReplaceR(mLowerPath, L'\\', L'/');
+		}
+
+		if (m_ResourceUpgrades.find(mLowerPath) != m_ResourceUpgrades.end())
+		{
+			mOutput = m_ResourceUpgrades.at(mLowerPath);
 		}
 		else
 		{
-			KeyReplacements.insert(std::make_pair(L"$mod_data", path));
+			mOutput = mLowerPath;
 		}
-
-		const std::wstring content_key = (L"$content_" + uuid.ToWstring());
-		if (KeyReplacements.find(content_key) == KeyReplacements.end())
-			KeyReplacements.insert(std::make_pair(content_key, path));
 	}
-
-	std::wstring PathReplacer::ReplaceKey(const std::wstring& str)
+	
+	void PathReplacer::LoadResourceUpgrades(const std::wstring& path)
 	{
-		std::wstring final_path = PathReplacer::GetResourceUpgrade(str);
+		const nlohmann::json uJson = Json::LoadParseJson(path);
+		if (!uJson.is_object()) return;
 
-		if (PathReplacer::ReplaceKeyInternal(final_path))
+		DebugOutL("Loading resource upgrades: ", ConCol::YELLOW_INT, path);
+
+		const auto& upgrade_array = Json::Get(uJson, "upgrade");
+		if (!upgrade_array.is_array()) return;
+
+		for (const auto& upgrade_list : upgrade_array)
 		{
-			std::wstring CanonicalPath = File::GetCanonicalPathW(final_path);
-			String::ToLowerR(CanonicalPath);
+			if (!upgrade_list.is_array()) continue;
 
-			return CanonicalPath;
+			for (const auto& upgrade_obj : upgrade_list)
+			{
+				const auto& upgrade_key = Json::Get(upgrade_obj, 0);
+				const auto& upgrade_val = Json::Get(upgrade_obj, 1);
+
+				if (!(upgrade_key.is_string() && upgrade_val.is_string())) continue;
+
+				std::wstring upKeyWstr = String::ToWide(upgrade_key.get<std::string>());
+				std::wstring upValWstr = String::ToWide(upgrade_val.get<std::string>());
+
+				PathReplacer::CreateKey(upKeyWstr, upValWstr);
+
+				if (m_ResourceUpgrades.find(upKeyWstr) == m_ResourceUpgrades.end())
+					m_ResourceUpgrades.insert(std::make_pair(upKeyWstr, upValWstr));
+			}
 		}
-
-		return final_path;
 	}
 
-	void PathReplacer::RemoveNewLineCharacters(std::wstring& str)
+	std::wstring PathReplacer::ReplaceKey(const std::wstring& path)
 	{
-		String::ReplaceR(str, L'\n', L' ');
-		String::ReplaceR(str, L'\r', L' ');
+		std::wstring mOutput;
+		PathReplacer::UpgradeResource(path, mOutput);
+
+		const std::size_t mKeyIdx = mOutput.find_first_of(L'/');
+		if (mKeyIdx != std::wstring::npos)
+		{
+			const std::wstring mKeyChunk = mOutput.substr(0, mKeyIdx);
+
+			if (m_KeyReplacements.find(mKeyChunk) != m_KeyReplacements.end())
+				return (m_KeyReplacements.at(mKeyChunk) + mOutput.substr(mKeyIdx));
+		}
+
+		return mOutput;
+	}
+
+	void PathReplacer::ReplaceKeyR(std::wstring& path)
+	{
+		PathReplacer::UpgradeResource(path, path);
+
+		const std::size_t mKeyIdx = path.find_first_of(L'/');
+		if (mKeyIdx != std::wstring::npos)
+		{
+			const std::wstring mKeyChunk = path.substr(0, mKeyIdx);
+
+			if (m_KeyReplacements.find(mKeyChunk) != m_KeyReplacements.end())
+				path = (m_KeyReplacements.at(mKeyChunk) + path.substr(mKeyIdx));
+		}
+	}
+
+	void PathReplacer::Clear()
+	{
+		DebugOutL(__FUNCTION__);
+
+		m_KeyReplacements.clear();
+		m_ResourceUpgrades.clear();
 	}
 }

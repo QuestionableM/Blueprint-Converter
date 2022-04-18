@@ -21,7 +21,6 @@
   <ItemGroup>
     <ClCompile Include="Code\BlueprintConverter\BlueprintConverter.cpp" />
     <ClCompile Include="Code\BlueprintConverter\ModelStorage.cpp" />
-    <ClCompile Include="Code\BlueprintConverter\ConvertSettings.cpp" />
     <ClCompile Include="Code\BlueprintConverter\ObjectDefinitions\BlueprintData.cpp" />
     <ClCompile Include="Code\BlueprintConverter\ObjectDefinitions\BlockModel.cpp" />
     <ClCompile Include="Code\BlueprintConverter\ObjectDefinitions\Model.cpp" />

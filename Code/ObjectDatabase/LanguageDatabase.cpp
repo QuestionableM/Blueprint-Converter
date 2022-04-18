@@ -19,13 +19,16 @@ namespace SMBC
 			const auto& _Title = Json::Get(trans.value(), "title");
 			if (!_Title.is_string()) continue;
 
-			std::wstring _WstrTitle = String::ToWide(_Title.get<std::string>());
-			PathReplacer::RemoveNewLineCharacters(_WstrTitle);
+			std::wstring mWstrTitle = String::ToWide(_Title.get<std::string>());
 
-			this->AddTranslation(
-				Uuid(trans.key()),
-				_WstrTitle
-			);
+			{
+				//Remove the new line characters
+
+				String::ReplaceR(mWstrTitle, L'\n', L' ');
+				String::ReplaceR(mWstrTitle, L'\r', L' ');
+			}
+
+			this->AddTranslation(Uuid(trans.key()), mWstrTitle);
 		}
 	}
 
