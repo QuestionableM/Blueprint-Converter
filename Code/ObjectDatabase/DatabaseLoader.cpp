@@ -35,7 +35,7 @@ namespace SMBC
 			_VanillaParts->LoadObjectsFromDirectory(data_path);
 		}
 
-		DebugOutL("Loaded ", ConCol::YELLOW_INT, _VanillaParts->Name, ConCol::WHITE, " (Objects: ", ConCol::YELLOW_INT, _VanillaParts->Objects.size(), ConCol::WHITE, ")");
+		DebugOutL("Loaded: ", 0b1101_fg, _VanillaParts->Name, 0b1110_fg, " (Objects: ", 0b1101_fg, _VanillaParts->Objects.size(), 0b1110_fg, ")");
 	}
 
 	void DatabaseLoader::LoadModDatabase()
@@ -61,18 +61,18 @@ namespace SMBC
 
 				const std::wstring mModDir = dir.path().wstring();
 
-				Mod* NewMod = Mod::CreateModFromDirectory(mModDir);
-				if (!NewMod) continue;
+				Mod* pNewMod = Mod::CreateModFromDirectory(mModDir);
+				if (!pNewMod) continue;
 
 				const std::wstring mDatabasePath = mModDir + L"/Objects/Database/ShapeSets";
 				if (!File::Exists(mDatabasePath)) continue;
 
-				NewMod->LoadTranslations();
+				pNewMod->LoadTranslations();
 
-				PathReplacer::SetModData(NewMod->Path, NewMod->Uuid);
-				NewMod->LoadObjectsFromDirectory(mDatabasePath);
+				PathReplacer::SetModData(pNewMod->Path, pNewMod->Uuid);
+				pNewMod->LoadObjectsFromDirectory(mDatabasePath);
 
-				DebugOutL("Loaded: ", ConCol::YELLOW_INT , NewMod->Name, ConCol::WHITE, " (Objects: ", ConCol::YELLOW_INT, NewMod->Objects.size(), ConCol::WHITE, ")");
+				DebugOutL("Loaded: ", 0b1101_fg, pNewMod->Name, 0b1110_fg, " (Objects: ", 0b1101_fg, pNewMod->Objects.size(), 0b1110_fg, ")");
 			}
 		}
 	}

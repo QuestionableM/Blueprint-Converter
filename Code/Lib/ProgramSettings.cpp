@@ -155,7 +155,7 @@ namespace SMBC
 			if (Settings::GetStaemPaths(game_path, ws_path))
 			{
 				Settings::PathToSM = game_path;
-				DebugOutL("Found a game path from the registry: ", ConCol::YELLOW_INT, Settings::PathToSM);
+				DebugOutL("Found a game path from the registry: ", 0b1101_fg, Settings::PathToSM);
 
 				Settings::AddToStrVec(Settings::BlueprintFolders, ws_path);
 				Settings::AddToStrVec(Settings::ModFolders, ws_path);
@@ -277,7 +277,7 @@ namespace SMBC
 			cfgData["UserSettings"] = user_settings;
 		}
 
-		DebugOutL(ConCol::CYAN, "Saving a new config...");
+		DebugOutL(0b0110_fg, "Saving a new config...");
 		Json::WriteToFile(Settings::ConfigPath.data(), cfgData);
 
 		//Update the game path keyword in case the path was updated
@@ -286,7 +286,7 @@ namespace SMBC
 
 	bool Settings::ReadConfig()
 	{
-		DebugOutL(ConCol::CYAN, "Reading the program config...");
+		DebugOutL(0b0110_fg, "Reading the program config...");
 		Settings::ClearData();
 
 		bool should_write = false;

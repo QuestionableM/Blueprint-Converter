@@ -4,46 +4,11 @@
 
 #ifdef SMBC_DEBUG_CONSOLE_ENABLED
 
-#include "Lib\WinInclude.h"
+#include "ConsoleColors.hpp"
 #include <string>
 
 namespace SMBC
 {
-	enum class ConCol : WORD
-	{
-		RED = FOREGROUND_RED,
-		GREEN = FOREGROUND_GREEN,
-		BLUE = FOREGROUND_BLUE,
-		YELLOW = FOREGROUND_RED | FOREGROUND_GREEN,
-		PINK = FOREGROUND_RED | FOREGROUND_BLUE,
-		CYAN = FOREGROUND_GREEN | FOREGROUND_BLUE,
-		WHITE = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE,
-
-		RED_INT = FOREGROUND_RED | FOREGROUND_INTENSITY,
-		GREEN_INT = FOREGROUND_GREEN | FOREGROUND_INTENSITY,
-		BLUE_INT = FOREGROUND_BLUE | FOREGROUND_INTENSITY,
-		YELLOW_INT = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY,
-		PINK_INT = FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_INTENSITY,
-		CYAN_INT = FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY,
-		WHITE_INT = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY,
-
-		RED_BG = BACKGROUND_RED,
-		GREEN_BG = BACKGROUND_GREEN,
-		BLUE_BG = BACKGROUND_BLUE,
-		YELLOW_BG = BACKGROUND_RED | BACKGROUND_GREEN,
-		PINK_BG = BACKGROUND_RED | BACKGROUND_BLUE,
-		CYAN_BG = BACKGROUND_GREEN | BACKGROUND_BLUE,
-		WHITE_BG = BACKGROUND_RED | BACKGROUND_GREEN | BACKGROUND_BLUE,
-
-		RED_BG_INT = BACKGROUND_RED | BACKGROUND_INTENSITY,
-		GREEN_BG_INT = BACKGROUND_GREEN | BACKGROUND_INTENSITY,
-		BLUE_BG_INT = BACKGROUND_BLUE | BACKGROUND_INTENSITY,
-		YELLOW_BG_INT = BACKGROUND_RED | BACKGROUND_GREEN | BACKGROUND_INTENSITY,
-		PINK_BG_INT = BACKGROUND_RED | BACKGROUND_BLUE | BACKGROUND_INTENSITY,
-		CYAN_BG_INT = BACKGROUND_GREEN | BACKGROUND_BLUE | BACKGROUND_INTENSITY,
-		WHITE_BG_INT = BACKGROUND_RED | BACKGROUND_GREEN | BACKGROUND_BLUE | BACKGROUND_INTENSITY
-	};
-
 	class __ConsoleOutputHandler;
 	class Console
 	{
@@ -65,7 +30,7 @@ namespace SMBC
 		static void Output(const double& number);
 		static void Output(const float& number);
 
-		static void Output(const ConCol& color);
+		static void Output(const ConsoleColor& color);
 
 		static void Output(const bool& boolean);
 	public:
@@ -101,13 +66,16 @@ namespace SMBC
 			this->variadic_func(argList...);
 		}
 	};
-
-#define DebugOut(...) SMBC::Console::Out(__VA_ARGS__)
-#define DebugOutL(...) SMBC::Console::Out(__VA_ARGS__, SMBC::ConCol::WHITE, "\n")
-#define DebugWarningL(...) SMBC::Console::Out(SMBC::ConCol::YELLOW_INT, "WARNING: ", __VA_ARGS__, SMBC::ConCol::WHITE, "\n")
-#define DebugErrorL(...) SMBC::Console::Out(SMBC::ConCol::RED_INT, "ERROR: ", __VA_ARGS__, SMBC::ConCol::WHITE, "\n")
-#define CreateDebugConsole() SMBC::Console::Create(L"SMBC Debug Console")
 }
+
+#define DebugOut(...)        SMBC::Console::Out(__VA_ARGS__)
+#define DebugOutL(...)       SMBC::Console::Out(__VA_ARGS__, 0b1110_fg, "\n")
+
+#define DebugWarningL(...)   SMBC::Console::Out(0b1101_fg, "WARNING: ", __FUNCTION__, " (", __LINE__, ") -> ", __VA_ARGS__, 0b1110_fg, "\n")
+#define DebugErrorL(...)     SMBC::Console::Out(0b1001_fg, "ERROR: "  , __FUNCTION__, " (", __LINE__, ") -> ", __VA_ARGS__, 0b1110_fg, "\n")
+
+#define CreateDebugConsole() SMBC::Console::Create(L"SMBC Debug Console")
+
 #else
 #define DebugOut(...) ((void*)0)
 #define DebugOutL(...) ((void*)0)

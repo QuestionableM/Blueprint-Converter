@@ -68,6 +68,7 @@
     <ClInclude Include="Code\BlueprintConverter\ObjectDefinitions\Part.h" />
     <ClInclude Include="Code\BlueprintConverter\OffsetData.h" />
     <ClInclude Include="Code\BuildConfig.hpp" />
+    <ClInclude Include="Code\ConsoleColors.hpp" />
     <ClInclude Include="Code\DebugCon.h" />
     <ClInclude Include="Code\Gui\About.h">
       <FileType>CppForm</FileType>

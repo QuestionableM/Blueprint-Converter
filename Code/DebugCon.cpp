@@ -66,7 +66,7 @@ namespace SMBC
 		Console::Output(std::to_string(number));
 	}
 
-	void Console::Output(const SMBC::ConCol& color)
+	void Console::Output(const ConsoleColor& color)
 	{
 		SetConsoleTextAttribute(Console::Handle, static_cast<WORD>(color));
 	}

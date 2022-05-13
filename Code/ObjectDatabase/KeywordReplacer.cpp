@@ -65,7 +65,7 @@ namespace SMBC
 		const nlohmann::json uJson = Json::LoadParseJson(path);
 		if (!uJson.is_object()) return;
 
-		DebugOutL("Loading resource upgrades: ", ConCol::YELLOW_INT, path);
+		DebugOutL("Loading resource upgrades: ", 0b1101_fg, path);
 
 		const auto& upgrade_array = Json::Get(uJson, "upgrade");
 		if (!upgrade_array.is_array()) return;
@@ -101,9 +101,21 @@ namespace SMBC
 		if (mKeyIdx != std::wstring::npos)
 		{
 			const std::wstring mKeyChunk = mOutput.substr(0, mKeyIdx);
-
-			if (m_KeyReplacements.find(mKeyChunk) != m_KeyReplacements.end())
-				return (m_KeyReplacements.at(mKeyChunk) + mOutput.substr(mKeyIdx));
+			if (mKeyChunk[0] == '$')
+			{
+				if (m_KeyReplacements.find(mKeyChunk) != m_KeyReplacements.end())
+				{
+					return (m_KeyReplacements.at(mKeyChunk) + mOutput.substr(mKeyIdx));
+				}
+				else
+				{
+					DebugErrorL("Couldn't replace the specified key: ", mKeyChunk);
+				}
+			}
+			else
+			{
+				DebugErrorL("Invalid key chunk: ", mKeyChunk);
+			}
 		}
 
 		return mOutput;
@@ -117,9 +129,20 @@ namespace SMBC
 		if (mKeyIdx != std::wstring::npos)
 		{
 			const std::wstring mKeyChunk = path.substr(0, mKeyIdx);
+			if (mKeyChunk[0] != '$')
+			{
+				DebugErrorL("Invalid Key Chunk: ", mKeyChunk);
+				return;
+			}
 
 			if (m_KeyReplacements.find(mKeyChunk) != m_KeyReplacements.end())
+			{
 				path = (m_KeyReplacements.at(mKeyChunk) + path.substr(mKeyIdx));
+			}
+			else
+			{
+				DebugErrorL("Couldn't replace the specified key: ", mKeyChunk);
+			}
 		}
 	}
 

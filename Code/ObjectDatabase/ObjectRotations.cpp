@@ -160,7 +160,7 @@ namespace SMBC
 				RotationTable.insert(std::make_pair(xAxisRotGroup.first, rotation_group));
 			}
 
-			DebugOutL(ConCol::GREEN_INT, "Rotations have been initialized!");
+			DebugOutL(0b0101_fg, "Rotations have been initialized!");
 		}
 
 		bool RotationExists(const int& xAxis, const int& zAxis)

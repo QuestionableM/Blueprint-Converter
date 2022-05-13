@@ -388,7 +388,7 @@ namespace SMBC
 
 	void Mod::ClearMods()
 	{
-		DebugOutL("Removing ", ConCol::YELLOW_INT, Mods.size(), ConCol::WHITE, " mods from memory...");
+		DebugOutL("Removing ", 0b1101_fg, Mods.size(), 0b1110_fg, " mods from memory...");
 
 		for (auto& mod : Mods)
 			delete mod.second;
