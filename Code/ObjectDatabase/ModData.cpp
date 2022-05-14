@@ -180,20 +180,26 @@ namespace SMBC
 
 	const PartData* Mod::GetPart(const SMBC::Uuid& uuid)
 	{
-		const ObjectData* current_obj = GetObject(uuid);
-		if (!current_obj || current_obj->Type() != ObjectType::Part)
+		if (Mod::AllObjects.find(uuid) == Mod::AllObjects.end())
 			return nullptr;
 
-		return static_cast<const PartData*>(current_obj);
+		const ObjectData* p_cur_obj = Mod::AllObjects.at(uuid);
+		if (p_cur_obj->Type() != ObjectType::Part)
+			return nullptr;
+
+		return static_cast<const PartData*>(p_cur_obj);
 	}
 
 	const BlockData* Mod::GetBlock(const SMBC::Uuid& uuid)
 	{
-		const ObjectData* current_obj = GetObject(uuid);
-		if (!current_obj || current_obj->Type() != ObjectType::Block)
+		if (Mod::AllObjects.find(uuid) == Mod::AllObjects.end())
 			return nullptr;
 
-		return static_cast<const BlockData*>(current_obj);
+		const ObjectData* p_cur_obj = Mod::AllObjects.at(uuid);
+		if (p_cur_obj->Type() != ObjectType::Block)
+			return nullptr;
+
+		return static_cast<const BlockData*>(p_cur_obj);
 	}
 
 	Mod* Mod::CreateModFromDirectory(const std::wstring& dir)
