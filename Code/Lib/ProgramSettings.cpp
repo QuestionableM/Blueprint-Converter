@@ -90,7 +90,7 @@ namespace SMBC
 				PathReplacer::LoadResourceUpgrades(pUpgradePath);
 		}
 
-		Settings::JsonStrArrayToVector(pSettings, "LanguageDirectories", Settings::VanillaLanguagePaths);
+		Settings::JsonStrArrayToVector(pSettings, "LanguageFiles", Settings::VanillaLanguagePaths);
 		Settings::JsonStrArrayToVector(pSettings, "ScrapObjectDatabase", Settings::SMDirDatabase);
 	}
 
@@ -212,11 +212,11 @@ namespace SMBC
 					}
 				},
 				{
-					"LanguageDirectories",
+					"LanguageFiles",
 					{
-						"$GAME_DATA/Gui/Language/English",
-						"$SURVIVAL_DATA/Gui/Language/English",
-						"$CHALLENGE_DATA/Gui/Language/English"
+						"$GAME_DATA/Gui/Language/English/InventoryItemDescriptions.json",
+						"$SURVIVAL_DATA/Gui/Language/English/inventoryDescriptions.json",
+						"$CHALLENGE_DATA/Gui/Language/English/inventoryDescriptions.json"
 					}
 				},
 				{
@@ -237,6 +237,25 @@ namespace SMBC
 
 			if (should_write != nullptr)
 				*should_write = true;
+		}
+		else
+		{
+			auto& program_settings = cfgData["ProgramSettings"];
+			if (program_settings.contains("LanguageDirectories"))
+			{
+				DebugWarningL("Found a deprecated json key: \"LanguageDirectories\"");
+				program_settings.erase("LanguageDirectories");
+
+				program_settings["LanguageFiles"] =
+				{
+					"$GAME_DATA/Gui/Language/English/InventoryItemDescriptions.json",
+					"$SURVIVAL_DATA/Gui/Language/English/inventoryDescriptions.json",
+					"$CHALLENGE_DATA/Gui/Language/English/inventoryDescriptions.json"
+				};
+
+				if (should_write != nullptr)
+					*should_write = true;
+			}
 		}
 
 		return cfgData;

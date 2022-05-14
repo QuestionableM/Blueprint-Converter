@@ -47,7 +47,7 @@ namespace SMBC
 
 	public:
 		void LoadObjectsFromDirectory(const std::wstring& dir);
-		void LoadTranslations(const std::wstring& path = L"");
+		void LoadTranslations(const std::wstring& path);
 		void LoadShapeSetList(const std::wstring& path);
 		void LoadObjectDatabase();
 

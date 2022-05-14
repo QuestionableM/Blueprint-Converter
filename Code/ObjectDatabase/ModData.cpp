@@ -219,10 +219,8 @@ namespace SMBC
 
 	glm::vec3 Mod::LoadPartCollision(const nlohmann::json& collision)
 	{
-		glm::vec3 out_coll(1.0f);
-
-		bool isBoxCol = collision.contains("box");
-		bool isHullCol = collision.contains("hull");
+		const bool isBoxCol = collision.contains("box");
+		const bool isHullCol = collision.contains("hull");
 		if (isBoxCol || isHullCol)
 		{
 			const auto& b_Col = collision.at(isBoxCol ? "box" : "hull");
@@ -234,7 +232,7 @@ namespace SMBC
 				const auto& zPos = Json::Get(b_Col, "z");
 
 				if (xPos.is_number() && yPos.is_number() && zPos.is_number())
-					out_coll = glm::vec3(xPos.get<float>(), yPos.get<float>(), zPos.get<float>());
+					return { xPos.get<float>(), yPos.get<float>(), zPos.get<float>() };
 			}
 		}
 		else
@@ -247,18 +245,21 @@ namespace SMBC
 
 				if (c_Diameter.is_number() && c_Depth.is_number())
 				{
-					float f_Diameter = c_Diameter.get<float>();
-					float f_Depth = c_Depth.get<float>();
+					const float f_Diameter = c_Diameter.get<float>();
+					const float f_Depth = c_Depth.get<float>();
 
 					const auto& c_Axis = Json::Get(cyl_col, "axis");
-					std::string c_AxisStr = (c_Axis.is_string() ? c_Axis.get<std::string>() : "z");
+					const std::string c_AxisStr = (c_Axis.is_string() ? c_Axis.get<std::string>() : "z");
 
-					if (c_AxisStr == "x" || c_AxisStr == "X")
-						out_coll = glm::vec3(f_Depth, f_Diameter, f_Diameter);
-					else if (c_AxisStr == "y" || c_AxisStr == "Y")
-						out_coll = glm::vec3(f_Diameter, f_Depth, f_Diameter);
-					else if (c_AxisStr == "z" || c_AxisStr == "Z")
-						out_coll = glm::vec3(f_Diameter, f_Diameter, f_Depth);
+					switch (c_AxisStr[0])
+					{
+					case 'x': case 'X':
+						return { f_Depth, f_Diameter, f_Diameter };
+					case 'y': case 'Y':
+						return { f_Diameter, f_Depth, f_Diameter };
+					case 'z': case 'Z':
+						return { f_Diameter, f_Diameter, f_Depth };
+					}
 				}
 			}
 			else
@@ -268,12 +269,12 @@ namespace SMBC
 				{
 					const auto& s_Diameter = Json::Get(sphere_col, "diameter");
 					if (s_Diameter.is_number())
-						out_coll = glm::vec3(s_Diameter.get<float>());
+						return glm::vec3(s_Diameter.get<float>());
 				}
 			}
 		}
 
-		return out_coll;
+		return glm::vec3(1.0f);
 	}
 
 	void Mod::LoadParts(const nlohmann::json& fJson)
@@ -354,14 +355,9 @@ namespace SMBC
 
 	void Mod::LoadTranslations(const std::wstring& path)
 	{
-		const std::wstring _Path = (path.empty() ? (m_Directory + L"/Gui/Language/English") : path);
+		if (!File::Exists(path)) return;
 
-		const std::wstring _LangFile = _Path + L"/inventoryDescriptions.json";
-		const std::wstring _OtherLangFile = _Path + L"/InventoryItemDescriptions.json";
-
-		const std::wstring _FinalPath = (File::Exists(_LangFile) ? _LangFile : File::Exists(_OtherLangFile) ? _OtherLangFile : L"");
-
-		m_LanguageDb.LoadLanguageFile(_FinalPath);
+		m_LanguageDb.LoadLanguageFile(path);
 	}
 
 	static std::wstring g_ShapeSetExtensions[2] =
@@ -408,7 +404,7 @@ namespace SMBC
 
 	void Mod::LoadObjectDatabase()
 	{
-		this->LoadTranslations();
+		this->LoadTranslations(m_Directory + L"/Gui/Language/English/inventoryDescriptions.json");
 		PathReplacer::SetModData(m_Directory, m_Uuid);
 
 		std::wstring l_ShapeSetPath;
