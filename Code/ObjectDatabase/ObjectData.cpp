@@ -11,12 +11,14 @@ namespace SMBC
 		const SMBC::Uuid& uuid,
 		const std::wstring& name,
 		SMBC::Texture::TextureList& textures,
-		const int& tiling)
+		const int& tiling,
+		Mod* pMod)
 	{
 		this->Uuid = uuid;
 		this->Name = name;
 		this->Tiling = tiling;
 		this->TextureList = textures;
+		this->ModPtr = pMod;
 	}
 
 	ObjectType PartData::Type() const
@@ -29,12 +31,14 @@ namespace SMBC
 		const std::wstring& path,
 		const std::wstring& name,
 		SMBC::Texture::Texture& textures,
-		const glm::vec3& bounds)
+		const glm::vec3& bounds,
+		Mod* pMod)
 	{
 		this->Uuid = uuid;
 		this->Path = path;
 		this->Name = name;
 		this->TextureList = textures;
 		this->Bounds = bounds;
+		this->ModPtr = pMod;
 	}
 }

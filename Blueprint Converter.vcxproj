@@ -44,6 +44,8 @@
     <ClCompile Include="Code\Lib\String.cpp" />
     <ClCompile Include="Code\Main.cpp" />
     <ClCompile Include="Code\ObjectDatabase\Blueprint.cpp" />
+    <ClCompile Include="Code\ObjectDatabase\DataLoaders\BlockListLoader.cpp" />
+    <ClCompile Include="Code\ObjectDatabase\DataLoaders\PartListLoader.cpp" />
     <ClCompile Include="Code\ObjectDatabase\KeywordReplacer.cpp" />
     <ClCompile Include="Code\ObjectDatabase\LanguageDatabase.cpp" />
     <ClCompile Include="Code\ObjectDatabase\MaterialManager.cpp" />
@@ -96,6 +98,8 @@
     <ClInclude Include="Code\Lib\String.h" />
     <ClInclude Include="Code\Lib\WinInclude.h" />
     <ClInclude Include="Code\ObjectDatabase\Blueprint.h" />
+    <ClInclude Include="Code\ObjectDatabase\DataLoaders\BlockListLoader.h" />
+    <ClInclude Include="Code\ObjectDatabase\DataLoaders\PartListLoader.h" />
     <ClInclude Include="Code\ObjectDatabase\KeywordReplacer.h" />
     <ClInclude Include="Code\ObjectDatabase\LanguageDatabase.h" />
     <ClInclude Include="Code\ObjectDatabase\MaterialManager.h" />

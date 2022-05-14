@@ -3,6 +3,9 @@
 #include "ObjectDatabase\KeywordReplacer.h"
 #include "ObjectDatabase\DatabaseLoader.h"
 
+#include "ObjectDatabase\DataLoaders\BlockListLoader.h"
+#include "ObjectDatabase\DataLoaders\PartListLoader.h"
+
 #include "Lib\ConvData.h"
 #include "Lib\String.h"
 #include "Lib\File.h"
@@ -15,308 +18,11 @@ namespace fs = std::filesystem;
 
 namespace SMBC
 {
-	void Mod::GetBlockMaterials(const nlohmann::json& block, Texture::TextureList& tex)
+	const static std::unordered_map<std::string, void (*)(const nlohmann::json&, Mod*)> m_DataLoaders =
 	{
-		const auto& bGlass = Json::Get(block, "glass");
-		const auto& bAlpha = Json::Get(block, "alpha");
-
-		if (bGlass.is_boolean() && bGlass.get<bool>())
-		{
-			tex.material = L"BlockGlass";
-		}
-		else
-		{
-			tex.material = L"BlockDifAsgNor";
-
-			if (bAlpha.is_boolean() && bAlpha.get<bool>())
-				tex.material.append(L"Alpha");
-		}
-	}
-
-	static const std::string blkTexNames[3] = { "dif", "asg", "nor" };
-	bool Mod::GetBlockTextures(const nlohmann::json& block, Texture::TextureList& tex)
-	{
-		for (int a = 0; a < 3; a++)
-		{
-			const auto& bTexture = Json::Get(block, blkTexNames[a]);
-
-			if (bTexture.is_string())
-			{
-				std::wstring& strRef = tex.GetStringRef(a);
-
-				strRef = String::ToWide(bTexture.get<std::string>());
-				strRef = PathReplacer::ReplaceKey(strRef);
-			}
-		}
-
-		return tex.HasTextures();
-	}
-
-	void Mod::LoadBlocks(const nlohmann::json& fJson)
-	{
-		const auto& bList = Json::Get(fJson, "blockList");
-		if (!bList.is_array()) return;
-
-		ConvData::ProgressMax += bList.size();
-		for (const auto& lBlock : bList)
-		{
-			const auto& bUuid   = Json::Get(lBlock, "uuid");
-			const auto& bTiling = Json::Get(lBlock, "tiling");
-			const auto& bColor  = Json::Get(lBlock, "color");
-
-			if (!bUuid.is_string()) continue;
-
-			SMBC::Uuid uuid_obj(bUuid.get<std::string>());
-
-			if (AllObjects.find(uuid_obj) != AllObjects.end())
-			{
-				DebugWarningL("An object with this uuid already exists! (", uuid_obj.ToString(), ")");
-				continue;
-			}
-
-			Texture::TextureList tex_list;
-			if (!Mod::GetBlockTextures(lBlock, tex_list)) continue;
-			Mod::GetBlockMaterials(lBlock, tex_list);
-
-			int tiling_value = (bTiling.is_number() ? bTiling.get<int>() : 4);
-			if (tiling_value > 16 || tiling_value <= 0) tiling_value = 4;
-
-			const std::wstring l_NameWstr = m_LanguageDb.GetTranslation(uuid_obj);
-
-			BlockData* new_blk = new BlockData(uuid_obj, l_NameWstr, tex_list, tiling_value);
-			new_blk->ModPtr = this;
-
-			const auto new_pair = std::make_pair(new_blk->Uuid, new_blk);
-			Mod::AllObjects.insert(new_pair);
-			m_Objects.insert(new_pair);
-
-			ConvData::ProgressValue++;
-		}
-	}
-
-	void Mod::LoadTextureList(const nlohmann::json& texList, Texture::TextureList& entry)
-	{
-		const int arr_sz = (int)texList.size();
-		const int list_sz = (arr_sz > 3 ? 3 : arr_sz);
-
-		for (int a = 0; a < list_sz; a++)
-		{
-			const auto& cur_item = texList.at(a);
-
-			if (cur_item.is_string())
-			{
-				std::wstring& wstr_path = entry.GetStringRef(a);
-
-				wstr_path = String::ToWide(cur_item.get<std::string>());
-				wstr_path = PathReplacer::ReplaceKey(wstr_path);
-			}
-		}
-	}
-
-	void Mod::AddSubMesh(const nlohmann::json& subMesh, Texture::Texture& tex, const std::wstring& idx)
-	{
-		const auto& sTexList = Json::Get(subMesh, "textureList");
-		if (!sTexList.is_array()) return;
-
-		Texture::TextureList new_entry;
-		Mod::LoadTextureList(sTexList, new_entry);
-
-		const auto& sMaterial = Json::Get(subMesh, "material");
-		new_entry.material = (sMaterial.is_string() ? String::ToWide(sMaterial.get<std::string>()) : L"DifAsgNor");
-
-		tex.AddEntry(idx, new_entry);
-	}
-
-	bool Mod::TryLoadSubMeshList(const nlohmann::json& pLodItem, Texture::Texture& tex)
-	{
-		const auto& pMeshList = Json::Get(pLodItem, "subMeshList");
-		if (!pMeshList.is_array()) return false;
-
-		std::size_t _idx = 0;
-		Texture::Texture out_tex(Texture::TextureType::SubMeshList);
-		for (const auto& subMesh : pMeshList)
-		{
-			if (!subMesh.is_object()) continue;
-
-			const auto& sIdx = Json::Get(subMesh, "idx");
-			std::size_t cur_idx = (sIdx.is_number() ? sIdx.get<std::size_t>() : _idx);
-
-			Mod::AddSubMesh(subMesh, out_tex, std::to_wstring(cur_idx));
-			_idx++;
-		}
-
-		tex = out_tex;
-		return true;
-	}
-
-	bool Mod::TryLoadSubMeshMap(const nlohmann::json& pLodItem, Texture::Texture& tex)
-	{
-		const auto& pMeshMap = Json::Get(pLodItem, "subMeshMap");
-		if (!pMeshMap.is_object()) return false;
-
-		Texture::Texture out_tex(Texture::TextureType::SubMeshMap);
-		for (const auto& subMesh : pMeshMap.items())
-		{
-			if (!subMesh.value().is_object()) continue;
-
-			std::wstring subMeshName = String::ToWide(subMesh.key());
-			Mod::AddSubMesh(subMesh.value(), out_tex, subMeshName);
-		}
-
-		tex = out_tex;
-		return true;
-	}
-
-	bool Mod::LoadSubMeshes(const nlohmann::json& pLodItem, Texture::Texture& tex)
-	{
-		if (Mod::TryLoadSubMeshList(pLodItem, tex) || Mod::TryLoadSubMeshMap(pLodItem, tex))
-			return true;
-
-		return false;
-	}
-
-	bool Mod::LoadRenderable(const nlohmann::json& pRenderable, Texture::Texture& tex_data, std::wstring& mesh_path)
-	{
-		const auto& rLodList = Json::Get(pRenderable, "lodList");
-		if (!rLodList.is_array() || rLodList.size() == 0) return false;
-
-		const auto& rLodItem = Json::Get(rLodList, 0);
-		if (!rLodItem.is_object()) return false;
-
-		const auto& rMesh = Json::Get(rLodItem, "mesh");
-		if (!rMesh.is_string()) return false;
-
-		mesh_path = String::ToWide(rMesh.get<std::string>());
-		mesh_path = PathReplacer::ReplaceKey(mesh_path);
-
-		return Mod::LoadSubMeshes(rLodItem, tex_data);
-	}
-
-	bool Mod::GetRenderableData(const nlohmann::json& part, Texture::Texture& tex_data, std::wstring& mesh_path)
-	{
-		const auto& pRenderable = Json::Get(part, "renderable");
-
-		nlohmann::json rend_data;
-		if (pRenderable.is_string())
-		{
-			std::wstring pRendWstr = String::ToWide(pRenderable.get<std::string>());
-			pRendWstr = PathReplacer::ReplaceKey(pRendWstr);
-
-			rend_data = Json::LoadParseJson(pRendWstr);
-			if (!rend_data.is_object()) return false;
-		}
-		else if (pRenderable.is_object())
-		{
-			rend_data = pRenderable;
-		}
-		else
-		{
-			return false;
-		}
-
-		return Mod::LoadRenderable(rend_data, tex_data, mesh_path);
-	}
-
-	glm::vec3 Mod::LoadPartCollision(const nlohmann::json& collision)
-	{
-		const bool isBoxCol = collision.contains("box");
-		const bool isHullCol = collision.contains("hull");
-		if (isBoxCol || isHullCol)
-		{
-			const auto& b_Col = collision.at(isBoxCol ? "box" : "hull");
-
-			if (b_Col.is_object())
-			{
-				const auto& xPos = Json::Get(b_Col, "x");
-				const auto& yPos = Json::Get(b_Col, "y");
-				const auto& zPos = Json::Get(b_Col, "z");
-
-				if (xPos.is_number() && yPos.is_number() && zPos.is_number())
-					return { xPos.get<float>(), yPos.get<float>(), zPos.get<float>() };
-			}
-		}
-		else
-		{
-			const auto& cyl_col = Json::Get(collision, "cylinder");
-			if (cyl_col.is_object())
-			{
-				const auto& c_Diameter = Json::Get(cyl_col, "diameter");
-				const auto& c_Depth = Json::Get(cyl_col, "depth");
-
-				if (c_Diameter.is_number() && c_Depth.is_number())
-				{
-					const float f_Diameter = c_Diameter.get<float>();
-					const float f_Depth = c_Depth.get<float>();
-
-					const auto& c_Axis = Json::Get(cyl_col, "axis");
-					const std::string c_AxisStr = (c_Axis.is_string() ? c_Axis.get<std::string>() : "z");
-
-					switch (c_AxisStr[0])
-					{
-					case 'x': case 'X':
-						return { f_Depth, f_Diameter, f_Diameter };
-					case 'y': case 'Y':
-						return { f_Diameter, f_Depth, f_Diameter };
-					case 'z': case 'Z':
-						return { f_Diameter, f_Diameter, f_Depth };
-					}
-				}
-			}
-			else
-			{
-				const auto& sphere_col = Json::Get(collision, "sphere");
-				if (sphere_col.is_object())
-				{
-					const auto& s_Diameter = Json::Get(sphere_col, "diameter");
-					if (s_Diameter.is_number())
-						return glm::vec3(s_Diameter.get<float>());
-				}
-			}
-		}
-
-		return glm::vec3(1.0f);
-	}
-
-	void Mod::LoadParts(const nlohmann::json& fJson)
-	{
-		const auto& pList = Json::Get(fJson, "partList");
-		if (!pList.is_array()) return;
-
-		ConvData::ProgressMax += pList.size();
-		for (const auto& lPart : pList)
-		{
-			const auto& pUuid = Json::Get(lPart, "uuid");
-			const auto& pColor = Json::Get(lPart, "color");
-			const auto& pRenderable = Json::Get(lPart, "renderable");
-
-			if (!pUuid.is_string()) continue;
-
-			SMBC::Uuid uuid_obj(pUuid.get<std::string>());
-
-			if (AllObjects.find(uuid_obj) != AllObjects.end())
-			{
-				DebugWarningL("An object with this uuid already exists! (", uuid_obj.ToString(), ")");
-				continue;
-			}
-
-			std::wstring mesh_path;
-			Texture::Texture tex_data;
-			if (!Mod::GetRenderableData(lPart, tex_data, mesh_path))
-				continue;
-
-			const std::wstring l_NameWstr = m_LanguageDb.GetTranslation(uuid_obj);
-			const glm::vec3 pBounds = Mod::LoadPartCollision(lPart);
-
-			PartData* new_part = new PartData(uuid_obj, mesh_path, l_NameWstr, tex_data, pBounds);
-			new_part->ModPtr = this;
-
-			const auto new_pair = std::make_pair(new_part->Uuid, new_part);
-			Mod::AllObjects.insert(new_pair);
-			m_Objects.insert(new_pair);
-
-			ConvData::ProgressValue++;
-		}
-	}
+		{ "blockList", BlockListLoader::Load },
+		{ "partList" , PartListLoader::Load  }
+	};
 
 	void Mod::LoadObjectFile(const std::wstring& path)
 	{
@@ -327,8 +33,20 @@ namespace SMBC
 			return;
 		}
 
-		this->LoadBlocks(mObjectFile);
-		this->LoadParts(mObjectFile);
+		for (const auto& l_cur_item : mObjectFile.items())
+		{
+			if (!l_cur_item.value().is_array()) continue;
+
+			const std::string l_key_str = l_cur_item.key();
+			if (m_DataLoaders.find(l_key_str) != m_DataLoaders.end())
+			{
+				m_DataLoaders.at(l_key_str)(l_cur_item.value(), this);
+			}
+			else
+			{
+				DebugErrorL("Couldn't find the loader for \"", l_key_str, "\"");
+			}
+		}
 	}
 
 	bool Mod::IsShapeSetExtensionValid(const std::string& extension)
@@ -355,8 +73,9 @@ namespace SMBC
 			if (!mCurDir.is_regular_file()) continue;
 
 			const fs::path& fPath = mCurDir.path();
+			if (!fPath.has_filename() || !fPath.has_extension()) continue;
 
-			if (fPath.has_filename() && fPath.has_extension() && this->IsShapeSetExtensionValid(fPath.extension().string()))
+			if (this->IsShapeSetExtensionValid(fPath.extension().string()))
 				this->LoadObjectFile(fPath.wstring());
 		}
 	}
@@ -368,7 +87,7 @@ namespace SMBC
 		m_LanguageDb.LoadLanguageFile(path);
 	}
 
-	static std::wstring g_ShapeSetExtensions[2] =
+	static const std::wstring g_ShapeSetExtensions[2] =
 	{
 		L".shapedb",
 		L".json"

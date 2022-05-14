@@ -35,6 +35,8 @@
     <ClCompile Include="Code\ObjectDatabase\ObjectRotations.cpp" />
     <ClCompile Include="Code\BlueprintConverter\ObjectDefinitions\BlockModel.cpp" />
     <ClCompile Include="Code\ObjectDatabase\MaterialManager.cpp" />
+    <ClCompile Include="Code\ObjectDatabase\DataLoaders\BlockListLoader.cpp" />
+    <ClCompile Include="Code\ObjectDatabase\DataLoaders\PartListLoader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Code\BlueprintConverter\BlueprintConverter.h" />
@@ -77,5 +79,7 @@
     <ClInclude Include="Code\ObjectDatabase\MaterialManager.h" />
     <ClInclude Include="Code\Lib\WinInclude.h" />
     <ClInclude Include="Code\ConsoleColors.hpp" />
+    <ClInclude Include="Code\ObjectDatabase\DataLoaders\BlockListLoader.h" />
+    <ClInclude Include="Code\ObjectDatabase\DataLoaders\PartListLoader.h" />
   </ItemGroup>
 </Project>

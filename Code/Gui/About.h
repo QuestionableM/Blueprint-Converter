@@ -102,7 +102,7 @@ namespace BlueprintConverter {
 			this->Version_LBL->Name = L"Version_LBL";
 			this->Version_LBL->Size = System::Drawing::Size(86, 16);
 			this->Version_LBL->TabIndex = 6;
-			this->Version_LBL->Text = L"Version: 1.1.1";
+			this->Version_LBL->Text = L"Version: 1.1.2";
 			this->Version_LBL->TextAlign = System::Drawing::ContentAlignment::MiddleLeft;
 			// 
 			// GitHubRepo_LL

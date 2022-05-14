@@ -72,42 +72,6 @@ namespace SMBC
 	#endif
 
 		return nlohmann::json();
-		/*try
-		{
-			std::ifstream _InputFile(path);
-			if (_InputFile.is_open())
-			{
-				std::string _RawJson;
-
-				if (_stringify)
-					_RawJson = Json::ReadWholeFile(_InputFile);
-				else
-				{
-					std::stringstream sstream;
-
-					sstream << _InputFile.rdbuf();
-					_RawJson = sstream.str();
-				}
-
-				return nlohmann::json::parse(_RawJson, nullptr, true, true);
-			}
-			#ifdef _DEBUG
-			else
-			{
-				DebugErrorL("Couldn't open the specified file: ", path);
-			}
-			#endif
-		}
-	#ifdef _DEBUG
-		catch (nlohmann::json::parse_error& err)
-		{
-			DebugErrorL("Couldn't load the specified json file:\nFile: ", path, "\nByte: ", err.byte, "\nId: ", err.id, "\nError Message: ", err.what());
-		}
-	#else
-		catch (...) {}
-	#endif
-
-		return nlohmann::json();*/
 	}
 
 	void Json::WriteToFile(const std::wstring& path, const nlohmann::json& mJson)

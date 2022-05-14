@@ -15,6 +15,9 @@ namespace SMBC
 {
 	class Mod
 	{
+		friend class BlockListLoader;
+		friend class PartListLoader;
+
 		inline static std::unordered_map<Uuid, ObjectData*> AllObjects = {};
 		inline static std::unordered_map<Uuid, Mod*> Mods              = {};
 		inline static std::vector<Mod*> ModsArray                      = {};
@@ -29,23 +32,9 @@ namespace SMBC
 		Uuid m_Uuid;
 
 	private:
-		static void GetBlockMaterials(const nlohmann::json& block, Texture::TextureList& tex);
-		static bool GetBlockTextures(const nlohmann::json& block, Texture::TextureList& tex);
-		void LoadBlocks(const nlohmann::json& fJson);
-
-		static void LoadTextureList(const nlohmann::json& texList, Texture::TextureList& entry);
-		static void AddSubMesh(const nlohmann::json& subMesh, Texture::Texture& tex, const std::wstring& idx);
-		static bool TryLoadSubMeshList(const nlohmann::json& pLodItem, Texture::Texture& tex);
-		static bool TryLoadSubMeshMap (const nlohmann::json& pLodItem, Texture::Texture& tex);
-		static bool LoadSubMeshes(const nlohmann::json& pLodItem, Texture::Texture& tex);
-		static bool LoadRenderable(const nlohmann::json& pRenderable, Texture::Texture& tex_data, std::wstring& mesh_path);
-		static bool GetRenderableData(const nlohmann::json& part, Texture::Texture& tex_data, std::wstring& mesh_path);
-		static glm::vec3 LoadPartCollision(const nlohmann::json& collision);
-		void LoadParts(const nlohmann::json& fJson);
-
 		void LoadObjectFile(const std::wstring& path);
-
 		bool IsShapeSetExtensionValid(const std::string& extension);
+
 	public:
 		void LoadObjectsFromDirectory(const std::wstring& dir);
 		void LoadTranslations(const std::wstring& path);
