@@ -15,15 +15,12 @@ namespace SMBC
 
 		friend bool operator==(const Uuid& lhs, const Uuid& rhs) noexcept;
 		friend bool operator!=(const Uuid& lhs, const Uuid& rhs) noexcept;
-		friend bool operator< (const Uuid& lhs, const Uuid& rhs) noexcept;
 
 		void FromString(const std::string& str);
 
 	public:
 		Uuid();
 		Uuid(const std::string& uuid);
-
-		//void operator=(const std::string& uuid);
 
 		std::string  ToString()  const;
 		std::wstring ToWstring() const;
@@ -33,7 +30,6 @@ namespace SMBC
 
 	bool operator==(const Uuid& lhs, const Uuid& rhs) noexcept;
 	bool operator!=(const Uuid& lhs, const Uuid& rhs) noexcept;
-	bool operator< (const Uuid& lhs, const Uuid& rhs) noexcept;
 }
 
 namespace std

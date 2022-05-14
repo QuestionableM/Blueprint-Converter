@@ -91,12 +91,4 @@ namespace SMBC
 			lhs.m_data64x2[1] != rhs.m_data64x2[1]
 		);
 	}
-
-	bool operator< (const Uuid& lhs, const Uuid& rhs) noexcept
-	{
-		return (
-			lhs.m_data64x2[0] < rhs.m_data64x2[0] ||
-			lhs.m_data64x2[1] < rhs.m_data64x2[1]
-		);
-	}
 }
