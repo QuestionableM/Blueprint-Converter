@@ -423,10 +423,6 @@ namespace SMBC
 
 			this->LoadObjectsFromDirectory(l_DbPath);
 		}
-		//const std::wstring lShapeDbFile = this->Path + L"/Objects/Database/shapesets.shapedb";
-		//const std::wstring lShapeDbFile2 = this->Path + L"/Objects/Database/shapesets.json";
-		//check is the shapesets.json/.shapedb file exists
-		//const std::wstring lDatabasePath = this->Path + L"/Objects/Database";
 		/*
 		const std::wstring mDatabasePath = mModDir + L"/Objects/Database/ShapeSets";
 		if (!File::Exists(mDatabasePath)) continue;
@@ -450,11 +446,12 @@ namespace SMBC
 
 	void Mod::ClearMods()
 	{
-		DebugOutL("Removing ", 0b1101_fg, Mods.size(), 0b1110_fg, " mods from memory...");
+		DebugOutL("Removing ", 0b1101_fg, Mod::ModsArray.size(), 0b1110_fg, " mods from memory...");
 
-		for (auto& mod : Mod::Mods)
-			delete mod.second;
+		for (std::size_t a = 0; a < Mod::ModsArray.size(); a++)
+			delete Mod::ModsArray[a];
 
+		Mod::ModsArray.clear();
 		Mod::Mods.clear();
 		Mod::AllObjects.clear();
 	}
@@ -513,6 +510,18 @@ namespace SMBC
 		);
 	}
 
+	Mod* Mod::CreateVanillaGameMod(const std::wstring& game_path)
+	{
+		Mod* pNewMod = new Mod();
+		pNewMod->m_Uuid = Uuid();
+		pNewMod->m_Name = L"VANILLA GAME";
+		pNewMod->m_WorkshopId = 0ull;
+		pNewMod->m_Directory = game_path;
+
+		Mod::ModsArray.push_back(pNewMod);
+		return pNewMod;
+	}
+
 	Mod* Mod::CreateMod(
 		const SMBC::Uuid& uuid,
 		const std::wstring& name,
@@ -532,6 +541,7 @@ namespace SMBC
 		pNewMod->m_Directory = dir;
 
 		Mod::Mods.insert(std::make_pair(uuid, pNewMod));
+		Mod::ModsArray.push_back(pNewMod);
 		return pNewMod;
 	}
 

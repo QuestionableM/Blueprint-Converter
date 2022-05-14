@@ -18,24 +18,19 @@ namespace SMBC
 {
 	void DatabaseLoader::LoadGameDatabase()
 	{
-		Mod* _VanillaParts = Mod::CreateMod(
-			SMBC::Uuid("00000000-0000-0000-0000-000000000000"),
-			L"VANILLA GAME",
-			0ull,
-			Settings::PathToSM
-		);
+		Mod* pVanillaMod = Mod::CreateVanillaGameMod(Settings::PathToSM);
 
-		for (std::wstring& path : Settings::VanillaLanguagePaths)
-			_VanillaParts->LoadTranslations(path);
+		for (const std::wstring& path : Settings::VanillaLanguagePaths)
+			pVanillaMod->LoadTranslations(path);
 
-		for (std::wstring& data_path : Settings::SMDirDatabase)
+		for (const std::wstring& data_path : Settings::SMDirDatabase)
 		{
 			if (!File::Exists(data_path)) continue;
 
-			_VanillaParts->LoadObjectsFromDirectory(data_path);
+			pVanillaMod->LoadObjectsFromDirectory(data_path);
 		}
 
-		DebugOutL("Loaded: ", 0b1101_fg, _VanillaParts->m_Name, 0b1110_fg, " (Objects: ", 0b1101_fg, _VanillaParts->m_Objects.size(), 0b1110_fg, ")");
+		DebugOutL("Loaded: ", 0b1101_fg, pVanillaMod->m_Name, 0b1110_fg, " (Objects: ", 0b1101_fg, pVanillaMod->m_Objects.size(), 0b1110_fg, ")");
 	}
 
 	void DatabaseLoader::LoadModDatabase()
