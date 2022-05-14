@@ -76,7 +76,7 @@ namespace SMBC
 
 	std::wstring Block::GetName() const
 	{
-		return pParent->Name + L" (" + pParent->ModPtr->Name + L": " + pParent->Uuid.ToWstring() + L")";
+		return pParent->Name + L" (" + pParent->ModPtr->m_Name + L": " + pParent->Uuid.ToWstring() + L")";
 	}
 
 	glm::vec3 Block::GetCenterPoint() const

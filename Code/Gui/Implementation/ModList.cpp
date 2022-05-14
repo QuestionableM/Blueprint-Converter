@@ -136,7 +136,7 @@ namespace BlueprintConverter
 
 			for (const ModListData* mod_list : *this->UsedModVector)
 			{
-				std::wstring mModName = (mod_list->ptr != nullptr) ? mod_list->ptr->Name : L"UNKNOWN_MOD";
+				const std::wstring mModName = (mod_list->ptr != nullptr) ? mod_list->ptr->m_Name : L"UNKNOWN_MOD";
 
 				this->ModList_LB->Items->Add(gcnew System::String((mModName + L" (" + std::to_wstring(mod_list->used_parts) + L")").c_str()));
 			}
@@ -169,7 +169,7 @@ namespace BlueprintConverter
 
 	void ModList::AddModToList(SMBC::Mod* ModData)
 	{
-		const std::string mUuidStr = (ModData != nullptr) ? ModData->Uuid.ToString() : "UnknownMod";
+		const std::string mUuidStr = (ModData != nullptr) ? ModData->m_Uuid.ToString() : "UnknownMod";
 
 		if (this->UsedModData->find(mUuidStr) != this->UsedModData->end())
 		{
@@ -195,55 +195,54 @@ namespace BlueprintConverter
 
 	void ModList::ModList_LB_SelectedIndexChanged(System::Object^ sender, System::EventArgs^ e)
 	{
-		int sel_idx = this->ModList_LB->SelectedIndex;
-		if (this->selected_mod == sel_idx) return;
-		this->selected_mod = sel_idx;
+		int selected_idx = this->ModList_LB->SelectedIndex;
+		if (this->selected_mod == selected_idx) return;
+		this->selected_mod = selected_idx;
 
-		bool _WorkshopIdExists = false;
-		bool _PathExists = false;
+		bool workshop_id_exists = false;
+		bool path_exists        = false;
 
-		SMBC::Mod* CurMod = this->GetCurrentMod();
-		if (CurMod != nullptr)
+		SMBC::Mod* pCurMod = this->GetCurrentMod();
+		if (pCurMod != nullptr)
 		{
-			_WorkshopIdExists = !CurMod->WorkshopId.empty();
-			_PathExists = !CurMod->Path.empty();
+			workshop_id_exists = (pCurMod->m_WorkshopId != 0);
+			path_exists = !pCurMod->m_Directory.empty();
 		}
 
-		this->OpenInWorkshop_BTN->Enabled = _WorkshopIdExists;
-		this->OpenInFileExplorer_BTN->Enabled = _PathExists;
+		this->OpenInWorkshop_BTN->Enabled = workshop_id_exists;
+		this->OpenInFileExplorer_BTN->Enabled = path_exists;
 	}
 
 	void ModList::OpenInWorkshop_BTN_Click(System::Object^ sender, System::EventArgs^ e)
 	{
-		SMBC::Mod* CurMod = this->GetCurrentMod();
-		if (CurMod == nullptr) return;
+		SMBC::Mod* pCurMod = this->GetCurrentMod();
+		if (pCurMod == nullptr) return;
 
-		if (CurMod->WorkshopId.empty())
+		if (pCurMod->m_WorkshopId == 0ull)
 		{
 			SMBC::Gui::Error("Error", "Couldn't open the workshop link to the specified blueprint!");
 			return;
 		}
 
-		std::wstring _WorkshopLink;
-		if (SMBC::Settings::OpenLinksInSteam) _WorkshopLink.append(L"steam://openurl/");
-		SMBC::String::Combine(_WorkshopLink, L"https://steamcommunity.com/sharedfiles/filedetails/?id=", CurMod->WorkshopId);
+		std::wstring lWorkshopLink;
+		if (SMBC::Settings::OpenLinksInSteam) lWorkshopLink.append(L"steam://openurl/");
+		SMBC::String::Combine(lWorkshopLink, L"https://steamcommunity.com/sharedfiles/filedetails/?id=", std::to_string(pCurMod->m_WorkshopId));
 
-		System::Diagnostics::Process::Start(gcnew System::String(_WorkshopLink.c_str()));
+		System::Diagnostics::Process::Start(gcnew System::String(lWorkshopLink.c_str()));
 	}
 
 	void ModList::OpenInFileExplorer_BTN_Click(System::Object^ sender, System::EventArgs^ e)
 	{
-		SMBC::Mod* CurMod = this->GetCurrentMod();
-		if (CurMod == nullptr) return;
+		SMBC::Mod* pCurMod = this->GetCurrentMod();
+		if (pCurMod == nullptr) return;
 
-		if (!SMBC::File::Exists(CurMod->Path))
+		if (!SMBC::File::Exists(pCurMod->m_Directory))
 		{
 			SMBC::Gui::Error(L"Internal Error", L"The path to specified mod directory doesn't exist!");
 			return;
 		}
 
-		std::wstring path_cpy = CurMod->Path;
-		SMBC::String::ReplaceR(path_cpy, L'/', L'\\');
+		const std::wstring path_cpy = SMBC::String::Replace(pCurMod->m_Directory, L'/', L'\\');
 
 		SMBC::Gui::OpenFolderInExplorer(path_cpy);
 	}

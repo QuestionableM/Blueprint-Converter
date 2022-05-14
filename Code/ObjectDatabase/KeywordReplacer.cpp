@@ -37,8 +37,9 @@ namespace SMBC
 	{
 		const std::wstring mContentKey = String::ToWide("$content_" + uuid.ToString());
 
-		PathReplacer::SetReplacement(mContentKey, path);
-		PathReplacer::SetReplacement(L"$mod_data", path);
+		PathReplacer::SetReplacement(mContentKey     , path);
+		PathReplacer::SetReplacement(L"$mod_data"    , path);
+		PathReplacer::SetReplacement(L"$content_data", path);
 	}
 	
 	void PathReplacer::UpgradeResource(const std::wstring& mPath, std::wstring& mOutput)

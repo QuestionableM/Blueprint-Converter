@@ -21,7 +21,7 @@ namespace SMBC
 		Mod* _VanillaParts = Mod::CreateMod(
 			SMBC::Uuid("00000000-0000-0000-0000-000000000000"),
 			L"VANILLA GAME",
-			L"",
+			0ull,
 			Settings::PathToSM
 		);
 
@@ -35,7 +35,7 @@ namespace SMBC
 			_VanillaParts->LoadObjectsFromDirectory(data_path);
 		}
 
-		DebugOutL("Loaded: ", 0b1101_fg, _VanillaParts->Name, 0b1110_fg, " (Objects: ", 0b1101_fg, _VanillaParts->Objects.size(), 0b1110_fg, ")");
+		DebugOutL("Loaded: ", 0b1101_fg, _VanillaParts->m_Name, 0b1110_fg, " (Objects: ", 0b1101_fg, _VanillaParts->m_Objects.size(), 0b1110_fg, ")");
 	}
 
 	void DatabaseLoader::LoadModDatabase()
@@ -64,15 +64,9 @@ namespace SMBC
 				Mod* pNewMod = Mod::CreateModFromDirectory(mModDir);
 				if (!pNewMod) continue;
 
-				const std::wstring mDatabasePath = mModDir + L"/Objects/Database/ShapeSets";
-				if (!File::Exists(mDatabasePath)) continue;
+				pNewMod->LoadObjectDatabase();
 
-				pNewMod->LoadTranslations();
-
-				PathReplacer::SetModData(pNewMod->Path, pNewMod->Uuid);
-				pNewMod->LoadObjectsFromDirectory(mDatabasePath);
-
-				DebugOutL("Loaded: ", 0b1101_fg, pNewMod->Name, 0b1110_fg, " (Objects: ", 0b1101_fg, pNewMod->Objects.size(), 0b1110_fg, ")");
+				DebugOutL("Loaded: ", 0b1101_fg, pNewMod->m_Name, 0b1110_fg, " (Objects: ", 0b1101_fg, pNewMod->m_Objects.size(), 0b1110_fg, ")");
 			}
 		}
 	}

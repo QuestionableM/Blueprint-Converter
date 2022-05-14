@@ -9,41 +9,36 @@ namespace SMBC
 {
 	void LangDB::LoadLanguageFile(const std::wstring& path)
 	{
-		nlohmann::json _LangFile = Json::LoadParseJson(path);
-		if (!_LangFile.is_object()) return;
+		const nlohmann::json lang_file = Json::LoadParseJson(path);
+		if (!lang_file.is_object()) return;
 
-		for (auto& trans : _LangFile.items())
+		for (const auto& l_translation : lang_file.items())
 		{
-			if (!trans.value().is_object()) continue;
+			if (!l_translation.value().is_object()) continue;
 
-			const auto& _Title = Json::Get(trans.value(), "title");
-			if (!_Title.is_string()) continue;
+			const auto& l_title = Json::Get(l_translation.value(), "title");
+			if (!l_title.is_string()) continue;
 
-			std::wstring mWstrTitle = String::ToWide(_Title.get<std::string>());
+			std::wstring l_wide_title = String::ToWide(l_title.get<std::string>());
 
 			{
 				//Remove the new line characters
 
-				String::ReplaceR(mWstrTitle, L'\n', L' ');
-				String::ReplaceR(mWstrTitle, L'\r', L' ');
+				String::ReplaceR(l_wide_title, L'\n', L' ');
+				String::ReplaceR(l_wide_title, L'\r', L' ');
 			}
 
-			this->AddTranslation(Uuid(trans.key()), mWstrTitle);
+			Uuid l_key_uuid(l_translation.key());
+			if (m_Translations.find(l_key_uuid) == m_Translations.end())
+				m_Translations.insert(std::make_pair(l_key_uuid, l_wide_title));
 		}
 	}
 
-	void LangDB::AddTranslation(const Uuid& uuid, const std::wstring& trans)
+	std::wstring LangDB::GetTranslation(const Uuid& uuid) const
 	{
-		if (this->Translations.find(uuid) == this->Translations.end())
-			this->Translations.insert(std::make_pair(uuid, trans));
-	}
+		if (m_Translations.find(uuid) != m_Translations.end())
+			return m_Translations.at(uuid);
 
-	static const std::wstring BlockNotFoundString = L"BLOCK NOT FOUND";
-	const std::wstring& LangDB::GetTranslation(const Uuid& uuid) const
-	{
-		if (this->Translations.find(uuid) != this->Translations.end())
-			return this->Translations.at(uuid);
-
-		return BlockNotFoundString;
+		return L"BLOCK NOT FOUND";
 	}
 }
