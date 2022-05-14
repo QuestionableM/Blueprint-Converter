@@ -113,10 +113,6 @@ namespace SMBC
 					DebugErrorL("Couldn't replace the specified key: ", mKeyChunk);
 				}
 			}
-			else
-			{
-				DebugErrorL("Invalid key chunk: ", mKeyChunk);
-			}
 		}
 
 		return mOutput;
@@ -130,11 +126,7 @@ namespace SMBC
 		if (mKeyIdx != std::wstring::npos)
 		{
 			const std::wstring mKeyChunk = path.substr(0, mKeyIdx);
-			if (mKeyChunk[0] != '$')
-			{
-				DebugErrorL("Invalid Key Chunk: ", mKeyChunk);
-				return;
-			}
+			if (mKeyChunk[0] != '$') return;
 
 			if (m_KeyReplacements.find(mKeyChunk) != m_KeyReplacements.end())
 			{
