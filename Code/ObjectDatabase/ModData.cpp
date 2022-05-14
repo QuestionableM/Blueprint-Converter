@@ -331,6 +331,14 @@ namespace SMBC
 		this->LoadParts(mObjectFile);
 	}
 
+	bool Mod::IsShapeSetExtensionValid(const std::string& extension)
+	{
+		if (extension == ".json")     return true;
+		if (extension == ".shapeset") return true;
+
+		return false;
+	}
+
 	void Mod::LoadObjectsFromDirectory(const std::wstring& dir)
 	{
 		std::error_code mError;
@@ -348,7 +356,7 @@ namespace SMBC
 
 			const fs::path& fPath = mCurDir.path();
 
-			if (fPath.has_filename() && fPath.has_extension() && fPath.extension() == ".json")
+			if (fPath.has_filename() && fPath.has_extension() && this->IsShapeSetExtensionValid(fPath.extension().string()))
 				this->LoadObjectFile(fPath.wstring());
 		}
 	}
@@ -419,15 +427,6 @@ namespace SMBC
 
 			this->LoadObjectsFromDirectory(l_DbPath);
 		}
-		/*
-		const std::wstring mDatabasePath = mModDir + L"/Objects/Database/ShapeSets";
-		if (!File::Exists(mDatabasePath)) continue;
-
-		pNewMod->LoadTranslations();
-
-		PathReplacer::SetModData(pNewMod->Path, pNewMod->Uuid);
-		pNewMod->LoadObjectsFromDirectory(mDatabasePath);
-		*/
 	}
 
 	std::size_t Mod::GetObjectCount()

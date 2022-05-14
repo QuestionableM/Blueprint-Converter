@@ -45,6 +45,7 @@ namespace SMBC
 
 		void LoadObjectFile(const std::wstring& path);
 
+		bool IsShapeSetExtensionValid(const std::string& extension);
 	public:
 		void LoadObjectsFromDirectory(const std::wstring& dir);
 		void LoadTranslations(const std::wstring& path);
