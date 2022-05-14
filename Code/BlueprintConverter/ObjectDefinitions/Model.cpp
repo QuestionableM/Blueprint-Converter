@@ -124,21 +124,18 @@ namespace SMBC
 					if (mOffset.VertexMap.find(pVertex) != mOffset.VertexMap.end())
 						String::Combine(_f_str, " ", (mOffset.VertexMap.at(pVertex) + 1));
 
-					const bool has_uv     = (ConvertSettings::ExportUvs     && d_idx.m_Uv   > -1);
-					const bool has_normal = (ConvertSettings::ExportNormals && d_idx.m_Norm > -1);
-
-					if (!has_uv && !has_normal) continue;
+					if (!pSubMesh->has_uvs && !pSubMesh->has_normals) continue;
 
 					_f_str.append("/");
 
-					if (has_uv)
+					if (pSubMesh->has_uvs)
 					{
 						const glm::vec2& pUv = this->uvs[d_idx.m_Uv];
 						if (mOffset.UvMap.find(pUv) != mOffset.UvMap.end())
 							String::Combine(_f_str, (mOffset.UvMap.at(pUv) + 1));
 					}
 
-					if (has_normal)
+					if (pSubMesh->has_normals)
 					{
 						const glm::vec3& pNormal = translated_normals[d_idx.m_Norm];
 						if (mOffset.NormalMap.find(pNormal) != mOffset.NormalMap.end())

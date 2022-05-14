@@ -48,6 +48,10 @@ namespace SMBC
 		}
 
 		SubMeshData* new_subMesh = new SubMeshData(0);
+
+		new_subMesh->has_normals = ConvertSettings::ExportNormals;
+		new_subMesh->has_uvs     = ConvertSettings::ExportUvs;
+
 		new_subMesh->DataIdx =
 		{
 			{{0, 0,  0}, {1, 1,  0}, {2, 2,  0}},

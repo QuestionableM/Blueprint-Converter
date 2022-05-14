@@ -22,6 +22,9 @@ namespace SMBC
 
 		std::vector<std::vector<VertexData>> DataIdx;
 
+		bool has_uvs;
+		bool has_normals;
+
 		bool IsEmpty();
 		SubMeshData(const int& sub_mesh_idx);
 		~SubMeshData() = default;

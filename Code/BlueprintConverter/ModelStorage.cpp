@@ -57,9 +57,6 @@ namespace SMBC
 		const std::size_t uv_offset     = model->uvs.size();
 		const std::size_t normal_offset = model->normals.size();
 
-		const bool has_uvs     = ConvertSettings::ExportUvs     && mesh->HasTextureCoords(0);
-		const bool has_normals = ConvertSettings::ExportNormals && mesh->HasNormals();
-
 		sub_mesh->DataIdx.reserve(mesh->mNumFaces);
 		for (unsigned int a = 0; a < mesh->mNumFaces; a++)
 		{
@@ -73,8 +70,8 @@ namespace SMBC
 
 				d_idx.push_back({
 					ind_idx + vertex_offset,
-					(has_uvs ? (ind_idx + uv_offset) : -1),
-					(has_normals ? (ind_idx + normal_offset) : -1)
+					(sub_mesh->has_uvs ? (ind_idx + uv_offset) : 0),
+					(sub_mesh->has_normals ? (ind_idx + normal_offset) : 0)
 				});
 			}
 
@@ -89,6 +86,9 @@ namespace SMBC
 		{
 			const aiMesh* cMesh = scene->mMeshes[a];
 			SubMeshData* cSubMesh = new SubMeshData(a);
+
+			cSubMesh->has_normals = ConvertSettings::ExportNormals && cMesh->HasNormals();
+			cSubMesh->has_uvs     = ConvertSettings::ExportUvs && cMesh->HasTextureCoords(0);
 
 			ModelStorage::LoadIndices(cMesh, model, cSubMesh);
 			ModelStorage::LoadVertices(cMesh, model);
