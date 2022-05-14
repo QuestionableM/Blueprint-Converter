@@ -10,9 +10,9 @@ namespace SMBC
 
 	struct VertexData
 	{
-		long long pVert;
-		long long pUv;
-		long long pNorm;
+		std::size_t m_Vert;
+		std::size_t m_Uv;
+		std::size_t m_Norm;
 	};
 
 	struct SubMeshData

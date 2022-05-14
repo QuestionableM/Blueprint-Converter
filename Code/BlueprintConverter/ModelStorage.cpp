@@ -53,9 +53,9 @@ namespace SMBC
 
 	void ModelStorage::LoadIndices(const aiMesh*& mesh, Model*& model, SubMeshData*& sub_mesh)
 	{
-		const long long mVertOffset = model->vertices.size();
-		const long long mUvOffset = model->uvs.size();
-		const long long mNormalOffset = model->normals.size();
+		const std::size_t vertex_offset = model->vertices.size();
+		const std::size_t uv_offset     = model->uvs.size();
+		const std::size_t normal_offset = model->normals.size();
 
 		const bool has_uvs     = ConvertSettings::ExportUvs     && mesh->HasTextureCoords(0);
 		const bool has_normals = ConvertSettings::ExportNormals && mesh->HasNormals();
@@ -69,12 +69,12 @@ namespace SMBC
 			d_idx.reserve(cFace.mNumIndices);
 			for (unsigned int b = 0; b < cFace.mNumIndices; b++)
 			{
-				long long ind_idx = (long long)cFace.mIndices[b];
+				const std::size_t ind_idx = (std::size_t)cFace.mIndices[b];
 
 				d_idx.push_back({
-					ind_idx + mVertOffset,
-					(has_uvs ? (ind_idx + mUvOffset) : -1),
-					(has_normals ? (ind_idx + mNormalOffset) : -1)
+					ind_idx + vertex_offset,
+					(has_uvs ? (ind_idx + uv_offset) : -1),
+					(has_normals ? (ind_idx + normal_offset) : -1)
 				});
 			}
 
