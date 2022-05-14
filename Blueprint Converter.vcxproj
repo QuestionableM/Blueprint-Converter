@@ -215,8 +215,12 @@
       <AdditionalLibraryDirectories>$(SolutionDir)\Dependencies\Assimp\Lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>"$(SolutionDir)Dependencies\Version Counter\Version Counter.exe"</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>"$(SolutionDir)Dependencies\Version Counter\VersionCounter.exe"</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -233,8 +237,12 @@
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
     </Link>
     <PostBuildEvent>
-      <Command>"$(SolutionDir)Dependencies\Version Counter\Version Counter.exe"</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>"$(SolutionDir)Dependencies\Version Counter\VersionCounter.exe"</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -250,8 +258,12 @@
       <AdditionalLibraryDirectories>$(SolutionDir)\Dependencies\Assimp\Lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>"$(SolutionDir)Dependencies\Version Counter\Version Counter.exe"</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>"$(SolutionDir)Dependencies\Version Counter\VersionCounter.exe"</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -268,8 +280,12 @@
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
     </Link>
     <PostBuildEvent>
-      <Command>"$(SolutionDir)Dependencies\Version Counter\Version Counter.exe"</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>"$(SolutionDir)Dependencies\Version Counter\VersionCounter.exe"</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

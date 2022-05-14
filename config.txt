@@ -1,2 +1,3 @@
+./Code
 ./Code/Lib/BuildVersion.h
 SMBC_BUILD_VERSION
