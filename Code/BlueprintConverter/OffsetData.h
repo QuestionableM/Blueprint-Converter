@@ -10,9 +10,12 @@ namespace SMBC
 {
 	struct OffsetData
 	{
-		std::unordered_map<glm::vec3, std::size_t> VertexMap = {};
-		std::unordered_map<glm::vec3, std::size_t> NormalMap = {};
-		std::unordered_map<glm::vec2, std::size_t> UvMap = {};
+		using Vec3StorageMap = std::unordered_map<glm::vec3, std::size_t>;
+		using Vec2StorageMap = std::unordered_map<glm::vec2, std::size_t>;
+
+		Vec3StorageMap VertexMap = {};
+		Vec3StorageMap NormalMap = {};
+		Vec2StorageMap UvMap = {};
 
 		std::size_t Vertex  = 0;
 		std::size_t Normal  = 0;

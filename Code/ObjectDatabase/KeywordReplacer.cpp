@@ -24,9 +24,10 @@ namespace SMBC
 
 		PathReplacer::CreateKey(mLowerKey, mLowerVal);
 
-		if (m_KeyReplacements.find(mLowerKey) != m_KeyReplacements.end())
+		StringStorageMap::iterator it = m_KeyReplacements.find(mLowerKey);
+		if (it != m_KeyReplacements.end())
 		{
-			m_KeyReplacements.at(mLowerKey) = mLowerVal;
+			it->second = mLowerVal;
 			return;
 		}
 
@@ -51,9 +52,10 @@ namespace SMBC
 			String::ReplaceR(mLowerPath, L'\\', L'/');
 		}
 
-		if (m_ResourceUpgrades.find(mLowerPath) != m_ResourceUpgrades.end())
+		const StringStorageMap::iterator it = m_ResourceUpgrades.find(mLowerPath);
+		if (it != m_ResourceUpgrades.end())
 		{
-			mOutput = m_ResourceUpgrades.at(mLowerPath);
+			mOutput = it->second;
 		}
 		else
 		{
@@ -104,9 +106,10 @@ namespace SMBC
 			const std::wstring mKeyChunk = mOutput.substr(0, mKeyIdx);
 			if (mKeyChunk[0] == '$')
 			{
-				if (m_KeyReplacements.find(mKeyChunk) != m_KeyReplacements.end())
+				const StringStorageMap::iterator it = m_KeyReplacements.find(mKeyChunk);
+				if (it != m_KeyReplacements.end())
 				{
-					return (m_KeyReplacements.at(mKeyChunk) + mOutput.substr(mKeyIdx));
+					return (it->second + mOutput.substr(mKeyIdx));
 				}
 				else
 				{
@@ -128,9 +131,10 @@ namespace SMBC
 			const std::wstring mKeyChunk = path.substr(0, mKeyIdx);
 			if (mKeyChunk[0] != '$') return;
 
-			if (m_KeyReplacements.find(mKeyChunk) != m_KeyReplacements.end())
+			const StringStorageMap::iterator it = m_KeyReplacements.find(mKeyChunk);
+			if (it != m_KeyReplacements.end())
 			{
-				path = (m_KeyReplacements.at(mKeyChunk) + path.substr(mKeyIdx));
+				path = (it->second + path.substr(mKeyIdx));
 			}
 			else
 			{

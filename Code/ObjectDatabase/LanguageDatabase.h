@@ -9,8 +9,9 @@ namespace SMBC
 {
 	class LangDB
 	{
+		using TranslationStorageMap = std::unordered_map<Uuid, std::wstring>;
 	public:
-		std::unordered_map<Uuid, std::wstring> m_Translations;
+		TranslationStorageMap m_Translations;
 
 		LangDB() = default;
 

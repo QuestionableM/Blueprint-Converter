@@ -50,9 +50,10 @@ namespace SMBC
 		{
 			const std::size_t mChildIdx = pEntity->GetIndex();
 
-			if (bpData->mIndexMap.find(mChildIdx) != bpData->mIndexMap.end())
+			const IndexStorageMap::iterator it = bpData->mIndexMap.find(mChildIdx);
+			if (it != bpData->mIndexMap.end())
 			{
-				bpData->mIndexMap.at(mChildIdx)->Add(pEntity);
+				it->second->Add(pEntity);
 			}
 			else
 			{
@@ -84,9 +85,10 @@ namespace SMBC
 	{
 		SMBC::Body* cCollection = nullptr;
 
-		if (mCollectionsMap.find(cName) != mCollectionsMap.end())
+		const CollectionStorageMap::iterator it = mCollectionsMap.find(cName);
+		if (it != mCollectionsMap.end())
 		{
-			cCollection = mCollectionsMap.at(cName);
+			cCollection = it->second;
 		}
 		else
 		{

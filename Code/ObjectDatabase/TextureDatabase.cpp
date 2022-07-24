@@ -85,9 +85,10 @@ namespace SMBC
 
 		bool Texture::GetEntry(const std::wstring& name, SMBC::Texture::TextureList& tex_list) const
 		{
-			if (this->TexList.find(name) != this->TexList.end())
+			const TextureStorageMap::const_iterator it = this->TexList.find(name);
+			if (it != this->TexList.end())
 			{
-				tex_list = this->TexList.at(name);
+				tex_list = it->second;
 				return true;
 			}
 

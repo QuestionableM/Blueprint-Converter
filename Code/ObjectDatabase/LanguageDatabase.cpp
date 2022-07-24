@@ -36,8 +36,9 @@ namespace SMBC
 
 	std::wstring LangDB::GetTranslation(const Uuid& uuid) const
 	{
-		if (m_Translations.find(uuid) != m_Translations.end())
-			return m_Translations.at(uuid);
+		const TranslationStorageMap::const_iterator it = m_Translations.find(uuid);
+		if (it != m_Translations.end())
+			return it->second;
 
 		return L"BLOCK NOT FOUND";
 	}

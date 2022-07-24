@@ -34,8 +34,11 @@ namespace SMBC
 			OffsetVector3 oPosition;
 		};
 
-		static std::unordered_map<int, std::unordered_map<int, RotationEntry>> RotationTable = {};
-		static std::unordered_map<int, std::unordered_map<int, RotationSettings>> RotationsForEditor = {};
+		using RotationEntryMap = std::unordered_map<int, std::unordered_map<int, RotationEntry>>;
+		using RotationSettingsMap = std::unordered_map<int, std::unordered_map<int, RotationSettings>>;
+
+		static RotationEntryMap RotationTable = {};
+		static RotationSettingsMap RotationsForEditor = {};
 
 		void LoadRotationsFromFile()
 		{
@@ -165,13 +168,12 @@ namespace SMBC
 
 		bool RotationExists(const int& xAxis, const int& zAxis)
 		{
-			if (RotationTable.find(xAxis) != RotationTable.end())
+			const RotationEntryMap::const_iterator x_it = RotationTable.find(xAxis);
+			if (x_it != RotationTable.end())
 			{
-				const std::unordered_map<int, RotationEntry>& zAxisRot = RotationTable.at(xAxis);
+				const std::unordered_map<int, RotationEntry>& zAxisRot = x_it->second;
 				if (zAxisRot.find(zAxis) != zAxisRot.end())
-				{
 					return true;
-				}
 			}
 
 			DebugErrorL("Couldn't find the specified rotation: (", xAxis, ", ", zAxis, ")");

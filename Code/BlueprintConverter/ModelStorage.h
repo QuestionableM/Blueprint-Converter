@@ -12,7 +12,9 @@ namespace SMBC
 {
 	class ModelStorage
 	{
-		inline static std::unordered_map<std::wstring, SMBC::Model*> CachedModels = {};
+		using ModelStorageMap = std::unordered_map<std::wstring, SMBC::Model*>;
+
+		inline static ModelStorageMap CachedModels = {};
 		inline static Assimp::Importer Importer = Assimp::Importer();
 
 		static const aiScene* LoadScene(const std::wstring& path);

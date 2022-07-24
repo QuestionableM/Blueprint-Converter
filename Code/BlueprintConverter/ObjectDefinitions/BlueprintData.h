@@ -16,8 +16,12 @@ namespace SMBC
 		std::size_t ObjectIndex = 0;
 		std::size_t BodyIndex   = 0;
 
-		std::unordered_map<std::size_t, Body*> mIndexMap = {};
-		std::unordered_map<std::string, Body*> mCollectionsMap = {};
+		using IndexStorageMap = std::unordered_map<std::size_t, Body*>;
+		using CollectionStorageMap = std::unordered_map<std::string, Body*>;
+
+		IndexStorageMap mIndexMap = {};
+		CollectionStorageMap mCollectionsMap = {};
+
 		std::vector<Body*> mCollections = {};
 
 		void (*CollectionBindFunction)(BlueprintData*, Entity*) = nullptr;

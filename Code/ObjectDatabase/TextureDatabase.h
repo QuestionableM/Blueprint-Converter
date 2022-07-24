@@ -34,9 +34,10 @@ namespace SMBC
 
 		class Texture
 		{
+			using TextureStorageMap = std::unordered_map<std::wstring, SMBC::Texture::TextureList>;
 		public:
 			SMBC::Texture::TextureType TexType = SMBC::Texture::TextureType::None;
-			std::unordered_map<std::wstring, SMBC::Texture::TextureList> TexList;
+			TextureStorageMap TexList;
 
 			Texture(const SMBC::Texture::TextureType& tex_type);
 			Texture() = default;

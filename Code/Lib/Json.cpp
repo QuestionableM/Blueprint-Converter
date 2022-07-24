@@ -84,8 +84,9 @@ namespace SMBC
 
 	const nlohmann::json& Json::Get(const nlohmann::json& json, const std::string& key)
 	{
-		if (json.find(key) != json.end())
-			return json.at(key);
+		const nlohmann::detail::iter_impl<const nlohmann::json> it = json.find(key);
+		if (it != json.end())
+			return it.value();
 
 		return Json::NullObject;
 	}

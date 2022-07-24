@@ -111,8 +111,9 @@ namespace SMBC
 
 	Model* ModelStorage::LoadModel(const std::wstring& path)
 	{
-		if (CachedModels.find(path) != CachedModels.end())
-			return CachedModels.at(path);
+		const ModelStorageMap::iterator it = CachedModels.find(path);
+		if (it != CachedModels.end())
+			return it->second;
 
 		const aiScene* ModelScene = ModelStorage::LoadScene(path);
 		if (ModelScene && ModelScene->HasMeshes())

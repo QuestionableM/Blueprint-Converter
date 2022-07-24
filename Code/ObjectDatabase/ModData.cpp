@@ -18,7 +18,8 @@ namespace fs = std::filesystem;
 
 namespace SMBC
 {
-	const static std::unordered_map<std::string, void (*)(const nlohmann::json&, Mod*)> m_DataLoaders =
+	using DataLoaderMap = std::unordered_map<std::string, void (*)(const nlohmann::json&, Mod*)>;
+	const static DataLoaderMap m_DataLoaders =
 	{
 		{ "blockList", BlockListLoader::Load },
 		{ "partList" , PartListLoader::Load  }
@@ -38,9 +39,10 @@ namespace SMBC
 			if (!l_cur_item.value().is_array()) continue;
 
 			const std::string l_key_str = l_cur_item.key();
-			if (m_DataLoaders.find(l_key_str) != m_DataLoaders.end())
+			const DataLoaderMap::const_iterator it = m_DataLoaders.find(l_key_str);
+			if (it != m_DataLoaders.end())
 			{
-				m_DataLoaders.at(l_key_str)(l_cur_item.value(), this);
+				it->second(l_cur_item.value(), this);
 			}
 			else
 			{
@@ -172,18 +174,20 @@ namespace SMBC
 
 	const ObjectData* Mod::GetObject(const SMBC::Uuid& uuid)
 	{
-		if (AllObjects.find(uuid) == AllObjects.end())
+		const ObjectDataMap::const_iterator it = Mod::AllObjects.find(uuid);
+		if (it == AllObjects.end())
 			return nullptr;
 
-		return AllObjects.at(uuid);
+		return it->second;
 	}
 
 	const PartData* Mod::GetPart(const SMBC::Uuid& uuid)
 	{
-		if (Mod::AllObjects.find(uuid) == Mod::AllObjects.end())
+		const ObjectDataMap::const_iterator it = Mod::AllObjects.find(uuid);
+		if (it == Mod::AllObjects.end())
 			return nullptr;
 
-		const ObjectData* p_cur_obj = Mod::AllObjects.at(uuid);
+		const ObjectData* p_cur_obj = it->second;
 		if (p_cur_obj->Type() != ObjectType::Part)
 			return nullptr;
 
@@ -192,10 +196,11 @@ namespace SMBC
 
 	const BlockData* Mod::GetBlock(const SMBC::Uuid& uuid)
 	{
-		if (Mod::AllObjects.find(uuid) == Mod::AllObjects.end())
+		const ObjectDataMap::const_iterator it = Mod::AllObjects.find(uuid);
+		if (it == Mod::AllObjects.end())
 			return nullptr;
 
-		const ObjectData* p_cur_obj = Mod::AllObjects.at(uuid);
+		const ObjectData* p_cur_obj = it->second;
 		if (p_cur_obj->Type() != ObjectType::Block)
 			return nullptr;
 

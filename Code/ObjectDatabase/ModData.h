@@ -18,7 +18,9 @@ namespace SMBC
 		friend class BlockListLoader;
 		friend class PartListLoader;
 
-		inline static std::unordered_map<Uuid, ObjectData*> AllObjects = {};
+		using ObjectDataMap = std::unordered_map<Uuid, ObjectData*>;
+
+		inline static ObjectDataMap AllObjects = {};
 		inline static std::unordered_map<Uuid, Mod*> Mods              = {};
 		inline static std::vector<Mod*> ModsArray                      = {};
 

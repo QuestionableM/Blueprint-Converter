@@ -29,8 +29,9 @@ namespace SMBC
 
 	std::wstring MaterialManager::GetMaterialW(const std::wstring& mat_name)
 	{
-		if (MatStorage.find(mat_name) != MatStorage.end())
-			return L"m" + MatStorage.at(mat_name);
+		const MaterialStorageMap::iterator it = MatStorage.find(mat_name);
+		if (it != MatStorage.end())
+			return L"m" + it->second;
 
 		DebugErrorL("Couldn't find the specifieid material: ", mat_name);
 

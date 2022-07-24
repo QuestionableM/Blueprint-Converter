@@ -9,8 +9,10 @@ namespace SMBC
 {
 	class PathReplacer
 	{
-		inline static std::unordered_map<std::wstring, std::wstring> m_KeyReplacements  = {};
-		inline static std::unordered_map<std::wstring, std::wstring> m_ResourceUpgrades = {};
+		using StringStorageMap = std::unordered_map<std::wstring, std::wstring>;
+
+		inline static StringStorageMap m_KeyReplacements  = {};
+		inline static StringStorageMap m_ResourceUpgrades = {};
 
 		static void CreateKey(std::wstring& key, std::wstring& replacement);
 	public:

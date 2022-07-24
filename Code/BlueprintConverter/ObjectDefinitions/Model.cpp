@@ -120,9 +120,12 @@ namespace SMBC
 				{
 					const VertexData& d_idx = vert_vec[b];
 
-					const glm::vec3& pVertex = translated_vertices[d_idx.m_Vert];
-					if (mOffset.VertexMap.find(pVertex) != mOffset.VertexMap.end())
-						String::Combine(_f_str, " ", (mOffset.VertexMap.at(pVertex) + 1));
+					{
+						const glm::vec3& pVertex = translated_vertices[d_idx.m_Vert];
+						const OffsetData::Vec3StorageMap::iterator it = mOffset.VertexMap.find(pVertex);
+						if (it != mOffset.VertexMap.end())
+							String::Combine(_f_str, " ", (it->second + 1));
+					}
 
 					if (!pSubMesh->has_uvs && !pSubMesh->has_normals) continue;
 
@@ -131,15 +134,17 @@ namespace SMBC
 					if (pSubMesh->has_uvs)
 					{
 						const glm::vec2& pUv = this->uvs[d_idx.m_Uv];
-						if (mOffset.UvMap.find(pUv) != mOffset.UvMap.end())
-							String::Combine(_f_str, (mOffset.UvMap.at(pUv) + 1));
+						const OffsetData::Vec2StorageMap::iterator it = mOffset.UvMap.find(pUv);
+						if (it != mOffset.UvMap.end())
+							String::Combine(_f_str, (it->second + 1));
 					}
 
 					if (pSubMesh->has_normals)
 					{
 						const glm::vec3& pNormal = translated_normals[d_idx.m_Norm];
-						if (mOffset.NormalMap.find(pNormal) != mOffset.NormalMap.end())
-							String::Combine(_f_str, "/", (mOffset.NormalMap.at(pNormal) + 1));
+						const OffsetData::Vec3StorageMap::iterator it = mOffset.NormalMap.find(pNormal);
+						if (it != mOffset.NormalMap.end())
+							String::Combine(_f_str, "/", (it->second + 1));
 					}
 				}
 
