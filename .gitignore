@@ -1,6 +1,5 @@
 /.vs
-/Bin
-/Junk
+/Build
 /LocalBinaries
 /AssimpDebugLog.txt
 /Converted Models

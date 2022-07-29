@@ -28,7 +28,7 @@ namespace SMBC
 
 		static void ReadProgramSettings(const nlohmann::json& config_json);
 
-		static bool GetStaemPaths(std::wstring& game_path, std::wstring& workshop_path);
+		static bool GetSteamPaths(std::wstring& game_path, std::wstring& workshop_path);
 		static void FindLocalUsers();
 		static void FindGamePath(const nlohmann::json& config_json, bool& should_write);
 		static void ReadUserSettings(const nlohmann::json& config_json, bool& should_write);

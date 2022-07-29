@@ -190,26 +190,32 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>$(SolutionDir)\Bin\$(Platform)$(Configuration)\</OutDir>
-    <IntDir>Junk\$(Platform)$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)Build\$(PlatformShortName)-$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)Build\Junk\$(PlatformShortName)-$(Configuration)\</IntDir>
+    <CopyLocalProjectReference>false</CopyLocalProjectReference>
+    <CopyCppRuntimeToOutputDir>true</CopyCppRuntimeToOutputDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>$(SolutionDir)\Bin\$(Platform)$(Configuration)\</OutDir>
-    <IntDir>Junk\$(Platform)$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)Build\$(PlatformShortName)-$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)Build\Junk\$(PlatformShortName)-$(Configuration)\</IntDir>
+    <CopyLocalProjectReference>false</CopyLocalProjectReference>
+    <CopyCppRuntimeToOutputDir>true</CopyCppRuntimeToOutputDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <OutDir>$(SolutionDir)\Bin\$(Platform)$(Configuration)\</OutDir>
-    <IntDir>Junk\$(Platform)$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)Build\$(PlatformShortName)-$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)Build\Junk\$(PlatformShortName)-$(Configuration)\</IntDir>
+    <CopyCppRuntimeToOutputDir>true</CopyCppRuntimeToOutputDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>$(SolutionDir)\Bin\$(Platform)$(Configuration)\</OutDir>
-    <IntDir>Junk\$(Platform)$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)Build\$(PlatformShortName)-$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)Build\Junk\$(PlatformShortName)-$(Configuration)\</IntDir>
+    <CopyCppRuntimeToOutputDir>true</CopyCppRuntimeToOutputDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)\Dependencies\Assimp\Include;$(SolutionDir)\Dependencies\glm;$(SolutionDir)\Dependencies\Json;$(SolutionDir)Dependencies\stduuid;$(SolutionDir)Code;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\Dependencies\Assimp\Include;$(SolutionDir)\Dependencies\glm;$(SolutionDir)\Dependencies\Json;$(SolutionDir)Dependencies\stduuid;$(SolutionDir)Dependencies\ValveVDF\include;$(SolutionDir)Code;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <Optimization>Disabled</Optimization>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -230,7 +236,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)\Dependencies\Assimp\Include;$(SolutionDir)\Dependencies\glm;$(SolutionDir)\Dependencies\Json;$(SolutionDir)Dependencies\stduuid;$(SolutionDir)Code;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\Dependencies\Assimp\Include;$(SolutionDir)\Dependencies\glm;$(SolutionDir)\Dependencies\Json;$(SolutionDir)Dependencies\stduuid;$(SolutionDir)Dependencies\ValveVDF\include;$(SolutionDir)Code;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <Optimization>Disabled</Optimization>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -252,7 +258,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)\Dependencies\Assimp\Include;$(SolutionDir)\Dependencies\glm;$(SolutionDir)\Dependencies\Json;$(SolutionDir)Dependencies\stduuid;$(SolutionDir)Code;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\Dependencies\Assimp\Include;$(SolutionDir)\Dependencies\glm;$(SolutionDir)\Dependencies\Json;$(SolutionDir)Dependencies\stduuid;$(SolutionDir)Dependencies\ValveVDF\include;$(SolutionDir)Code;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -273,7 +279,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)\Dependencies\Assimp\Include;$(SolutionDir)\Dependencies\glm;$(SolutionDir)\Dependencies\Json;$(SolutionDir)Dependencies\stduuid;$(SolutionDir)Code;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\Dependencies\Assimp\Include;$(SolutionDir)\Dependencies\glm;$(SolutionDir)\Dependencies\Json;$(SolutionDir)Dependencies\stduuid;$(SolutionDir)Dependencies\ValveVDF\include;$(SolutionDir)Code;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>

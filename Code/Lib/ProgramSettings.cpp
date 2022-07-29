@@ -12,6 +12,11 @@
 #include <msclr/marshal_cppstd.h>
 #include <ShlObj.h>
 
+#pragma warning(push)
+#pragma warning(disable : 4996)
+	#include <valve_vdf\vdf_parser.hpp>
+#pragma warning(pop)
+
 namespace fs = std::filesystem;
 
 namespace SMBC
@@ -94,24 +99,95 @@ namespace SMBC
 		Settings::JsonStrArrayToVector(pSettings, "ScrapObjectDatabase", Settings::SMDirDatabase);
 	}
 
-	bool Settings::GetStaemPaths(std::wstring& game_path, std::wstring& workshop_path)
+	using vdf_childs_table = std::unordered_map<std::string, std::shared_ptr<tyti::vdf::object>>;
+	using vdf_attrib_table = std::unordered_map<std::string, std::string>;
+	bool Settings::GetSteamPaths(std::wstring& game_path, std::wstring& workshop_path)
 	{
 		std::wstring steam_path = String::ReadRegistryKey(L"SOFTWARE\\Valve\\Steam", L"SteamPath");
 		if (steam_path.empty() || !File::Exists(steam_path))
 			steam_path = String::ReadRegistryKey(L"SOFTWARE\\WOW6432Node\\Valve\\Steam", L"SteamPath");
 
-		if (steam_path.empty() || !File::Exists(steam_path)) return false;
+		if (steam_path.empty() || !File::Exists(steam_path))
+			return false;
 
-		const std::wstring sm_path = steam_path + L"/steamapps/common/scrap mechanic";
-		const std::wstring ws_path = steam_path + L"/steamapps/workshop/content/387990";
+		const std::wstring registry_sm_path = steam_path + L"/steamapps/common/scrap mechanic";
+		const std::wstring registry_ws_path = steam_path + L"/steamapps/workshop/content/387990";
 
-		if (File::Exists(sm_path))
-			game_path = sm_path;
+		//If SM and WS paths are not valid, then the program will read the libraryfolders.vdf file
+		if (File::Exists(registry_sm_path) && File::Exists(registry_ws_path))
+		{
+			game_path = registry_sm_path;
+			workshop_path = registry_ws_path;
 
-		if (File::Exists(ws_path))
-			workshop_path = ws_path;
+			DebugOutL("Found a game path from the registry: ", 0b1101_fg, registry_sm_path);
+			DebugOutL("Found a workshop path from the registry: ", 0b1101_fg, registry_ws_path);
 
-		return true;
+			return true;
+		}
+		else
+		{
+			const std::wstring vdf_path = steam_path + L"/steamapps/libraryfolders.vdf";
+			if (!File::Exists(vdf_path))
+				return false;
+
+			DebugOutL("VDF path found: ", vdf_path);
+
+			std::ifstream vdf_reader(vdf_path);
+			if (!vdf_reader.is_open())
+				return false;
+
+			tyti::vdf::basic_object<char> vdf_root = tyti::vdf::read(vdf_reader);
+			if (vdf_root.name != "libraryfolders")
+				return false;
+
+			vdf_reader.close();
+
+			const vdf_childs_table& vdf_lib_folders = vdf_root.childs;
+			for (const auto& lib_folder : vdf_lib_folders)
+			{
+				const vdf_attrib_table& lib_folder_attribs = lib_folder.second->attribs;
+				const vdf_attrib_table::const_iterator attrib_iter = lib_folder_attribs.find("path");
+				if (attrib_iter == lib_folder_attribs.end())
+					continue;
+
+				const vdf_childs_table& lib_folder_childs = lib_folder.second->childs;
+				const vdf_childs_table::const_iterator childs_iter = lib_folder_childs.find("apps");
+				if (childs_iter == lib_folder_childs.end())
+					continue;
+
+				const vdf_attrib_table& apps_attribs = childs_iter->second->attribs;
+				const vdf_attrib_table::const_iterator apps_attribs_iter = apps_attribs.find("387990");
+				if (apps_attribs_iter == apps_attribs.end())
+					continue;
+
+				const std::wstring library_path_wstr = String::ToWide(attrib_iter->second);
+				const std::wstring library_sm_path = library_path_wstr + L"/steamapps/common/scrap mechanic";
+				const std::wstring library_ws_path = library_path_wstr + L"/steamapps/workshop/content/387990";
+
+				const bool library_sm_exists = File::Exists(library_sm_path);
+				const bool library_ws_exists = File::Exists(library_ws_path);
+
+				if (library_sm_exists)
+				{
+					DebugOutL("Found a game path from the library: ", 0b1101_fg, library_sm_path);
+					game_path = library_sm_path;
+				}
+
+				if (library_ws_exists)
+				{
+					DebugOutL("Found a workshop path from the library: ", 0b1101_fg, library_ws_path);
+					workshop_path = library_ws_path;
+				}
+
+				if (library_sm_exists || library_ws_exists)
+				{
+					DebugOutL("Successfully got the steam paths!");
+					return true;
+				}
+			}
+		}
+
+		return false;
 	}
 
 	void Settings::FindLocalUsers()
@@ -152,10 +228,9 @@ namespace SMBC
 		{
 			std::wstring game_path, ws_path;
 
-			if (Settings::GetStaemPaths(game_path, ws_path))
+			if (Settings::GetSteamPaths(game_path, ws_path))
 			{
 				Settings::PathToSM = game_path;
-				DebugOutL("Found a game path from the registry: ", 0b1101_fg, Settings::PathToSM);
 
 				Settings::AddToStrVec(Settings::BlueprintFolders, ws_path);
 				Settings::AddToStrVec(Settings::ModFolders, ws_path);
