@@ -18,28 +18,45 @@ namespace SMBC
 			HWND owner = NULL
 		);
 
-		void OpenFolderInExplorer(const std::wstring& path);
-		
-		WForms::DialogResult Message(
+		inline void OpenFolderInExplorer(const std::wstring& path)
+		{
+			System::Diagnostics::Process::Start("explorer.exe", gcnew System::String(path.c_str()));
+		}
+
+		inline WForms::DialogResult Message(
 			System::String^ title,
 			System::String^ description,
 			WForms::MessageBoxButtons buttons = WForms::MessageBoxButtons::OK,
-			WForms::MessageBoxIcon icon = WForms::MessageBoxIcon::None
-		);
+			WForms::MessageBoxIcon icon = WForms::MessageBoxIcon::None)
+		{
+			return WForms::MessageBox::Show(description, title, buttons, icon);
+		}
 
-		WForms::DialogResult Error(
-			System::String^ title,
-			System::String^ description
-		);
+		inline WForms::DialogResult Error(System::String^ title, System::String^ description)
+		{
+			return Gui::Message(
+				title, description,
+				WForms::MessageBoxButtons::OK,
+				WForms::MessageBoxIcon::Error
+			);
+		}
 
-		WForms::DialogResult Warning(
-			System::String^ title,
-			System::String^ description
-		);
+		inline WForms::DialogResult Warning(System::String^ title, System::String^ description)
+		{
+			return Gui::Message(
+				title, description,
+				WForms::MessageBoxButtons::OK,
+				WForms::MessageBoxIcon::Warning
+			);
+		}
 
-		WForms::DialogResult Question(
-			System::String^ title,
-			System::String^ description
-		);
+		inline WForms::DialogResult Question(System::String^ title, System::String^ description)
+		{
+			return Gui::Message(
+				title, description,
+				WForms::MessageBoxButtons::YesNo,
+				WForms::MessageBoxIcon::Question
+			);
+		}
 	};
 }

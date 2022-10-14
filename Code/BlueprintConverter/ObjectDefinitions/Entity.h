@@ -53,12 +53,13 @@ namespace SMBC
 		virtual std::wstring GetName() const = 0;
 		virtual glm::vec3 GetCenterPoint() const = 0;
 
-		virtual glm::mat4 GetTransformMatrix() const;
-		virtual std::size_t GetAmountOfObjects() const;
+		inline virtual glm::mat4 GetTransformMatrix() const { return glm::mat4(1.0f); }
+		inline virtual std::size_t GetAmountOfObjects() const { return 1; }
+
 		virtual void WriteObjectToFile(std::ofstream& file, OffsetData& mOffset) const;
 
-		std::size_t GetIndex() const;
-		SMBC::Color GetColor() const;
-		virtual SMBC::Uuid GetUuid() const;
+		inline std::size_t GetIndex() const { return this->mIndex; }
+		inline SMBC::Color GetColor() const { return this->mColor; }
+		inline virtual SMBC::Uuid GetUuid() const { return SMBC::Uuid(); }
 	};
 }

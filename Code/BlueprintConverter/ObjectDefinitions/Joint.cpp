@@ -13,23 +13,6 @@
 
 namespace SMBC
 {
-	Joint::Joint(const PartData* pParent, Model* pModel, const glm::vec3& pos, const AxisData& mAxis, const Color& mColor, const std::size_t& mChildIdx)
-	{
-		this->pParent = pParent;
-		this->pModel = pModel;
-		this->mPosition = pos;
-		this->mAxis = mAxis;
-		this->mColor = mColor;
-		this->mIndex = mChildIdx;
-	}
-
-
-
-	EntityType Joint::Type() const
-	{
-		return EntityType::Joint;
-	}
-
 	std::string Joint::GetMtlName(const std::wstring& mat_name, const std::size_t& mIdx) const
 	{
 		std::string out_str = pParent->Uuid.ToString();
@@ -95,11 +78,6 @@ namespace SMBC
 		ConvData::ProgressValue++;
 	}
 
-	std::wstring Joint::GetName() const
-	{
-		return pParent->Name + L" (" + pParent->ModPtr->m_Name + L": " + pParent->Uuid.ToWstring() + L")";
-	}
-
 	glm::vec3 Joint::GetCenterPoint() const
 	{
 		const glm::vec3 pModelCenter = pModel->GetCenterPoint();
@@ -121,10 +99,5 @@ namespace SMBC
 		model_matrix *= glm::translate(pParent->Bounds / 2.0f);
 
 		return model_matrix;
-	}
-
-	SMBC::Uuid Joint::GetUuid() const
-	{
-		return pParent->Uuid;
 	}
 }

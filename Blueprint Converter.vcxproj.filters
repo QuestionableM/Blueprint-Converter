@@ -22,7 +22,6 @@
     <ClCompile Include="Code\ObjectDatabase\Blueprint.cpp" />
     <ClCompile Include="Code\Lib\ConvData.cpp" />
     <ClCompile Include="Code\ObjectDatabase\ObjectData.cpp" />
-    <ClCompile Include="Code\Lib\Uuid.cpp" />
     <ClCompile Include="Code\BlueprintConverter\ObjectDefinitions\Entity.cpp" />
     <ClCompile Include="Code\BlueprintConverter\ObjectDefinitions\Model.cpp" />
     <ClCompile Include="Code\BlueprintConverter\ModelStorage.cpp" />

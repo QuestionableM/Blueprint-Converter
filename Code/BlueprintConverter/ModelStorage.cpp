@@ -106,7 +106,7 @@ namespace SMBC
 		for (std::size_t pVertId = 0; pVertId < mVertexAmount; pVertId++)
 			pCenter += model->vertices[pVertId];
 
-		model->mCenterPoint = pCenter / (float)mVertexAmount;
+		model->mCenterPoint = pCenter / static_cast<float>(mVertexAmount);
 	}
 
 	Model* ModelStorage::LoadModel(const std::wstring& path)

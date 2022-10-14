@@ -2,36 +2,6 @@
 
 namespace SMBC
 {
-	void ConvertError::operator=(const std::wstring& error_msg)
-	{
-		this->ErrorMsg = error_msg;
-	}
-
-	ConvertError::operator bool() const noexcept
-	{
-		return !this->ErrorMsg.empty();
-	}
-
-	std::wstring ConvertError::GetString() const noexcept
-	{
-		return this->ErrorMsg;
-	}
-
-
-
-	void ConvData::SetState(const ConvState& state, const std::size_t& MaxValue)
-	{
-		ConvData::State = state;
-
-		ConvData::ProgressValue = 0;
-		ConvData::ProgressMax = MaxValue;
-	}
-
-	void ConvData::SetState(const ConvState& state)
-	{
-		ConvData::State = state;
-	}
-
 	struct StateData
 	{
 		std::wstring Description;

@@ -16,27 +16,6 @@
 
 namespace SMBC
 {
-	Block::Block(
-		const BlockData* pParent,
-		const glm::vec3& position,
-		const glm::vec3& size,
-		const AxisData& mAxisData,
-		const Color& mColor,
-		const std::size_t& obj_idx)
-	{
-		this->pParent = pParent;
-		this->mPosition = position;
-		this->mScale = size;
-		this->mAxis = mAxisData;
-		this->mColor = mColor;
-		this->mIndex = obj_idx;
-	}
-
-	EntityType Block::Type() const
-	{
-		return EntityType::Block;
-	}
-
 	std::string Block::GetMtlName(const std::wstring& mat_name, const std::size_t& mIdx) const
 	{
 		std::string out_str = pParent->Uuid.ToString();
@@ -74,11 +53,6 @@ namespace SMBC
 		ConvData::ProgressValue++;
 	}
 
-	std::wstring Block::GetName() const
-	{
-		return pParent->Name + L" (" + pParent->ModPtr->m_Name + L": " + pParent->Uuid.ToWstring() + L")";
-	}
-
 	glm::vec3 Block::GetCenterPoint() const
 	{
 		Model new_block(L"BLOCK_INTERNAL");
@@ -113,10 +87,5 @@ namespace SMBC
 		new_block.WriteToFile(file, block_matrix, mOffset, this);
 
 		ConvData::ProgressValue++;
-	}
-
-	SMBC::Uuid Block::GetUuid() const
-	{
-		return pParent->Uuid;
 	}
 }

@@ -1,7 +1,6 @@
 #include "Json.h"
 
 #include <sstream>
-#include <iomanip>
 
 #include "Lib\String.h"
 
@@ -74,43 +73,16 @@ namespace SMBC
 		return nlohmann::json();
 	}
 
-	void Json::WriteToFile(const std::wstring& path, const nlohmann::json& mJson)
-	{
-		std::ofstream mOutput(path);
-		if (!mOutput.is_open()) return;
-
-		mOutput << std::setw(1) << std::setfill('\t') << mJson;
-	}
-
-	const nlohmann::json& Json::Get(const nlohmann::json& json, const std::string& key)
-	{
-		const nlohmann::detail::iter_impl<const nlohmann::json> it = json.find(key);
-		if (it != json.end())
-			return it.value();
-
-		return Json::NullObject;
-	}
-
-	const nlohmann::json& Json::Get(const nlohmann::json& json, const std::size_t& key)
-	{
-		if (key < json.size())
-			return json[key];
-
-		return Json::NullObject;
-	}
-
 	std::wstring Json::GetWstr(nlohmann::json& json, const std::string& key)
 	{
-		std::wstring _Output = L"";
-
 		if (json.contains(key))
 		{
-			auto& _value = json.at(key);
+			const auto& v_value = json.at(key);
 
-			if (_value.is_string())
-				_Output.append(SMBC::String::ToWide(_value.get<std::string>()));
+			if (v_value.is_string())
+				return SMBC::String::ToWide(v_value.get<std::string>());
 		}
 
-		return _Output;
+		return L"";
 	}
 }

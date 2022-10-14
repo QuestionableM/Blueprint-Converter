@@ -25,8 +25,9 @@ namespace SMBC
 		bool has_uvs;
 		bool has_normals;
 
-		bool IsEmpty();
-		SubMeshData(const int& sub_mesh_idx);
+		inline bool IsEmpty() { return this->DataIdx.empty(); }
+
+		inline SubMeshData(const int& sub_mesh_idx) { this->SubMeshIndex = sub_mesh_idx; }
 		~SubMeshData() = default;
 	};
 
@@ -40,16 +41,31 @@ namespace SMBC
 		std::wstring meshPath;
 		glm::vec3 mCenterPoint;
 
-	public:
-		Model(const std::wstring& mesh_path);
+		inline Model(const std::wstring& mesh_path)
+		{
+			this->meshPath = mesh_path;
+		}
+
 		Model(Model&) = delete;
 		Model(Model&&) = delete;
 		Model(const Model&) = delete;
-		~Model();
+
+		inline ~Model()
+		{
+			for (SMBC::SubMeshData*& v_curSubMesh : this->subMeshData)
+				delete v_curSubMesh;
+		}
 
 		void WriteToFile(std::ofstream& file, const glm::mat4& model_mat, OffsetData& mOffset, const class Entity* pEntity) const;
-		glm::vec3 GetCenterPoint() const;
 
-		bool IsEmpty();
+		inline glm::vec3 GetCenterPoint() const
+		{
+			return mCenterPoint;
+		}
+
+		inline bool IsEmpty()
+		{
+			return (this->subMeshData.size() <= 0 || (this->vertices.size() <= 0 && this->uvs.size() <= 0 && this->normals.size() <= 0));
+		}
 	};
 }

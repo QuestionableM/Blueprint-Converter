@@ -13,21 +13,6 @@
 
 namespace SMBC
 {
-	Part::Part(const PartData* pParent, Model* pModel, const glm::vec3& position, const AxisData& mAxisData, const Color& mColor, const std::size_t& obj_idx)
-	{
-		this->pParent = pParent;
-		this->pModel = pModel;
-		this->mPosition = position;
-		this->mAxis = mAxisData;
-		this->mColor = mColor;
-		this->mIndex = obj_idx;
-	}
-
-	EntityType Part::Type() const
-	{
-		return EntityType::Part;
-	}
-
 	std::string Part::GetMtlName(const std::wstring& mat_name, const std::size_t& mIdx) const
 	{
 		std::string out_str = pParent->Uuid.ToString();
@@ -93,11 +78,6 @@ namespace SMBC
 		ConvData::ProgressValue++;
 	}
 
-	std::wstring Part::GetName() const
-	{
-		return pParent->Name + L" (" + pParent->ModPtr->m_Name + L": " + pParent->Uuid.ToWstring() + L")";
-	}
-
 	glm::vec3 Part::GetCenterPoint() const
 	{
 		const glm::vec3 pModelCenter = pModel->GetCenterPoint();
@@ -118,10 +98,5 @@ namespace SMBC
 		model_matrix *= glm::translate(pParent->Bounds / 2.0f);
 
 		return model_matrix;
-	}
-
-	SMBC::Uuid Part::GetUuid() const
-	{
-		return pParent->Uuid;
 	}
 }

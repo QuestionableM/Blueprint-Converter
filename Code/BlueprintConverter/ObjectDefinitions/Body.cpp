@@ -6,28 +6,6 @@
 
 namespace SMBC
 {
-	Body::Body(const std::string& mBodyName)
-	{
-		this->mBodyName = mBodyName;
-	}
-
-	Body::~Body()
-	{
-		for (Entity* pEntity : mObjects)
-			delete pEntity;
-	}
-
-
-	EntityType Body::Type() const
-	{
-		return EntityType::Body;
-	}
-
-	std::string Body::GetMtlName(const std::wstring& mat_name, const std::size_t& mIdx) const
-	{
-		return "NOT_IMPLEMENTED_FOR_BODIES";
-	}
-
 	void Body::FillTextureMap(std::unordered_map<std::string, ObjectTextureData>& tex_map) const
 	{
 		for (Entity* pEntity : mObjects)
@@ -40,11 +18,6 @@ namespace SMBC
 			pEntity->FillTextureJson(mJson);
 	}
 
-	std::wstring Body::GetName() const
-	{
-		return L"Body_" + std::to_wstring(this->mIndex);
-	}
-
 	glm::vec3 Body::GetCenterPoint() const
 	{
 		glm::vec3 pCenter(0.0f);
@@ -52,7 +25,7 @@ namespace SMBC
 		for (Entity* pEntity : mObjects)
 			pCenter += pEntity->GetCenterPoint();
 
-		return pCenter / (float)mObjects.size();
+		return pCenter / static_cast<float>(mObjects.size());
 	}
 
 
@@ -77,10 +50,5 @@ namespace SMBC
 
 		for (Entity* pEntity : mObjects)
 			pEntity->WriteObjectToFile(file, mOffset);
-	}
-
-	void Body::Add(Entity* mEntity)
-	{
-		mObjects.push_back(mEntity);
 	}
 }

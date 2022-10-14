@@ -25,14 +25,26 @@ namespace SMBC
 
 	class ConvertError
 	{
-		std::wstring ErrorMsg;
 	public:
 		ConvertError() = default;
 
-		void operator=(const std::wstring& error_msg);
+		inline void operator=(const std::wstring& error_msg)
+		{
+			this->ErrorMsg = error_msg;
+		}
 
-		explicit operator bool() const noexcept;
-		std::wstring GetString() const noexcept;
+		inline explicit operator bool() const noexcept
+		{
+			return !this->ErrorMsg.empty();
+		}
+
+		inline std::wstring GetString() const noexcept
+		{
+			return this->ErrorMsg;
+		}
+
+	private:
+		std::wstring ErrorMsg;
 	};
 
 	//Blueprint Conversion Data
@@ -43,8 +55,18 @@ namespace SMBC
 		inline static std::size_t ProgressMax   = 0;
 		inline static std::size_t ProgressValue = 0;
 
-		static void SetState(const ConvState& state, const std::size_t& MaxValue);
-		static void SetState(const ConvState& state);
+		inline static void SetState(const ConvState& state, const std::size_t& MaxValue)
+		{
+			ConvData::State = state;
+
+			ConvData::ProgressValue = 0;
+			ConvData::ProgressMax = MaxValue;
+		}
+
+		inline static void SetState(const ConvState& state)
+		{
+			ConvData::State = state;
+		}
 
 		static std::wstring GetStateString();
 		static bool StateHasNumbers();

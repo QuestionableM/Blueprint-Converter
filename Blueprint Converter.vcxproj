@@ -54,7 +54,6 @@
     <ClCompile Include="Code\ObjectDatabase\ObjectData.cpp" />
     <ClCompile Include="Code\ObjectDatabase\ObjectRotations.cpp" />
     <ClCompile Include="Code\ObjectDatabase\TextureDatabase.cpp" />
-    <ClCompile Include="Code\Lib\Uuid.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Code\BlueprintConverter\BlueprintConverter.h" />

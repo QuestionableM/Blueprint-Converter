@@ -12,29 +12,6 @@
 
 namespace SMBC
 {
-	bool SubMeshData::IsEmpty()
-	{
-		return (this->DataIdx.size() <= 0);
-	}
-
-	SubMeshData::SubMeshData(const int& sub_mesh_idx)
-	{
-		this->SubMeshIndex = sub_mesh_idx;
-	}
-
-
-
-	Model::Model(const std::wstring& mesh_path)
-	{
-		this->meshPath = mesh_path;
-	}
-
-	Model::~Model()
-	{
-		for (SMBC::SubMeshData*& data_ptr : this->subMeshData)
-			delete data_ptr;
-	}
-
 	void Model::WriteToFile(std::ofstream& file, const glm::mat4& model_mat, OffsetData& mOffset, const class Entity* pEntity) const
 	{
 		std::vector<glm::vec3> translated_vertices = {};
@@ -151,15 +128,5 @@ namespace SMBC
 				file.write(_f_str.c_str(), _f_str.size());
 			}
 		}
-	}
-
-	glm::vec3 Model::GetCenterPoint() const
-	{
-		return mCenterPoint;
-	}
-
-	bool Model::IsEmpty()
-	{
-		return (this->subMeshData.size() <= 0 || (this->vertices.size() <= 0 && this->uvs.size() <= 0 && this->normals.size() <= 0));
 	}
 }
