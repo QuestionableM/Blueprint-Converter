@@ -14,10 +14,8 @@ namespace SMBC
 			String::ToUtf8(path).c_str(),
 			aiProcess_FindInvalidData |
 			aiProcess_RemoveComponent |
-			aiProcess_RemoveRedundantMaterials |
 			aiProcess_JoinIdenticalVertices |
-			aiProcess_FindDegenerates |
-			aiProcess_OptimizeMeshes
+			aiProcess_FindDegenerates
 		);
 	}
 
