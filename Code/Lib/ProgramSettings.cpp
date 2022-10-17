@@ -192,33 +192,33 @@ namespace SMBC
 
 	void Settings::FindLocalUsers()
 	{
-		std::wstring SMLocalData;
-		if (!File::GetAppDataPath(SMLocalData)) return;
+		std::wstring v_smLocalData;
+		if (!File::GetAppDataPath(v_smLocalData)) return;
 
-		SMLocalData.append(L"\\Axolot Games\\Scrap Mechanic\\User");
-		if (!File::Exists(SMLocalData)) return;
+		v_smLocalData.append(L"\\Axolot Games\\Scrap Mechanic\\User");
+		if (!File::Exists(v_smLocalData)) return;
 
-		std::error_code mError;
-		fs::directory_iterator DirIter(SMLocalData, fs::directory_options::skip_permission_denied, mError);
+		std::error_code v_errorCode;
+		fs::directory_iterator v_dirIter(v_smLocalData, fs::directory_options::skip_permission_denied, v_errorCode);
 
-		for (const auto& dir : DirIter)
+		for (const auto& v_curDir : v_dirIter)
 		{
-			if (mError)
+			if (v_errorCode)
 			{
-				DebugErrorL("Couldn't read an item in the directory: ", SMLocalData);
+				DebugErrorL("Couldn't read an item in the directory: ", v_smLocalData);
 				continue;
 			}
 
-			if (!dir.is_directory()) continue;
+			if (!v_curDir.is_directory()) continue;
 
-			std::wstring BPPath = dir.path().wstring() + L"\\Blueprints";
-			std::wstring ModPath = dir.path().wstring() + L"\\Mods";
+			const std::wstring BPPath = v_curDir.path().wstring() + L"\\Blueprints";
+			const std::wstring ModPath = v_curDir.path().wstring() + L"\\Mods";
 
 			if (File::Exists(BPPath))
 				Settings::AddToStrVec(Settings::BlueprintFolders, BPPath);
 
 			if (File::Exists(ModPath))
-				Settings::AddToStrVec(Settings::ModFolders, ModPath);
+				Settings::AddToStrVec(Settings::LocalModFolders, ModPath);
 		}
 	}
 
@@ -226,14 +226,14 @@ namespace SMBC
 	{
 		if (Settings::PathToSM.empty() || !File::Exists(Settings::PathToSM))
 		{
-			std::wstring game_path, ws_path;
+			std::wstring v_gamePath, v_wsPath;
 
-			if (Settings::GetSteamPaths(game_path, ws_path))
+			if (Settings::GetSteamPaths(v_gamePath, v_wsPath))
 			{
-				Settings::PathToSM = game_path;
+				Settings::PathToSM = v_gamePath;
 
-				Settings::AddToStrVec(Settings::BlueprintFolders, ws_path);
-				Settings::AddToStrVec(Settings::ModFolders, ws_path);
+				Settings::AddToStrVec(Settings::BlueprintFolders, v_wsPath);
+				Settings::AddToStrVec(Settings::ModFolders, v_wsPath);
 				
 				should_write = true;
 			}
@@ -244,23 +244,24 @@ namespace SMBC
 
 	void Settings::ReadUserSettings(const nlohmann::json& config_json, bool& should_write)
 	{
-		const auto& user_settings = Json::Get(config_json, "UserSettings");
-		if (user_settings.is_object())
+		const auto& v_userSettings = Json::Get(config_json, "UserSettings");
+		if (v_userSettings.is_object())
 		{
-			const auto& game_path = Json::Get(user_settings, "GamePath");
-			if (game_path.is_string())
+			const auto& v_gamePath = Json::Get(v_userSettings, "GamePath");
+			if (v_gamePath.is_string())
 			{
-				const std::string sm_path = game_path.get<std::string>();
-				Settings::PathToSM = String::ToWide(sm_path);
+				const std::string v_smPath = v_gamePath.get<std::string>();
+				Settings::PathToSM = String::ToWide(v_smPath);
 
 				DebugOutL("Game Path: ", Settings::PathToSM);
 			}
 
-			Settings::JsonStrArrayToVector(user_settings, "BlueprintPaths", Settings::BlueprintFolders);
-			Settings::JsonStrArrayToVector(user_settings, "ScrapModsPath", Settings::ModFolders);
+			Settings::JsonStrArrayToVector(v_userSettings, "BlueprintPaths", Settings::BlueprintFolders);
+			Settings::JsonStrArrayToVector(v_userSettings, "LocalModFolders", Settings::LocalModFolders);
+			Settings::JsonStrArrayToVector(v_userSettings, "WorkshopModFolders", Settings::ModFolders);
 
-			const auto& open_in_steam = Json::Get(user_settings, "OpenLinksInSteam");
-			Settings::OpenLinksInSteam = (open_in_steam.is_boolean() ? open_in_steam.get<bool>() : false);
+			const auto& v_openInSteam = Json::Get(v_userSettings, "OpenLinksInSteam");
+			Settings::OpenLinksInSteam = (v_openInSteam.is_boolean() ? v_openInSteam.get<bool>() : false);
 		}
 
 		Settings::FindGamePath(config_json, should_write);
@@ -349,6 +350,7 @@ namespace SMBC
 	{
 		Settings::BlueprintFolders.clear();
 		Settings::ModFolders.clear();
+		Settings::LocalModFolders.clear();
 		Settings::SMDirDatabase.clear();
 		Settings::VanillaLanguagePaths.clear();
 
