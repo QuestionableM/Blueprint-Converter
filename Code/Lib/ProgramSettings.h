@@ -17,6 +17,7 @@ namespace SMBC
 
 		inline static std::vector<std::wstring> BlueprintFolders = {};
 		inline static std::vector<std::wstring> ModFolders = {};
+		inline static std::vector<std::wstring> LocalModFolders = {};
 		inline static std::vector<std::wstring> SMDirDatabase = {};
 		inline static std::vector<std::wstring> VanillaLanguagePaths = {};
 		inline static std::wstring PathToSM = L"";

@@ -224,7 +224,8 @@
       <AdditionalLibraryDirectories>$(SolutionDir)\Dependencies\Assimp\Lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /y /d "$(SolutionDir)assimp$(PlatformArchitecture).dll" "$(SolutionDir)Build\$(PlatformShortName)-$(Configuration)"</Command>
+      <Command>xcopy /y /d "$(SolutionDir)Dependencies\Assimp\DLL\assimp$(PlatformArchitecture).dll" "$(SolutionDir)Build\$(PlatformShortName)-$(Configuration)"
+xcopy /y /d "$(SolutionDir)Resources" "$(SolutionDir)Build\$(PlatformShortName)-$(Configuration)\Resources" /I</Command>
     </PostBuildEvent>
     <PreBuildEvent>
       <Command>"$(SolutionDir)Dependencies\Version Counter\VersionCounter.exe"</Command>
@@ -245,7 +246,8 @@
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /y /d "$(SolutionDir)assimp$(PlatformArchitecture).dll" "$(SolutionDir)Build\$(PlatformShortName)-$(Configuration)"</Command>
+      <Command>xcopy /y /d "$(SolutionDir)Dependencies\Assimp\DLL\assimp$(PlatformArchitecture).dll" "$(SolutionDir)Build\$(PlatformShortName)-$(Configuration)"
+xcopy /y /d "$(SolutionDir)Resources" "$(SolutionDir)Build\$(PlatformShortName)-$(Configuration)\Resources" /I</Command>
     </PostBuildEvent>
     <PreBuildEvent>
       <Command>"$(SolutionDir)Dependencies\Version Counter\VersionCounter.exe"</Command>
@@ -265,7 +267,8 @@
       <AdditionalLibraryDirectories>$(SolutionDir)\Dependencies\Assimp\Lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /y /d "$(SolutionDir)assimp$(PlatformArchitecture).dll" "$(SolutionDir)Build\$(PlatformShortName)-$(Configuration)"</Command>
+      <Command>xcopy /y /d "$(SolutionDir)Dependencies\Assimp\DLL\assimp$(PlatformArchitecture).dll" "$(SolutionDir)Build\$(PlatformShortName)-$(Configuration)"
+xcopy /y /d "$(SolutionDir)Resources" "$(SolutionDir)Build\$(PlatformShortName)-$(Configuration)\Resources" /I</Command>
     </PostBuildEvent>
     <PreBuildEvent>
       <Command>"$(SolutionDir)Dependencies\Version Counter\VersionCounter.exe"</Command>
@@ -286,7 +289,8 @@
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /y /d "$(SolutionDir)assimp$(PlatformArchitecture).dll" "$(SolutionDir)Build\$(PlatformShortName)-$(Configuration)"</Command>
+      <Command>xcopy /y /d "$(SolutionDir)Dependencies\Assimp\DLL\assimp$(PlatformArchitecture).dll" "$(SolutionDir)Build\$(PlatformShortName)-$(Configuration)"
+xcopy /y /d "$(SolutionDir)Resources" "$(SolutionDir)Build\$(PlatformShortName)-$(Configuration)\Resources" /I</Command>
     </PostBuildEvent>
     <PreBuildEvent>
       <Command>"$(SolutionDir)Dependencies\Version Counter\VersionCounter.exe"</Command>

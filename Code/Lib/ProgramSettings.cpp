@@ -270,68 +270,77 @@ namespace SMBC
 	{
 		nlohmann::json cfgData = Json::LoadParseJson(Settings::ConfigPath.data());
 		if (!cfgData.is_object())
-		{
 			cfgData = nlohmann::json::object();
-		}
 
-		if (!cfgData.contains("ProgramSettings"))
+		nlohmann::json v_programSettings = Json::Get(cfgData, "ProgramSettings");
+		if (v_programSettings.is_object())
 		{
-			cfgData["ProgramSettings"] =
+			const nlohmann::json::const_iterator v_iter = v_programSettings.find("LanguageDirectories");
+			if (v_iter != v_programSettings.end())
 			{
-				{
-					"Keywords",
-					{
-						{ "$CHALLENGE_DATA", "$GAME_FOLDER/ChallengeData" },
-						{ "$GAME_DATA"     , "$GAME_FOLDER/Data"          },
-						{ "$SURVIVAL_DATA" , "$GAME_FOLDER/Survival"      }
-					}
-				},
-				{
-					"LanguageFiles",
-					{
-						"$GAME_DATA/Gui/Language/English/InventoryItemDescriptions.json",
-						"$SURVIVAL_DATA/Gui/Language/English/inventoryDescriptions.json",
-						"$CHALLENGE_DATA/Gui/Language/English/inventoryDescriptions.json"
-					}
-				},
-				{
-					"ResourceUpgradeFiles",
-					{
-						"$GAME_DATA/upgrade_resources.json"
-					}
-				},
-				{
-					"ScrapObjectDatabase",
-					{
-						"$CHALLENGE_DATA/Objects/Database/ShapeSets",
-						"$SURVIVAL_DATA/Objects/Database/ShapeSets",
-						"$GAME_DATA/Objects/Database/ShapeSets"
-					}
-				}
-			};
+				DebugWarningL("Found a deprecated json key: \"LanguageDirectories\"");
+				v_programSettings.erase(v_iter);
 
-			if (should_write != nullptr)
-				*should_write = true;
+				if (should_write)
+					(*should_write) = true;
+			}
 		}
 		else
 		{
-			auto& program_settings = cfgData["ProgramSettings"];
-			if (program_settings.contains("LanguageDirectories"))
-			{
-				DebugWarningL("Found a deprecated json key: \"LanguageDirectories\"");
-				program_settings.erase("LanguageDirectories");
-
-				program_settings["LanguageFiles"] =
-				{
-					"$GAME_DATA/Gui/Language/English/InventoryItemDescriptions.json",
-					"$SURVIVAL_DATA/Gui/Language/English/inventoryDescriptions.json",
-					"$CHALLENGE_DATA/Gui/Language/English/inventoryDescriptions.json"
-				};
-
-				if (should_write != nullptr)
-					*should_write = true;
-			}
+			v_programSettings = nlohmann::json::object();
 		}
+
+		if (!v_programSettings.contains("Keywords"))
+		{
+			v_programSettings["Keywords"] =
+			{
+				{ "$CHALLENGE_DATA", "$GAME_FOLDER/ChallengeData" },
+				{ "$GAME_DATA"     , "$GAME_FOLDER/Data"          },
+				{ "$SURVIVAL_DATA" , "$GAME_FOLDER/Survival"      }
+			};
+
+			if (should_write)
+				(*should_write) = true;
+		}
+
+		if (!v_programSettings.contains("LanguageFiles"))
+		{
+			v_programSettings["LanguageFiles"] =
+			{
+				"$GAME_DATA/Gui/Language/English/InventoryItemDescriptions.json",
+				"$SURVIVAL_DATA/Gui/Language/English/inventoryDescriptions.json",
+				"$CHALLENGE_DATA/Gui/Language/English/inventoryDescriptions.json"
+			};
+
+			if (should_write)
+				(*should_write) = true;
+		}
+
+		if (!v_programSettings.contains("ResourceUpgradeFiles"))
+		{
+			v_programSettings["ResourceUpgradeFiles"] =
+			{
+				"$GAME_DATA/upgrade_resources.json"
+			};
+
+			if (should_write)
+				(*should_write) = true;
+		}
+
+		if (!v_programSettings.contains("ScrapObjectDatabase"))
+		{
+			v_programSettings["ScrapObjectDatabase"] =
+			{
+				"$CHALLENGE_DATA/Objects/Database/ShapeSets",
+				"$SURVIVAL_DATA/Objects/Database/ShapeSets",
+				"$GAME_DATA/Objects/Database/ShapeSets"
+			};
+
+			if (should_write)
+				(*should_write) = true;
+		}
+
+		cfgData["ProgramSettings"] = v_programSettings;
 
 		return cfgData;
 	}
@@ -365,8 +374,10 @@ namespace SMBC
 
 			user_settings["GamePath"] = String::ToUtf8(Settings::PathToSM);
 			user_settings["OpenLinksInSteam"] = Settings::OpenLinksInSteam;
-			Settings::WstrVecToJsonArray(user_settings, Settings::ModFolders, "ScrapModsPath");
+
 			Settings::WstrVecToJsonArray(user_settings, Settings::BlueprintFolders, "BlueprintPaths");
+			Settings::WstrVecToJsonArray(user_settings, Settings::LocalModFolders, "LocalModFolders");
+			Settings::WstrVecToJsonArray(user_settings, Settings::ModFolders, "WorkshopModFolders");
 
 			cfgData["UserSettings"] = user_settings;
 		}
@@ -389,7 +400,8 @@ namespace SMBC
 		Settings::ReadUserSettings(cfgData, should_write);
 
 		//Stop reading the config if the path to the game is invalid
-		if (Settings::PathToSM.empty()) return false;
+		if (Settings::PathToSM.empty())
+			return false;
 
 		Settings::UpdatePathReplacement();
 		Settings::ReadProgramSettings(cfgData);
