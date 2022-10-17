@@ -88,7 +88,7 @@ namespace SMBC
 		std::string FloatVecToString(const float* f, const std::size_t& amount, const std::string& separator = " ");
 		bool IsLetterAllowed(const wchar_t& ch);
 
-		std::wstring ReadRegistryKey(const std::wstring& main_key, const std::wstring& sub_key);
+		bool ReadRegistryKey(const std::wstring& main_key, const std::wstring& sub_key, std::wstring& r_output);
 
 		inline void Combine(std::string& mainStr, const std::wstring& curArg) {
 			mainStr.append(SMBC::String::ToUtf8(curArg));

@@ -103,30 +103,36 @@ namespace SMBC
 	using vdf_attrib_table = std::unordered_map<std::string, std::string>;
 	bool Settings::GetSteamPaths(std::wstring& game_path, std::wstring& workshop_path)
 	{
-		std::wstring steam_path = String::ReadRegistryKey(L"SOFTWARE\\Valve\\Steam", L"SteamPath");
-		if (steam_path.empty() || !File::Exists(steam_path))
-			steam_path = String::ReadRegistryKey(L"SOFTWARE\\WOW6432Node\\Valve\\Steam", L"SteamPath");
+		std::wstring v_steamPath;
+		if (!String::ReadRegistryKey(L"SOFTWARE\\Valve\\Steam", L"SteamPath", v_steamPath))
+		{
+			if (!String::ReadRegistryKey(L"SOFTWARE\\WOW6432Node\\Valve\\Steam", L"SteamPath", v_steamPath))
+			{
+				DebugErrorL("Couldn't find the installation path for Steam!");
+				return false;
+			}
+		}
 
-		if (steam_path.empty() || !File::Exists(steam_path))
+		if (!File::Exists(v_steamPath))
 			return false;
 
-		const std::wstring registry_sm_path = steam_path + L"/steamapps/common/scrap mechanic";
-		const std::wstring registry_ws_path = steam_path + L"/steamapps/workshop/content/387990";
+		const std::wstring v_guessedSmPath = v_steamPath + L"/steamapps/common/scrap mechanic";
+		const std::wstring v_guessedWsPath = v_steamPath + L"/steamapps/workshop/content/387990";
 
 		//If SM and WS paths are not valid, then the program will read the libraryfolders.vdf file
-		if (File::Exists(registry_sm_path) && File::Exists(registry_ws_path))
+		if (File::Exists(v_guessedSmPath) && File::Exists(v_guessedWsPath))
 		{
-			game_path = registry_sm_path;
-			workshop_path = registry_ws_path;
+			game_path = v_guessedSmPath;
+			workshop_path = v_guessedWsPath;
 
-			DebugOutL("Found a game path from the registry: ", 0b1101_fg, registry_sm_path);
-			DebugOutL("Found a workshop path from the registry: ", 0b1101_fg, registry_ws_path);
+			DebugOutL("Guessed a game path from the registry: ", 0b1101_fg, v_guessedSmPath);
+			DebugOutL("Guessed a workshop path from the registry: ", 0b1101_fg, v_guessedWsPath);
 
 			return true;
 		}
 		else
 		{
-			const std::wstring vdf_path = steam_path + L"/steamapps/libraryfolders.vdf";
+			const std::wstring vdf_path = v_steamPath + L"/steamapps/libraryfolders.vdf";
 			if (!File::Exists(vdf_path))
 				return false;
 

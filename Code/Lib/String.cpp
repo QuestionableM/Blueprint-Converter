@@ -63,7 +63,7 @@ namespace SMBC
 		return false;
 	}
 
-	std::wstring String::ReadRegistryKey(const std::wstring& main_key, const std::wstring& sub_key)
+	bool String::ReadRegistryKey(const std::wstring& main_key, const std::wstring& sub_key, std::wstring& r_output)
 	{
 		wchar_t _Data[255] = {};
 		DWORD _BufSz = 8196;
@@ -79,8 +79,11 @@ namespace SMBC
 		);
 
 		if (_Status == ERROR_SUCCESS)
-			return std::wstring(_Data);
+		{
+			r_output = std::wstring(_Data);
+			return true;
+		}
 
-		return L"";
+		return false;
 	}
 }
