@@ -273,11 +273,19 @@ namespace SMBC
 		Settings::FindGamePath(config_json, should_write);
 	}
 
-	nlohmann::json Settings::GetConfigJson(bool* should_write)
-	{
-		nlohmann::json cfgData = Json::LoadParseJson(Settings::ConfigPath.data());
-		if (!cfgData.is_object())
+	nlohmann::json Settings::GetConfigJson(bool* should_write, const bool& read_from_file)
+	{ 
+		nlohmann::json cfgData;
+		if (read_from_file)
+		{
+			nlohmann::json cfgData = Json::LoadParseJson(Settings::ConfigPath.data());
+			if (!cfgData.is_object())
+				cfgData = nlohmann::json::object();
+		}
+		else
+		{
 			cfgData = nlohmann::json::object();
+		}
 
 		nlohmann::json v_programSettings = Json::Get(cfgData, "ProgramSettings");
 		if (v_programSettings.is_object())
@@ -375,7 +383,7 @@ namespace SMBC
 
 	void Settings::SaveConfig()
 	{
-		nlohmann::json cfgData = Settings::GetConfigJson();
+		nlohmann::json cfgData = Settings::GetConfigJson(nullptr, false);
 
 		{
 			nlohmann::json user_settings = nlohmann::json::object();
@@ -403,7 +411,7 @@ namespace SMBC
 		Settings::ClearData();
 
 		bool should_write = false;
-		nlohmann::json cfgData = Settings::GetConfigJson(&should_write);
+		nlohmann::json cfgData = Settings::GetConfigJson(&should_write, true);
 
 		Settings::ReadUserSettings(cfgData, should_write);
 
