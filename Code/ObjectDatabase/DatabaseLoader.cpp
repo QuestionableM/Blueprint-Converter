@@ -33,37 +33,48 @@ namespace SMBC
 		DebugOutL("Loaded: ", 0b1101_fg, pVanillaMod->m_Name, 0b1110_fg, " (Objects: ", 0b1101_fg, pVanillaMod->m_Objects.size(), 0b1110_fg, ")");
 	}
 
-	void DatabaseLoader::LoadModDatabase()
+	void DatabaseLoader::LoadModsFromStrVector(const std::vector<std::wstring>& r_wstr_vec, const bool& is_local)
 	{
-		if (Settings::ModFolders.empty()) return;
+		if (r_wstr_vec.empty())
+			return;
 
-		std::error_code mError;
+		std::error_code v_errorCode;
 
-		for (const std::wstring& _ModDirectory : Settings::ModFolders)
+		for (const std::wstring& v_modStorageDir : r_wstr_vec)
 		{
-			if (!File::Exists(_ModDirectory)) continue;
+			if (!File::Exists(v_modStorageDir))
+				continue;
 
-			fs::directory_iterator _DirIter(_ModDirectory, fs::directory_options::skip_permission_denied, mError);
-			for (const auto& dir : _DirIter)
+			fs::directory_iterator v_dirIter(v_modStorageDir, fs::directory_options::skip_permission_denied, v_errorCode);
+			for (const auto& v_curDir : v_dirIter)
 			{
-				if (mError)
+				if (v_errorCode)
 				{
-					DebugErrorL("Couldn't get an item in: ", _ModDirectory);
+					DebugErrorL("Caught an error while iterating through ", v_modStorageDir);
 					continue;
 				}
 
-				if (!dir.is_directory()) continue;
+				if (!v_curDir.is_directory())
+					continue;
 
-				const std::wstring mModDir = dir.path().wstring();
+				const std::wstring v_modDir = v_curDir.path().wstring();
 
-				Mod* pNewMod = Mod::CreateModFromDirectory(mModDir);
-				if (!pNewMod) continue;
+				Mod* v_newMod = Mod::CreateModFromDirectory(v_modDir, is_local);
+				if (!v_newMod) continue;
 
-				pNewMod->LoadObjectDatabase();
+				v_newMod->LoadObjectDatabase();
 
-				DebugOutL("Loaded: ", 0b1101_fg, pNewMod->m_Name, 0b1110_fg, " (Objects: ", 0b1101_fg, pNewMod->m_Objects.size(), 0b1110_fg, ")");
+				DebugOutL("Loaded: ", 0b1101_fg, v_newMod->m_Name, 0b1110_fg, " (Objects: ", 0b1101_fg, v_newMod->m_Objects.size(), 0b1110_fg, ", Is Local: ", v_newMod->m_isLocal, ")");
 			}
 		}
+	}
+
+	void DatabaseLoader::LoadModDatabase()
+	{
+		DebugOutL("Loading mods...");
+
+		DatabaseLoader::LoadModsFromStrVector(Settings::LocalModFolders, true);
+		DatabaseLoader::LoadModsFromStrVector(Settings::ModFolders, false);
 	}
 
 	void DatabaseLoader::LoadDatabase()

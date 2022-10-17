@@ -89,24 +89,22 @@ namespace SMBC
 		m_LanguageDb.LoadLanguageFile(path);
 	}
 
-	static const std::wstring g_ShapeSetExtensions[2] =
+	inline bool FindShapeSetFile(const std::wstring& mod_path, std::wstring& output_path)
 	{
-		L".shapedb",
-		L".json"
-	};
+		const std::wstring v_dbDir = mod_path + L"/Objects/Database/shapesets";
 
-	bool FindShapeSetFile(const std::wstring& mod_path, std::wstring& output_path)
-	{
-		const std::wstring l_DatabaseDir = mod_path + L"/Objects/Database/shapesets";
-
-		for (__int8 a = 0; a < 2; a++)
+		const std::wstring v_shapedbPath = v_dbDir + L".shapedb";
+		if (File::Exists(v_shapedbPath))
 		{
-			const std::wstring l_FullPath = l_DatabaseDir + g_ShapeSetExtensions[a];
-			if (File::Exists(l_FullPath))
-			{
-				output_path = l_FullPath;
-				return true;
-			}
+			output_path = v_shapedbPath;
+			return true;
+		}
+
+		const std::wstring v_jsonPath = v_dbDir + L".json";
+		if (File::Exists(v_jsonPath))
+		{
+			output_path = v_jsonPath;
+			return true;
 		}
 
 		return false;
@@ -114,20 +112,20 @@ namespace SMBC
 
 	void Mod::LoadShapeSetList(const std::wstring& path)
 	{
-		const nlohmann::json l_ShapeSetListFile = Json::LoadParseJson(path);
-		if (!l_ShapeSetListFile.is_object()) return;
+		const nlohmann::json v_shapeSetListJson = Json::LoadParseJson(path);
+		if (!v_shapeSetListJson.is_object()) return;
 
-		const auto& l_ShapeSetList = Json::Get(l_ShapeSetListFile, "shapeSetList");
-		if (!l_ShapeSetList.is_array()) return;
+		const auto& v_shapeSetArray = Json::Get(v_shapeSetListJson, "shapeSetList");
+		if (!v_shapeSetArray.is_array()) return;
 
-		for (const auto& path_shapedb : l_ShapeSetList)
+		for (const auto& v_curShapedb : v_shapeSetArray)
 		{
-			if (!path_shapedb.is_string()) continue;
+			if (!v_curShapedb.is_string()) continue;
 
-			const std::wstring l_path_wide = String::ToWide(path_shapedb.get<std::string>());
-			const std::wstring l_full_path = PathReplacer::ReplaceKey(l_path_wide);
+			const std::wstring v_pathWide = String::ToWide(v_curShapedb.get<std::string>());
+			const std::wstring v_fullPath = PathReplacer::ReplaceKey(v_pathWide);
 
-			this->LoadObjectFile(l_full_path);
+			this->LoadObjectFile(v_fullPath);
 		}
 	}
 
@@ -136,28 +134,18 @@ namespace SMBC
 		this->LoadTranslations(m_Directory + L"/Gui/Language/English/inventoryDescriptions.json");
 		PathReplacer::SetModData(m_Directory, m_Uuid);
 
-		std::wstring l_ShapeSetPath;
-		if (FindShapeSetFile(m_Directory, l_ShapeSetPath))
+		std::wstring v_shapeSetPath;
+		if (FindShapeSetFile(m_Directory, v_shapeSetPath))
 		{
-			this->LoadShapeSetList(l_ShapeSetPath);
+			this->LoadShapeSetList(v_shapeSetPath);
 		}
 		else
 		{
-			const std::wstring l_DbPath = m_Directory + L"/Objects/Database/ShapeSets";
-			if (!File::Exists(l_DbPath)) return;
+			const std::wstring v_dbPath = m_Directory + L"/Objects/Database/ShapeSets";
+			if (!File::Exists(v_dbPath)) return;
 
-			this->LoadObjectsFromDirectory(l_DbPath);
+			this->LoadObjectsFromDirectory(v_dbPath);
 		}
-	}
-
-	std::size_t Mod::GetObjectCount()
-	{
-		return AllObjects.size();
-	}
-
-	std::size_t Mod::GetModCount()
-	{
-		return Mods.size();
 	}
 
 	void Mod::ClearMods()
@@ -167,9 +155,9 @@ namespace SMBC
 		for (std::size_t a = 0; a < Mod::ModsArray.size(); a++)
 			delete Mod::ModsArray[a];
 
-		Mod::ModsArray.clear();
-		Mod::Mods.clear();
 		Mod::AllObjects.clear();
+		Mod::ModsArray.clear();
+		Mod::ModsMap.clear();
 	}
 
 	const ObjectData* Mod::GetObject(const SMBC::Uuid& uuid)
@@ -207,32 +195,55 @@ namespace SMBC
 		return static_cast<const BlockData*>(p_cur_obj);
 	}
 
-	Mod* Mod::CreateModFromDirectory(const std::wstring& dir)
+	Mod* Mod::CreateModFromDirectory(const std::wstring& dir, const bool& is_local)
 	{
-		const std::wstring mDescPath = dir + L"/description.json";
-		if (!File::Exists(mDescPath)) return nullptr;
+		const std::wstring v_descriptionPath = dir + L"/description.json";
+		if (!File::Exists(v_descriptionPath)) return nullptr;
 
-		const nlohmann::json mDescJson = Json::LoadParseJson(mDescPath, true);
-		if (!mDescJson.is_object()) return nullptr;
+		const nlohmann::json v_descJson = Json::LoadParseJson(v_descriptionPath, true);
+		if (!v_descJson.is_object()) return nullptr;
 
-		const auto& mType = Json::Get(mDescJson, "type");
-		if (!mType.is_string() || mType.get<std::string>() != "Blocks and Parts")
+		const auto& v_modType = Json::Get(v_descJson, "type");
+		if (!v_modType.is_string() || v_modType.get<std::string>() != "Blocks and Parts")
 			return nullptr;
 
-		const auto& mUuid = Json::Get(mDescJson, "localId");
-		const auto& mName = Json::Get(mDescJson, "name");
+		const auto& v_modName = Json::Get(v_descJson, "name");
+		const auto& v_modUuidStr = Json::Get(v_descJson, "localId");
 
-		if (!mUuid.is_string() || !mName.is_string()) return nullptr;
+		if (!v_modName.is_string() || !v_modUuidStr.is_string())
+			return nullptr;
 
-		const auto& lWorkshopIdStr = Json::Get(mDescJson, "fileId");
-		const unsigned __int64 lWorkshopId = (lWorkshopIdStr.is_number() ? lWorkshopIdStr.get<unsigned __int64>() : 0ull);
+		const auto& v_workshopIdStr = Json::Get(v_descJson, "fileId");
+		const unsigned __int64 v_workshopId = (v_workshopIdStr.is_number() ? v_workshopIdStr.get<unsigned __int64>() : 0ull);
+		const Uuid v_modUuid = v_modUuidStr.get<std::string>();
 
-		return Mod::CreateMod(
-			SMBC::Uuid(mUuid.get<std::string>()),
-			String::ToWide(mName.get<std::string>()),
-			lWorkshopId,
-			dir
-		);
+		const ModDataMap::const_iterator v_iter = Mod::ModsMap.find(v_modUuid);
+		if (v_iter != Mod::ModsMap.end())
+		{
+			if (v_iter->second->m_isLocal && !is_local)
+			{
+				DebugOutL("A local version of this mod has already been loaded! (Uuid: ", v_modUuid.ToString(), ", Name: ", v_modName.get<std::string>(), ")");
+				return nullptr;
+			}
+
+			if (v_iter->second->m_isLocal == is_local)
+			{
+				DebugErrorL("Uuid conflict between 2 mods: \"", v_modName.get<std::string>(), "\" and \"", v_iter->second->m_Name, "\" (Uuid: ", v_modUuid.ToString(), ")");
+				return nullptr;
+			}
+		}
+
+		Mod* v_newMod = new Mod();
+		v_newMod->m_Uuid = v_modUuid;
+		v_newMod->m_Name = String::ToWide(v_modName.get<std::string>());
+		v_newMod->m_WorkshopId = (v_workshopIdStr.is_number() ? v_workshopIdStr.get<unsigned __int64>() : 0ull);
+		v_newMod->m_Directory = dir;
+		v_newMod->m_isLocal = is_local;
+
+		Mod::ModsArray.push_back(v_newMod);
+		Mod::ModsMap.insert(std::make_pair(v_newMod->m_Uuid, v_newMod));
+
+		return v_newMod;
 	}
 
 	Mod* Mod::CreateVanillaGameMod(const std::wstring& game_path)
@@ -243,29 +254,6 @@ namespace SMBC
 		pNewMod->m_WorkshopId = 0ull;
 		pNewMod->m_Directory = game_path;
 
-		Mod::ModsArray.push_back(pNewMod);
-		return pNewMod;
-	}
-
-	Mod* Mod::CreateMod(
-		const SMBC::Uuid& uuid,
-		const std::wstring& name,
-		const unsigned __int64& workshop_id,
-		const std::wstring& dir)
-	{
-		if (Mod::Mods.find(uuid) != Mod::Mods.end())
-		{
-			DebugWarningL("Uuid conflict between 2 mods: \"", name, "\" and \"", Mod::Mods.at(uuid)->m_Name, "\" (", uuid.ToString(), ")");
-			return nullptr;
-		}
-
-		Mod* pNewMod = new Mod();
-		pNewMod->m_Uuid = uuid;
-		pNewMod->m_Name = name;
-		pNewMod->m_WorkshopId = workshop_id;
-		pNewMod->m_Directory = dir;
-
-		Mod::Mods.insert(std::make_pair(uuid, pNewMod));
 		Mod::ModsArray.push_back(pNewMod);
 		return pNewMod;
 	}
