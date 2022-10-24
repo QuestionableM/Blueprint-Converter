@@ -17,6 +17,13 @@ namespace SMBC
 
 		void LoadLanguageFile(const std::wstring& path);
 
-		std::wstring GetTranslation(const Uuid& uuid) const;
+		inline std::wstring GetTranslation(const Uuid& uuid) const
+		{
+			const TranslationStorageMap::const_iterator v_iter = m_Translations.find(uuid);
+			if (v_iter != m_Translations.end())
+				return v_iter->second;
+
+			return L"BLOCK_NOT_FOUND";
+		}
 	};
 }

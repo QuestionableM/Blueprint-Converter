@@ -50,9 +50,40 @@ namespace SMBC
 		inline static std::size_t GetModCount() { return Mod::ModsArray.size(); }
 		static void ClearMods();
 
-		static const ObjectData* GetObject(const SMBC::Uuid& uuid);
-		static const PartData* GetPart(const SMBC::Uuid& uuid);
-		static const BlockData* GetBlock(const SMBC::Uuid& uuid);
+		inline static const ObjectData* GetObject(const SMBC::Uuid& uuid)
+		{
+			const ObjectDataMap::const_iterator v_iter = Mod::AllObjects.find(uuid);
+			if (v_iter == Mod::AllObjects.end())
+				return nullptr;
+
+			return v_iter->second;
+		}
+
+		inline static const PartData* GetPart(const SMBC::Uuid& uuid)
+		{
+			const ObjectDataMap::const_iterator v_iter = Mod::AllObjects.find(uuid);
+			if (v_iter == Mod::AllObjects.end())
+				return nullptr;
+
+			const ObjectData* v_curObj = v_iter->second;
+			if (v_curObj->Type() != ObjectType::Part)
+				return nullptr;
+
+			return static_cast<const PartData*>(v_curObj);
+		}
+
+		inline static const BlockData* GetBlock(const SMBC::Uuid& uuid)
+		{
+			const ObjectDataMap::const_iterator v_iter = Mod::AllObjects.find(uuid);
+			if (v_iter == Mod::AllObjects.end())
+				return nullptr;
+
+			const ObjectData* v_curObj = v_iter->second;
+			if (v_curObj->Type() != ObjectType::Block)
+				return nullptr;
+
+			return static_cast<const BlockData*>(v_curObj);
+		}
 
 		static Mod* CreateModFromDirectory(const std::wstring& dir, const bool& is_local);
 		static Mod* CreateVanillaGameMod(const std::wstring& game_path);

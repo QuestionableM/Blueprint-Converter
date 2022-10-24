@@ -160,41 +160,6 @@ namespace SMBC
 		Mod::ModsMap.clear();
 	}
 
-	const ObjectData* Mod::GetObject(const SMBC::Uuid& uuid)
-	{
-		const ObjectDataMap::const_iterator it = Mod::AllObjects.find(uuid);
-		if (it == AllObjects.end())
-			return nullptr;
-
-		return it->second;
-	}
-
-	const PartData* Mod::GetPart(const SMBC::Uuid& uuid)
-	{
-		const ObjectDataMap::const_iterator it = Mod::AllObjects.find(uuid);
-		if (it == Mod::AllObjects.end())
-			return nullptr;
-
-		const ObjectData* p_cur_obj = it->second;
-		if (p_cur_obj->Type() != ObjectType::Part)
-			return nullptr;
-
-		return static_cast<const PartData*>(p_cur_obj);
-	}
-
-	const BlockData* Mod::GetBlock(const SMBC::Uuid& uuid)
-	{
-		const ObjectDataMap::const_iterator it = Mod::AllObjects.find(uuid);
-		if (it == Mod::AllObjects.end())
-			return nullptr;
-
-		const ObjectData* p_cur_obj = it->second;
-		if (p_cur_obj->Type() != ObjectType::Block)
-			return nullptr;
-
-		return static_cast<const BlockData*>(p_cur_obj);
-	}
-
 	Mod* Mod::CreateModFromDirectory(const std::wstring& dir, const bool& is_local)
 	{
 		const std::wstring v_descriptionPath = dir + L"/description.json";

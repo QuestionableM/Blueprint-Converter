@@ -33,13 +33,4 @@ namespace SMBC
 				m_Translations.insert(std::make_pair(l_key_uuid, l_wide_title));
 		}
 	}
-
-	std::wstring LangDB::GetTranslation(const Uuid& uuid) const
-	{
-		const TranslationStorageMap::const_iterator it = m_Translations.find(uuid);
-		if (it != m_Translations.end())
-			return it->second;
-
-		return L"BLOCK NOT FOUND";
-	}
 }
