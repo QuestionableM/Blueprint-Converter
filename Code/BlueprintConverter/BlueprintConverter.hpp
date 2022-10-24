@@ -1,9 +1,9 @@
 #pragma once
 
-#include <string>
-#include <glm.hpp>
+#include "Lib\ConvData.hpp"
 
-#include "Lib\ConvData.h"
+#include <glm.hpp>
+#include <string>
 
 namespace SMBC
 {

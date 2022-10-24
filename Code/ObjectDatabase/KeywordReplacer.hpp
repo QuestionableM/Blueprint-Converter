@@ -1,9 +1,9 @@
 #pragma once
 
-#include <string>
-#include <unordered_map>
+#include "Lib\Uuid.hpp"
 
-#include "Lib\Uuid.h"
+#include <unordered_map>
+#include <string>
 
 namespace SMBC
 {

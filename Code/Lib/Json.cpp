@@ -1,10 +1,9 @@
-#include "Json.h"
+#include "Json.hpp"
+
+#include "Lib\String.hpp"
+#include "DebugCon.hpp"
 
 #include <sstream>
-
-#include "Lib\String.h"
-
-#include "DebugCon.h"
 
 namespace SMBC
 {

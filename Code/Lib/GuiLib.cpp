@@ -1,4 +1,4 @@
-#include "GuiLib.h"
+#include "GuiLib.hpp"
 
 namespace SMBC
 {

@@ -1,11 +1,11 @@
 #include "Gui\SettingsGUI.h"
 
-#include "Lib\ProgramSettings.h"
-#include "Lib\GuiLib.h"
-#include "Lib\File.h"
-#include "Lib\Bit.h"
+#include "Lib\ProgramSettings.hpp"
+#include "Lib\GuiLib.hpp"
+#include "Lib\File.hpp"
+#include "Lib\Bit.hpp"
 
-#include <msclr/marshal_cppstd.h>
+#include <msclr\marshal_cppstd.h>
 
 #define SETTING_BLUEPRINT	0x1000
 #define SETTING_MOD_LIST	0x0100

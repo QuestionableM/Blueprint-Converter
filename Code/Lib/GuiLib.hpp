@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Lib\WinInclude.h"
-#include <shobjidl.h>
+#include "Lib\WinInclude.hpp"
 
+#include <shobjidl.h>
 #include <string>
 
 namespace WForms = System::Windows::Forms;

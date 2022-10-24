@@ -1,7 +1,7 @@
-#include "Gui/About.h"
+#include "Gui\About.h"
 
-#include "Lib/BuildVersion.h"
-#include "Lib\WinInclude.h"
+#include "Lib\BuildVersion.hpp"
+#include "Lib\WinInclude.hpp"
 
 #include <string>
 

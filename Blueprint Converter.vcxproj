@@ -49,26 +49,25 @@
     <ClCompile Include="Code\ObjectDatabase\MaterialManager.cpp" />
     <ClCompile Include="Code\ObjectDatabase\ModData.cpp" />
     <ClCompile Include="Code\ObjectDatabase\DatabaseLoader.cpp" />
-    <ClCompile Include="Code\ObjectDatabase\ObjectData.cpp" />
     <ClCompile Include="Code\ObjectDatabase\ObjectRotations.cpp" />
     <ClCompile Include="Code\ObjectDatabase\TextureDatabase.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Code\BlueprintConverter\BlueprintConverter.h" />
-    <ClInclude Include="Code\BlueprintConverter\ModelStorage.h" />
-    <ClInclude Include="Code\BlueprintConverter\ConvertSettings.h" />
-    <ClInclude Include="Code\BlueprintConverter\ObjectDefinitions\BlueprintData.h" />
-    <ClInclude Include="Code\BlueprintConverter\ObjectDefinitions\BlockModel.h" />
-    <ClInclude Include="Code\BlueprintConverter\ObjectDefinitions\Model.h" />
-    <ClInclude Include="Code\BlueprintConverter\ObjectDefinitions\Block.h" />
-    <ClInclude Include="Code\BlueprintConverter\ObjectDefinitions\Body.h" />
-    <ClInclude Include="Code\BlueprintConverter\ObjectDefinitions\Joint.h" />
-    <ClInclude Include="Code\BlueprintConverter\ObjectDefinitions\Entity.h" />
-    <ClInclude Include="Code\BlueprintConverter\ObjectDefinitions\Part.h" />
-    <ClInclude Include="Code\BlueprintConverter\OffsetData.h" />
+    <ClInclude Include="Code\BlueprintConverter\BlueprintConverter.hpp" />
+    <ClInclude Include="Code\BlueprintConverter\ModelStorage.hpp" />
+    <ClInclude Include="Code\BlueprintConverter\ConvertSettings.hpp" />
+    <ClInclude Include="Code\BlueprintConverter\ObjectDefinitions\BlueprintData.hpp" />
+    <ClInclude Include="Code\BlueprintConverter\ObjectDefinitions\BlockModel.hpp" />
+    <ClInclude Include="Code\BlueprintConverter\ObjectDefinitions\Model.hpp" />
+    <ClInclude Include="Code\BlueprintConverter\ObjectDefinitions\Block.hpp" />
+    <ClInclude Include="Code\BlueprintConverter\ObjectDefinitions\Body.hpp" />
+    <ClInclude Include="Code\BlueprintConverter\ObjectDefinitions\Joint.hpp" />
+    <ClInclude Include="Code\BlueprintConverter\ObjectDefinitions\Entity.hpp" />
+    <ClInclude Include="Code\BlueprintConverter\ObjectDefinitions\Part.hpp" />
+    <ClInclude Include="Code\BlueprintConverter\OffsetData.hpp" />
     <ClInclude Include="Code\BuildConfig.hpp" />
     <ClInclude Include="Code\ConsoleColors.hpp" />
-    <ClInclude Include="Code\DebugCon.h" />
+    <ClInclude Include="Code\DebugCon.hpp" />
     <ClInclude Include="Code\Gui\About.h">
       <FileType>CppForm</FileType>
     </ClInclude>
@@ -84,28 +83,28 @@
     <ClInclude Include="Code\Gui\SettingsGUI.h">
       <FileType>CppForm</FileType>
     </ClInclude>
-    <ClInclude Include="Code\Lib\Bit.h" />
-    <ClInclude Include="Code\Lib\BuildVersion.h" />
-    <ClInclude Include="Code\Lib\Color.h" />
-    <ClInclude Include="Code\Lib\ConvData.h" />
-    <ClInclude Include="Code\Lib\File.h" />
-    <ClInclude Include="Code\Lib\GuiLib.h" />
-    <ClInclude Include="Code\Lib\Json.h" />
-    <ClInclude Include="Code\Lib\ProgramSettings.h" />
-    <ClInclude Include="Code\Lib\String.h" />
-    <ClInclude Include="Code\Lib\WinInclude.h" />
-    <ClInclude Include="Code\ObjectDatabase\Blueprint.h" />
-    <ClInclude Include="Code\ObjectDatabase\DataLoaders\BlockListLoader.h" />
-    <ClInclude Include="Code\ObjectDatabase\DataLoaders\PartListLoader.h" />
-    <ClInclude Include="Code\ObjectDatabase\KeywordReplacer.h" />
-    <ClInclude Include="Code\ObjectDatabase\LanguageDatabase.h" />
-    <ClInclude Include="Code\ObjectDatabase\MaterialManager.h" />
-    <ClInclude Include="Code\ObjectDatabase\ModData.h" />
-    <ClInclude Include="Code\ObjectDatabase\DatabaseLoader.h" />
-    <ClInclude Include="Code\ObjectDatabase\ObjectData.h" />
+    <ClInclude Include="Code\Lib\Bit.hpp" />
+    <ClInclude Include="Code\Lib\BuildVersion.hpp" />
+    <ClInclude Include="Code\Lib\Color.hpp" />
+    <ClInclude Include="Code\Lib\ConvData.hpp" />
+    <ClInclude Include="Code\Lib\File.hpp" />
+    <ClInclude Include="Code\Lib\GuiLib.hpp" />
+    <ClInclude Include="Code\Lib\Json.hpp" />
+    <ClInclude Include="Code\Lib\ProgramSettings.hpp" />
+    <ClInclude Include="Code\Lib\String.hpp" />
+    <ClInclude Include="Code\Lib\WinInclude.hpp" />
+    <ClInclude Include="Code\ObjectDatabase\Blueprint.hpp" />
+    <ClInclude Include="Code\ObjectDatabase\DataLoaders\BlockListLoader.hpp" />
+    <ClInclude Include="Code\ObjectDatabase\DataLoaders\PartListLoader.hpp" />
+    <ClInclude Include="Code\ObjectDatabase\KeywordReplacer.hpp" />
+    <ClInclude Include="Code\ObjectDatabase\LanguageDatabase.hpp" />
+    <ClInclude Include="Code\ObjectDatabase\MaterialManager.hpp" />
+    <ClInclude Include="Code\ObjectDatabase\ModData.hpp" />
+    <ClInclude Include="Code\ObjectDatabase\DatabaseLoader.hpp" />
+    <ClInclude Include="Code\ObjectDatabase\ObjectData.hpp" />
     <ClInclude Include="Code\ObjectDatabase\ObjectRotations.hpp" />
-    <ClInclude Include="Code\ObjectDatabase\TextureDatabase.h" />
-    <ClInclude Include="Code\Lib\Uuid.h" />
+    <ClInclude Include="Code\ObjectDatabase\TextureDatabase.hpp" />
+    <ClInclude Include="Code\Lib\Uuid.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

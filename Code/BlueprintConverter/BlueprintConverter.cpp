@@ -1,10 +1,10 @@
-#include "BlueprintConverter.h"
+#include "BlueprintConverter.hpp"
 
-#include "BlueprintConverter\ObjectDefinitions\BlueprintData.h"
-#include "BlueprintConverter\ConvertSettings.h"
-#include "BlueprintConverter\ModelStorage.h"
+#include "BlueprintConverter\ObjectDefinitions\BlueprintData.hpp"
+#include "BlueprintConverter\ConvertSettings.hpp"
+#include "BlueprintConverter\ModelStorage.hpp"
 
-#include <gtc/matrix_transform.hpp>
+#include <gtc\matrix_transform.hpp>
 
 namespace SMBC
 {

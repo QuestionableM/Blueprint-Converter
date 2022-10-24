@@ -1,15 +1,16 @@
 #pragma once
 
-#include "ObjectDatabase\LanguageDatabase.h"
-#include "ObjectDatabase\TextureDatabase.h"
-#include "ObjectDatabase\ObjectData.h"
+#include "ObjectDatabase\LanguageDatabase.hpp"
+#include "ObjectDatabase\TextureDatabase.hpp"
+#include "ObjectDatabase\ObjectData.hpp"
 
-#include "Lib\Uuid.h"
+#include "Lib\Uuid.hpp"
+
+#include <nlohmann\json.hpp>
+#include <glm.hpp>
 
 #include <unordered_map>
 #include <string>
-#include <glm.hpp>
-#include <nlohmann/json.hpp>
 
 namespace SMBC
 {

@@ -1,10 +1,10 @@
-#include "Blueprint.h"
+#include "Blueprint.hpp"
 
-#include "Lib\String.h"
-#include "Lib\File.h"
-#include "Lib\Json.h"
+#include "Lib\String.hpp"
+#include "Lib\File.hpp"
+#include "Lib\Json.hpp"
 
-#include "DebugCon.h"
+#include "DebugCon.hpp"
 
 #include <filesystem>
 

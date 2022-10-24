@@ -1,17 +1,17 @@
-#include "ModData.h"
+#include "ModData.hpp"
 
-#include "ObjectDatabase\KeywordReplacer.h"
-#include "ObjectDatabase\DatabaseLoader.h"
+#include "ObjectDatabase\DataLoaders\BlockListLoader.hpp"
+#include "ObjectDatabase\DataLoaders\PartListLoader.hpp"
 
-#include "ObjectDatabase\DataLoaders\BlockListLoader.h"
-#include "ObjectDatabase\DataLoaders\PartListLoader.h"
+#include "ObjectDatabase\KeywordReplacer.hpp"
+#include "ObjectDatabase\DatabaseLoader.hpp"
 
-#include "Lib\ConvData.h"
-#include "Lib\String.h"
-#include "Lib\File.h"
-#include "Lib\Json.h"
+#include "Lib\ConvData.hpp"
+#include "Lib\String.hpp"
+#include "Lib\File.hpp"
+#include "Lib\Json.hpp"
 
-#include "DebugCon.h"
+#include "DebugCon.hpp"
 
 #include <filesystem>
 namespace fs = std::filesystem;

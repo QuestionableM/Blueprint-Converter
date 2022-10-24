@@ -1,11 +1,10 @@
 #pragma once
 
-#include <string>
+#include "ObjectDatabase\TextureDatabase.hpp"
+#include "Lib\Uuid.hpp"
+
 #include <glm.hpp>
-
-#include "ObjectDatabase\TextureDatabase.h"
-
-#include "Lib\Uuid.h"
+#include <string>
 
 namespace SMBC
 {
@@ -36,15 +35,21 @@ namespace SMBC
 		SMBC::Texture::TextureList TextureList;
 		int Tiling;
 
-		ObjectType Type() const override;
+		inline ObjectType Type() const override { return ObjectType::Block; }
 
-		BlockData(
-			const SMBC::Uuid& uuid,
+		inline BlockData(const SMBC::Uuid& uuid,
 			const std::wstring& name,
 			SMBC::Texture::TextureList& textures,
 			const int& tiling,
-			Mod* pMod
-		);
+			Mod* pMod)
+		{
+			this->Uuid = uuid;
+			this->Name = name;
+			this->Tiling = tiling;
+			this->TextureList = textures;
+			this->ModPtr = pMod;
+		}
+
 		~BlockData() = default;
 	};
 
@@ -55,16 +60,23 @@ namespace SMBC
 		std::wstring Path;
 		glm::vec3 Bounds;
 
-		ObjectType Type() const override;
+		inline ObjectType Type() const override { return ObjectType::Part; }
 
-		PartData(
-			const SMBC::Uuid& uuid,
+		PartData(const SMBC::Uuid& uuid,
 			const std::wstring& path,
 			const std::wstring& name,
 			SMBC::Texture::Texture& textures,
 			const glm::vec3& bounds,
-			Mod* pMod
-		);
+			Mod* pMod)
+		{
+			this->Uuid = uuid;
+			this->Path = path;
+			this->Name = name;
+			this->TextureList = textures;
+			this->Bounds = bounds;
+			this->ModPtr = pMod;
+		}
+
 		~PartData() = default;
 	};
 }

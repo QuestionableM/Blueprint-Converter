@@ -1,16 +1,16 @@
-#include "DatabaseLoader.h"
+#include "DatabaseLoader.hpp"
 
-#include "ObjectDatabase\KeywordReplacer.h"
-#include "ObjectDatabase\ModData.h"
+#include "ObjectDatabase\KeywordReplacer.hpp"
+#include "ObjectDatabase\ModData.hpp"
 
-#include "Lib\ProgramSettings.h"
-#include "Lib\ConvData.h"
-#include "Lib\File.h"
-#include "Lib\String.h"
+#include "Lib\ProgramSettings.hpp"
+#include "Lib\ConvData.hpp"
+#include "Lib\String.hpp"
+#include "Lib\File.hpp"
+
+#include "DebugCon.hpp"
 
 #include <filesystem>
-
-#include "DebugCon.h"
 
 namespace fs = std::filesystem;
 

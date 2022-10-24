@@ -1,6 +1,6 @@
 #pragma once
 
-#include "BlueprintConverter\ObjectDefinitions\Model.h"
+#include "BlueprintConverter\ObjectDefinitions\Model.hpp"
 
 namespace SMBC
 {

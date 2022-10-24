@@ -1,6 +1,6 @@
 #pragma once
 
-#include "BlueprintConverter\ObjectDefinitions\Body.h"
+#include "BlueprintConverter\ObjectDefinitions\Body.hpp"
 
 #include <unordered_map>
 #include <vector>

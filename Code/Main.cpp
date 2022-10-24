@@ -1,7 +1,6 @@
-#include "Lib\WinInclude.h"
-
-#include "Gui/MainGUI.h"
-#include "DebugCon.h"
+#include "Lib\WinInclude.hpp"
+#include "Gui\MainGUI.h"
+#include "DebugCon.hpp"
 
 #include <locale>
 

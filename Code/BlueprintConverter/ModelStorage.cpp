@@ -1,10 +1,10 @@
-#include "ModelStorage.h"
+#include "ModelStorage.hpp"
 
-#include "BlueprintConverter\ConvertSettings.h"
-#include "Lib\String.h"
-#include "DebugCon.h"
+#include "BlueprintConverter\ConvertSettings.hpp"
+#include "Lib\String.hpp"
+#include "DebugCon.hpp"
 
-#include <assimp/postprocess.h>
+#include <assimp\postprocess.h>
 
 namespace SMBC
 {

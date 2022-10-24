@@ -1,4 +1,4 @@
-#include "DebugCon.h"
+#include "DebugCon.hpp"
 
 #ifdef SMBC_DEBUG_CONSOLE_ENABLED
 

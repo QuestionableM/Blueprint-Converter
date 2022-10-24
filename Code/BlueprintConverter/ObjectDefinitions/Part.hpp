@@ -1,11 +1,10 @@
 #pragma once
 
-#include "BlueprintConverter/ObjectDefinitions/Entity.h"
-#include "BlueprintConverter\ObjectDefinitions\Body.h"
+#include "BlueprintConverter\ObjectDefinitions\Entity.hpp"
+#include "BlueprintConverter\ObjectDefinitions\Body.hpp"
 
-#include "ObjectDatabase\ObjectData.h"
-
-#include "Lib\Color.h"
+#include "ObjectDatabase\ObjectData.hpp"
+#include "Lib\Color.hpp"
 
 namespace SMBC
 {

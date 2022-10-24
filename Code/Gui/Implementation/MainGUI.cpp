@@ -1,29 +1,29 @@
-#include <msclr/marshal_cppstd.h>
-#include <filesystem>
-#include <cwctype>
-
-#include "BlueprintConverter\BlueprintConverter.h"
-#include "BlueprintConverter\ConvertSettings.h"
+#include "BlueprintConverter\BlueprintConverter.hpp"
+#include "BlueprintConverter\ConvertSettings.hpp"
 
 #include "ObjectDatabase\ObjectRotations.hpp"
-#include "ObjectDatabase\MaterialManager.h"
-#include "ObjectDatabase\KeywordReplacer.h"
-#include "ObjectDatabase\DatabaseLoader.h"
+#include "ObjectDatabase\MaterialManager.hpp"
+#include "ObjectDatabase\KeywordReplacer.hpp"
+#include "ObjectDatabase\DatabaseLoader.hpp"
 
-#include "Lib\ProgramSettings.h"
-#include "Lib\ConvData.h"
-#include "Lib\GuiLib.h"
-#include "Lib\String.h"
-#include "Lib\File.h"
-#include "Lib\Json.h"
+#include "Lib\ProgramSettings.hpp"
+#include "Lib\ConvData.hpp"
+#include "Lib\GuiLib.hpp"
+#include "Lib\String.hpp"
+#include "Lib\File.hpp"
+#include "Lib\Json.hpp"
 
-#include "Gui/GeneratorSettings.h"
-#include "Gui/SettingsGUI.h"
-#include "Gui/ModList.h"
-#include "Gui/MainGUI.h"
-#include "Gui/About.h"
+#include "Gui\GeneratorSettings.h"
+#include "Gui\SettingsGUI.h"
+#include "Gui\ModList.h"
+#include "Gui\MainGUI.h"
+#include "Gui\About.h"
 
-#include "DebugCon.h"
+#include "DebugCon.hpp"
+
+#include <msclr\marshal_cppstd.h>
+#include <filesystem>
+#include <cwctype>
 
 namespace fs = std::filesystem;
 

@@ -1,14 +1,14 @@
-#include "Entity.h"
+#include "Entity.hpp"
 
-#include "BlueprintConverter\ObjectDefinitions\Model.h"
-#include "BlueprintConverter\BlueprintConverter.h"
-#include "BlueprintConverter\ConvertSettings.h"
+#include "BlueprintConverter\ObjectDefinitions\Model.hpp"
+#include "BlueprintConverter\BlueprintConverter.hpp"
+#include "BlueprintConverter\ConvertSettings.hpp"
 
-#include "Lib\ConvData.h"
-#include "Lib\String.h"
+#include "Lib\ConvData.hpp"
+#include "Lib\String.hpp"
 
+#include <gtx\transform.hpp>
 #include <glm.hpp>
-#include <gtx/transform.hpp>
 
 namespace SMBC
 {

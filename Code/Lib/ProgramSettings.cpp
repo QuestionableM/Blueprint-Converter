@@ -1,15 +1,14 @@
-#include "ProgramSettings.h"
+#include "ProgramSettings.hpp"
 
-#include "Lib\File.h"
-#include "Lib\String.h"
+#include "ObjectDatabase\KeywordReplacer.hpp"
+#include "ObjectDatabase\ModData.hpp"
 
-#include "ObjectDatabase\KeywordReplacer.h"
-#include "ObjectDatabase\ModData.h"
+#include "Lib\String.hpp"
+#include "Lib\File.hpp"
+#include "DebugCon.hpp"
 
-#include "DebugCon.h"
-
+#include <msclr\marshal_cppstd.h>
 #include <filesystem>
-#include <msclr/marshal_cppstd.h>
 #include <ShlObj.h>
 
 #pragma warning(push)

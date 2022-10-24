@@ -1,8 +1,7 @@
-#include "TextureDatabase.h"
+#include "TextureDatabase.hpp"
 
-#include "ObjectDatabase\KeywordReplacer.h"
-
-#include "Lib\String.h"
+#include "ObjectDatabase\KeywordReplacer.hpp"
+#include "Lib\String.hpp"
 
 namespace SMBC
 {

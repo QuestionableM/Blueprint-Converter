@@ -1,14 +1,14 @@
-#include "Gui/ModList.h"
+#include "Gui\ModList.h"
 
-#include "ObjectDatabase\KeywordReplacer.h"
+#include "ObjectDatabase\KeywordReplacer.hpp"
 
-#include "Lib\ProgramSettings.h"
-#include "Lib\GuiLib.h"
-#include "Lib\String.h"
-#include "Lib\Json.h"
-#include "Lib\File.h"
+#include "Lib\ProgramSettings.hpp"
+#include "Lib\GuiLib.hpp"
+#include "Lib\String.hpp"
+#include "Lib\Json.hpp"
+#include "Lib\File.hpp"
 
-#include <msclr/marshal_cppstd.h>
+#include <msclr\marshal_cppstd.h>
 
 namespace BlueprintConverter
 {

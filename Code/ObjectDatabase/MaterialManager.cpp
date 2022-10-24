@@ -1,10 +1,10 @@
-#include "MaterialManager.h"
+#include "MaterialManager.hpp"
 
-#include "Lib\ProgramSettings.h"
-#include "Lib\String.h"
-#include "Lib\Json.h"
+#include "Lib\ProgramSettings.hpp"
+#include "Lib\String.hpp"
+#include "Lib\Json.hpp"
 
-#include "DebugCon.h"
+#include "DebugCon.hpp"
 
 namespace SMBC
 {

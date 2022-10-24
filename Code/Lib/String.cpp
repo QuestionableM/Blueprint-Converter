@@ -1,6 +1,6 @@
-#include "String.h"
+#include "String.hpp"
 
-#include "Lib\WinInclude.h"
+#include "Lib\WinInclude.hpp"
 
 #include <vector>
 #include <locale>

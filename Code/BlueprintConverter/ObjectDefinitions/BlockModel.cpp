@@ -1,6 +1,6 @@
-#include "BlockModel.h"
+#include "BlockModel.hpp"
 
-#include "BlueprintConverter\ConvertSettings.h"
+#include "BlueprintConverter\ConvertSettings.hpp"
 
 namespace SMBC
 {

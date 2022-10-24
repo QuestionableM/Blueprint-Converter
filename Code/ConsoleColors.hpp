@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Lib\WinInclude.h"
+#include "Lib\WinInclude.hpp"
 
 class ConsoleColor
 {

@@ -1,10 +1,10 @@
 #pragma once
 
+#include "Lib\Json.hpp"
+
 #include <unordered_map>
 #include <vector>
 #include <string>
-
-#include "Lib\Json.h"
 
 namespace SMBC
 {

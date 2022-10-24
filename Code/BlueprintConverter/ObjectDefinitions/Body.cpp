@@ -1,6 +1,6 @@
-#include "Body.h"
+#include "Body.hpp"
 
-#include "BlueprintConverter\ConvertSettings.h"
+#include "BlueprintConverter\ConvertSettings.hpp"
 
 #include <fstream>
 

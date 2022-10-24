@@ -1,6 +1,6 @@
 #pragma once
 
-#include "BlueprintConverter\ObjectDefinitions\Entity.h"
+#include "BlueprintConverter\ObjectDefinitions\Entity.hpp"
 
 #include <vector>
 

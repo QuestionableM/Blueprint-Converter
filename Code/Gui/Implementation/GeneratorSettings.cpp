@@ -1,12 +1,12 @@
-#include "Gui/GeneratorSettings.h"
+#include "Gui\GeneratorSettings.h"
 
-#include "Lib\File.h"
-#include "Lib\GuiLib.h"
-#include "Lib\String.h"
+#include "BlueprintConverter\ConvertSettings.hpp"
 
-#include "BlueprintConverter\ConvertSettings.h"
+#include "Lib\String.hpp"
+#include "Lib\GuiLib.hpp"
+#include "Lib\File.hpp"
 
-#include <msclr/marshal_cppstd.h>
+#include <msclr\marshal_cppstd.h>
 
 namespace BlueprintConverter
 {

@@ -1,12 +1,10 @@
-#include "File.h"
+#include "File.hpp"
 
-#include "Lib\WinInclude.h"
-#include <ShlObj.h>
+#include "Lib\WinInclude.hpp"
+#include "DebugCon.hpp"
 
 #include <filesystem>
-
-#include "DebugCon.h"
-
+#include <ShlObj.h>
 
 namespace fs = std::filesystem;
 

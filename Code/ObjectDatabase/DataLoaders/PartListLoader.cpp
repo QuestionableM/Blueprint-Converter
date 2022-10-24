@@ -1,13 +1,13 @@
-#include "PartListLoader.h"
+#include "PartListLoader.hpp"
 
-#include "ObjectDatabase\ModData.h"
-#include "ObjectDatabase\KeywordReplacer.h"
+#include "ObjectDatabase\KeywordReplacer.hpp"
+#include "ObjectDatabase\ModData.hpp"
 
-#include "Lib\Json.h"
-#include "Lib\String.h"
-#include "Lib\ConvData.h"
+#include "Lib\ConvData.hpp"
+#include "Lib\String.hpp"
+#include "Lib\Json.hpp"
 
-#include "DebugCon.h"
+#include "DebugCon.hpp"
 
 namespace SMBC
 {

@@ -1,9 +1,9 @@
 #pragma once
 
-#include "BlueprintConverter\ObjectDefinitions\Model.h"
+#include "BlueprintConverter\ObjectDefinitions\Model.hpp"
 
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
+#include <assimp\Importer.hpp>
+#include <assimp\scene.h>
 
 #include <unordered_map>
 #include <string>

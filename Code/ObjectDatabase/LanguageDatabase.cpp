@@ -1,9 +1,9 @@
-#include "LanguageDatabase.h"
+#include "LanguageDatabase.hpp"
 
-#include "ObjectDatabase\KeywordReplacer.h"
+#include "ObjectDatabase\KeywordReplacer.hpp"
 
-#include "Lib\String.h"
-#include "Lib\Json.h"
+#include "Lib\String.hpp"
+#include "Lib\Json.hpp"
 
 namespace SMBC
 {

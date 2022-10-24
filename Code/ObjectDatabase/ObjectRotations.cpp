@@ -1,17 +1,17 @@
 #include "ObjectRotations.hpp"
 
-#include "BlueprintConverter\ObjectDefinitions\Entity.h"
+#include "BlueprintConverter\ObjectDefinitions\Entity.hpp"
 
-#include "Lib\ProgramSettings.h"
-#include "Lib\Json.h"
+#include "Lib\ProgramSettings.hpp"
+#include "Lib\Json.hpp"
 
-#include "DebugCon.h"
+#include "DebugCon.hpp"
 
-#include <string>
-#include <unordered_map>
-
+#include <gtc\matrix_transform.hpp>
 #include <glm.hpp>
-#include <gtc/matrix_transform.hpp>
+
+#include <unordered_map>
+#include <string>
 
 namespace SMBC
 {

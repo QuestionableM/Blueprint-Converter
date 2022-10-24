@@ -1,15 +1,15 @@
-#include "Part.h"
+#include "Part.hpp"
 
-#include "BlueprintConverter\ObjectDefinitions\Model.h"
-#include "BlueprintConverter\ConvertSettings.h"
+#include "BlueprintConverter\ObjectDefinitions\Model.hpp"
+#include "BlueprintConverter\ConvertSettings.hpp"
 
 #include "ObjectDatabase\ObjectRotations.hpp"
-#include "ObjectDatabase\MaterialManager.h"
+#include "ObjectDatabase\MaterialManager.hpp"
 
-#include "Lib\ConvData.h"
-#include "Lib\String.h"
+#include "Lib\ConvData.hpp"
+#include "Lib\String.hpp"
 
-#include <gtx/transform.hpp>
+#include <gtx\transform.hpp>
 
 namespace SMBC
 {

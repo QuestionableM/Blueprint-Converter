@@ -1,21 +1,21 @@
-#include "BlueprintData.h"
+#include "BlueprintData.hpp"
 
-#include "Lib\ConvData.h"
-#include "Lib\String.h"
-#include "Lib\File.h"
-#include "Lib\Json.h"
+#include "BlueprintConverter\ObjectDefinitions\Joint.hpp"
+#include "BlueprintConverter\ObjectDefinitions\Block.hpp"
+#include "BlueprintConverter\ObjectDefinitions\Part.hpp"
+#include "BlueprintConverter\ObjectDefinitions\Body.hpp"
 
-#include "BlueprintConverter\BlueprintConverter.h"
-#include "BlueprintConverter\ConvertSettings.h"
-#include "BlueprintConverter\ModelStorage.h"
-#include "BlueprintConverter\OffsetData.h"
+#include "BlueprintConverter\BlueprintConverter.hpp"
+#include "BlueprintConverter\ConvertSettings.hpp"
+#include "BlueprintConverter\ModelStorage.hpp"
+#include "BlueprintConverter\OffsetData.hpp"
 
-#include "BlueprintConverter\ObjectDefinitions\Joint.h"
-#include "BlueprintConverter\ObjectDefinitions\Part.h"
-#include "BlueprintConverter\ObjectDefinitions\Block.h"
-#include "BlueprintConverter\ObjectDefinitions\Body.h"
+#include "Lib\ConvData.hpp"
+#include "Lib\String.hpp"
+#include "Lib\File.hpp"
+#include "Lib\Json.hpp"
 
-#include "DebugCon.h"
+#include "DebugCon.hpp"
 
 #include <filesystem>
 namespace fs = std::filesystem;

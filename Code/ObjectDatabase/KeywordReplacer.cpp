@@ -1,10 +1,10 @@
-#include "KeywordReplacer.h"
+#include "KeywordReplacer.hpp"
 
-#include "Lib\String.h"
-#include "Lib\Json.h"
-#include "Lib\File.h"
+#include "Lib\String.hpp"
+#include "Lib\Json.hpp"
+#include "Lib\File.hpp"
 
-#include "DebugCon.h"
+#include "DebugCon.hpp"
 
 namespace SMBC
 {

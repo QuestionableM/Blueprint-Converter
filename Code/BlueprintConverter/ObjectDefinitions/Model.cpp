@@ -1,12 +1,11 @@
-#include "Model.h"
+#include "Model.hpp"
 
-#include "BlueprintConverter\ObjectDefinitions\Entity.h"
-#include "BlueprintConverter\ConvertSettings.h"
-#include "BlueprintConverter\OffsetData.h"
+#include "BlueprintConverter\ObjectDefinitions\Entity.hpp"
+#include "BlueprintConverter\ConvertSettings.hpp"
+#include "BlueprintConverter\OffsetData.hpp"
 
-#include "Lib\String.h"
-
-#include "DebugCon.h"
+#include "Lib\String.hpp"
+#include "DebugCon.hpp"
 
 #include <fstream>
 

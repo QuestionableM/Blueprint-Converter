@@ -1,18 +1,18 @@
-#include "Block.h"
+#include "Block.hpp"
 
-#include "BlueprintConverter\ObjectDefinitions\BlockModel.h"
-#include "BlueprintConverter\ConvertSettings.h"
-#include "BlueprintConverter\OffsetData.h"
+#include "BlueprintConverter\ObjectDefinitions\BlockModel.hpp"
+#include "BlueprintConverter\ConvertSettings.hpp"
+#include "BlueprintConverter\OffsetData.hpp"
 
 #include "ObjectDatabase\ObjectRotations.hpp"
-#include "ObjectDatabase\MaterialManager.h"
+#include "ObjectDatabase\MaterialManager.hpp"
 
-#include "Lib\ConvData.h"
-#include "Lib\String.h"
+#include "Lib\ConvData.hpp"
+#include "Lib\String.hpp"
 
-#include <gtx/transform.hpp>
+#include "DebugCon.hpp"
 
-#include "DebugCon.h"
+#include <gtx\transform.hpp>
 
 namespace SMBC
 {

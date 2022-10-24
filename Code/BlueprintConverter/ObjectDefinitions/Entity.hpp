@@ -1,8 +1,7 @@
 #pragma once
 
-#include "ObjectDatabase\ModData.h"
-
-#include "Lib\Color.h"
+#include "ObjectDatabase\ModData.hpp"
+#include "Lib\Color.hpp"
 
 namespace SMBC
 {
