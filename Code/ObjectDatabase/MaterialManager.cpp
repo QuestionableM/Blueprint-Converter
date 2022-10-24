@@ -18,7 +18,7 @@ namespace SMBC
 			if (!pObject.value().is_string()) continue;
 
 			const std::wstring pKey = String::ToWide(pObject.key());
-			const std::wstring pValue = String::ToWide(pObject.value().get<std::string>());
+			const std::wstring pValue = String::ToWide(pObject.value().get_ref<const std::string&>());
 
 			if (MatStorage.find(pKey) != MatStorage.end())
 				continue;
@@ -40,8 +40,6 @@ namespace SMBC
 
 	std::string MaterialManager::GetMaterialA(const std::wstring& mat_name)
 	{
-		const std::wstring wMaterial = MaterialManager::GetMaterialW(mat_name);
-
-		return String::ToUtf8(wMaterial);
+		return String::ToUtf8(MaterialManager::GetMaterialW(mat_name));
 	}
 }

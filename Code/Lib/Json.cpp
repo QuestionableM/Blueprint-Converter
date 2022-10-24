@@ -80,7 +80,7 @@ namespace SMBC
 			const auto& v_value = json.at(key);
 
 			if (v_value.is_string())
-				return SMBC::String::ToWide(v_value.get<std::string>());
+				return SMBC::String::ToWide(v_value.get_ref<const std::string&>());
 		}
 
 		return L"";

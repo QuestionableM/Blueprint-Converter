@@ -19,7 +19,7 @@ namespace SMBC
 			const auto& l_title = Json::Get(l_translation.value(), "title");
 			if (!l_title.is_string()) continue;
 
-			std::wstring l_wide_title = String::ToWide(l_title.get<std::string>());
+			std::wstring l_wide_title = String::ToWide(l_title.get_ref<const std::string&>());
 
 			{
 				//Remove the new line characters
@@ -28,7 +28,7 @@ namespace SMBC
 				String::ReplaceR(l_wide_title, L'\r', L' ');
 			}
 
-			Uuid l_key_uuid(l_translation.key());
+			const Uuid l_key_uuid(l_translation.key());
 			if (m_Translations.find(l_key_uuid) == m_Translations.end())
 				m_Translations.insert(std::make_pair(l_key_uuid, l_wide_title));
 		}

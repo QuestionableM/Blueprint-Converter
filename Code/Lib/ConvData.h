@@ -68,7 +68,44 @@ namespace SMBC
 			ConvData::State = state;
 		}
 
-		static std::wstring GetStateString();
-		static bool StateHasNumbers();
+		inline static std::wstring GetStateString()
+		{
+			const std::size_t v_stateIdx = static_cast<std::size_t>(ConvData::State);
+			if (v_stateIdx > 0)
+				return g_actionData[v_stateIdx - 1].v_desc;
+
+			return L"NO_STATE";
+		}
+
+		inline static bool StateHasNumbers()
+		{
+			const std::size_t v_stateIdx = static_cast<std::size_t>(ConvData::State);
+			if (v_stateIdx > 0)
+				return g_actionData[v_stateIdx - 1].v_displayNumbers;
+
+			return false;
+		}
+
+	private:
+		struct StateData
+		{
+			std::wstring v_desc;
+			bool v_displayNumbers;
+		};
+
+		inline const static StateData g_actionData[] =
+		{
+			{ L"Reading Object Database... ",            true  },
+			{ L"Reading Blueprint JSON...",              false },
+			{ L"Reading Blueprint Blocks and Parts... ", true  },
+			{ L"Reading Blueprint Joints...",            true  },
+			{ L"Clearing Blueprint Data...",             false },
+			{ L"Writing Objects to the File... ",        true  },
+			{ L"Writing Mtl File... ",                   false },
+			{ L"Writing Texture File... ",               false },
+
+			{ L"Success!",         false },
+			{ L"Conversion Error", false }
+		};
 	};
 }

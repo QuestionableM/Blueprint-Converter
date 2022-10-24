@@ -30,7 +30,7 @@ namespace SMBC
 		{
 			if (!pValue.is_string()) continue;
 
-			std::wstring wstr_path = String::ToWide(pValue.get<std::string>());
+			std::wstring wstr_path = String::ToWide(pValue.get_ref<const std::string&>());
 			wstr_path = PathReplacer::ReplaceKey(wstr_path);
 
 			pWstrVec.push_back(wstr_path);
@@ -80,7 +80,7 @@ namespace SMBC
 				if (!keyword.value().is_string()) continue;
 
 				std::wstring wstr_key = String::ToWide(keyword.key());
-				std::wstring wstr_key_repl = String::ToWide(keyword.value().get<std::string>());
+				std::wstring wstr_key_repl = String::ToWide(keyword.value().get_ref<const std::string&>());
 				PathReplacer::ReplaceKeyR(wstr_key_repl);
 
 				PathReplacer::SetReplacement(wstr_key, wstr_key_repl);
@@ -256,14 +256,13 @@ namespace SMBC
 			const auto& v_gamePath = Json::Get(v_userSettings, "GamePath");
 			if (v_gamePath.is_string())
 			{
-				const std::string v_smPath = v_gamePath.get<std::string>();
-				Settings::PathToSM = String::ToWide(v_smPath);
+				Settings::PathToSM = String::ToWide(v_gamePath.get_ref<const std::string&>());
 
 				DebugOutL("Game Path: ", Settings::PathToSM);
 			}
 
-			Settings::JsonStrArrayToVector(v_userSettings, "BlueprintPaths", Settings::BlueprintFolders);
-			Settings::JsonStrArrayToVector(v_userSettings, "LocalModFolders", Settings::LocalModFolders);
+			Settings::JsonStrArrayToVector(v_userSettings, "BlueprintPaths"    , Settings::BlueprintFolders);
+			Settings::JsonStrArrayToVector(v_userSettings, "LocalModFolders"   , Settings::LocalModFolders);
 			Settings::JsonStrArrayToVector(v_userSettings, "WorkshopModFolders", Settings::ModFolders);
 
 			const auto& v_openInSteam = Json::Get(v_userSettings, "OpenLinksInSteam");

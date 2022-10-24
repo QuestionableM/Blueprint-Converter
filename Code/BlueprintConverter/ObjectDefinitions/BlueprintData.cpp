@@ -169,8 +169,8 @@ namespace SMBC
 		mAxisData.z = (zAxis.is_number() ? zAxis.get<short>() : 3);
 
 		const glm::vec3 pPosVec = BlueprintData::JsonToVec(mPos);
-		SMBC::Uuid mObjUuid = mUuid.get<std::string>();
-		SMBC::Color mObjColor = mColor.get<std::string>();
+		const SMBC::Uuid mObjUuid(mUuid.get_ref<const std::string&>());
+		const SMBC::Color mObjColor(mColor.get_ref<const std::string&>());
 
 		if (mBounds.is_object())
 		{
@@ -231,7 +231,7 @@ namespace SMBC
 
 		if (!jUuid.is_string() || !jColor.is_string() || !jChildA.is_number()) return;
 
-		const SMBC::Uuid jObjUuid = jUuid.get<std::string>();
+		const SMBC::Uuid jObjUuid(jUuid.get_ref<const std::string&>());
 
 		const SMBC::PartData* joint_data = Mod::GetPart(jObjUuid);
 		if (!joint_data) return;
@@ -242,7 +242,7 @@ namespace SMBC
 		{
 			const std::size_t jChildIdx = jChildA.get<std::size_t>();
 			const glm::vec3 jPosVec = BlueprintData::JsonToVec(jPosition);
-			const SMBC::Color jObjColor = jColor.get<std::string>();
+			const SMBC::Color jObjColor(jColor.get_ref<const std::string&>());
 
 			AxisData jAxisData;
 			jAxisData.x = (xAxis.is_number() ? xAxis.get<short>() : 1);

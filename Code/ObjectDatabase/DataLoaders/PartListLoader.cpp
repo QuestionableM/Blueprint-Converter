@@ -11,6 +11,15 @@
 
 namespace SMBC
 {
+	const PartListLoader::__CollisionLoaderStruct PartListLoader::g_collisionLoadersArray[] =
+	{
+		{ "box"     , PartListLoader::LoadBoxCollision      },
+		{ "hull"    , PartListLoader::LoadBoxCollision      },
+		{ "cylinder", PartListLoader::LoadCylinderCollision },
+		{ "sphere"  , PartListLoader::LoadSphereCollision   },
+		{ "slant"   , PartListLoader::LoadBoxCollision      }
+	};
+
 	void PartListLoader::LoadTextureList(const nlohmann::json& texList, Texture::TextureList& entry)
 	{
 		const int arr_sz = (int)texList.size();
@@ -24,7 +33,7 @@ namespace SMBC
 			{
 				std::wstring& wstr_path = entry.GetStringRef(a);
 
-				wstr_path = String::ToWide(cur_item.get<std::string>());
+				wstr_path = String::ToWide(cur_item.get_ref<const std::string&>());
 				wstr_path = PathReplacer::ReplaceKey(wstr_path);
 			}
 		}
@@ -39,7 +48,7 @@ namespace SMBC
 		PartListLoader::LoadTextureList(sTexList, new_entry);
 
 		const auto& sMaterial = Json::Get(subMesh, "material");
-		new_entry.material = (sMaterial.is_string() ? String::ToWide(sMaterial.get<std::string>()) : L"DifAsgNor");
+		new_entry.material = (sMaterial.is_string() ? String::ToWide(sMaterial.get_ref<const std::string&>()) : L"DifAsgNor");
 
 		tex.AddEntry(idx, new_entry);
 	}
@@ -103,7 +112,7 @@ namespace SMBC
 		const auto& rMesh = Json::Get(rLodItem, "mesh");
 		if (!rMesh.is_string()) return false;
 
-		mesh_path = String::ToWide(rMesh.get<std::string>());
+		mesh_path = String::ToWide(rMesh.get_ref<const std::string&>());
 		mesh_path = PathReplacer::ReplaceKey(mesh_path);
 
 		return PartListLoader::LoadSubMeshes(rLodItem, tex_data);
@@ -118,7 +127,7 @@ namespace SMBC
 		{
 		case nlohmann::detail::value_t::string:
 			{
-				const std::wstring p_rend_wide = String::ToWide(pRenderable.get<std::string>());
+				const std::wstring p_rend_wide = String::ToWide(pRenderable.get_ref<const std::string&>());
 				const std::wstring p_rend_repl = PathReplacer::ReplaceKey(p_rend_wide);
 
 				rend_data = Json::LoadParseJson(p_rend_repl);
@@ -137,64 +146,66 @@ namespace SMBC
 		return PartListLoader::LoadRenderable(rend_data, tex_data, mesh_path);
 	}
 
+	void PartListLoader::LoadBoxCollision(const nlohmann::json& collision, glm::vec3& vec_out)
+	{
+		const auto& v_box_x = Json::Get(collision, "x");
+		const auto& v_box_y = Json::Get(collision, "y");
+		const auto& v_box_z = Json::Get(collision, "z");
+
+		if (v_box_x.is_number() && v_box_y.is_number() && v_box_z.is_number())
+			vec_out = glm::vec3(v_box_x.get<float>(), v_box_y.get<float>(), v_box_z.get<float>());
+	}
+
+	void PartListLoader::LoadCylinderCollision(const nlohmann::json& collision, glm::vec3& vec_out)
+	{
+		const auto& v_diameter = Json::Get(collision, "diameter");
+		const auto& v_depth = Json::Get(collision, "depth");
+
+		if (!v_diameter.is_number() || !v_depth.is_number())
+			return;
+
+		const auto& v_axis = Json::Get(collision, "axis");
+		const std::string v_axis_str = (v_axis.is_string() ? v_axis.get_ref<const std::string&>() : "z");
+		if (v_axis_str.empty())
+			return;
+
+		const float v_diameter_f = v_diameter.get<float>();
+		const float v_depth_f = v_depth.get<float>();
+
+		const char v_axis_char = std::tolower(v_axis_str[0]);
+		switch (v_axis_char)
+		{
+		case 'x': vec_out = glm::vec3(v_depth_f   , v_diameter_f, v_diameter_f); break;
+		case 'y': vec_out = glm::vec3(v_diameter_f, v_depth_f   , v_diameter_f); break;
+		case 'z': vec_out = glm::vec3(v_diameter_f, v_diameter_f, v_depth_f   ); break;
+		}
+	}
+
+	void PartListLoader::LoadSphereCollision(const nlohmann::json& collision, glm::vec3& vec_out)
+	{
+		const auto& v_diameter = Json::Get(collision, "diameter");
+		if (v_diameter.is_number())
+			vec_out = glm::vec3(v_diameter.get<float>());
+	}
+
 	glm::vec3 PartListLoader::LoadPartCollision(const nlohmann::json& collision)
 	{
-		const bool isBoxCol = collision.contains("box");
-		const bool isHullCol = collision.contains("hull");
-		if (isBoxCol || isHullCol)
+		glm::vec3 v_output_vec(1.0f);
+
+		constexpr unsigned char v_collisionLoadersArraySz = sizeof(g_collisionLoadersArray) / sizeof(__CollisionLoaderStruct);
+		for (unsigned char a = 0; a < v_collisionLoadersArraySz; a++)
 		{
-			const auto& b_Col = collision.at(isBoxCol ? "box" : "hull");
+			const __CollisionLoaderStruct& v_curLoader = g_collisionLoadersArray[a];
 
-			if (b_Col.is_object())
-			{
-				const auto& xPos = Json::Get(b_Col, "x");
-				const auto& yPos = Json::Get(b_Col, "y");
-				const auto& zPos = Json::Get(b_Col, "z");
+			const auto& v_collisionJson = Json::Get(collision, v_curLoader.key);
+			if (!v_collisionJson.is_object())
+				continue;
 
-				if (xPos.is_number() && yPos.is_number() && zPos.is_number())
-					return { xPos.get<float>(), yPos.get<float>(), zPos.get<float>() };
-			}
-		}
-		else
-		{
-			const auto& cyl_col = Json::Get(collision, "cylinder");
-			if (cyl_col.is_object())
-			{
-				const auto& c_Diameter = Json::Get(cyl_col, "diameter");
-				const auto& c_Depth = Json::Get(cyl_col, "depth");
-
-				if (c_Diameter.is_number() && c_Depth.is_number())
-				{
-					const float f_Diameter = c_Diameter.get<float>();
-					const float f_Depth = c_Depth.get<float>();
-
-					const auto& c_Axis = Json::Get(cyl_col, "axis");
-					const std::string c_AxisStr = (c_Axis.is_string() ? c_Axis.get<std::string>() : "z");
-
-					switch (c_AxisStr[0])
-					{
-					case 'x': case 'X':
-						return { f_Depth, f_Diameter, f_Diameter };
-					case 'y': case 'Y':
-						return { f_Diameter, f_Depth, f_Diameter };
-					case 'z': case 'Z':
-						return { f_Diameter, f_Diameter, f_Depth };
-					}
-				}
-			}
-			else
-			{
-				const auto& sphere_col = Json::Get(collision, "sphere");
-				if (sphere_col.is_object())
-				{
-					const auto& s_Diameter = Json::Get(sphere_col, "diameter");
-					if (s_Diameter.is_number())
-						return glm::vec3(s_Diameter.get<float>());
-				}
-			}
+			v_curLoader.func_ptr(v_collisionJson, v_output_vec);
+			break;
 		}
 
-		return glm::vec3(1.0f);
+		return v_output_vec;
 	}
 
 	void PartListLoader::Load(const nlohmann::json& part_list, Mod* pMod)
@@ -207,7 +218,7 @@ namespace SMBC
 			const auto& p_uuid = Json::Get(l_part, "uuid");
 			if (!p_uuid.is_string()) continue;
 
-			SMBC::Uuid uuid_obj(p_uuid.get<std::string>());
+			const SMBC::Uuid uuid_obj(p_uuid.get_ref<const std::string&>());
 
 			if (Mod::AllObjects.find(uuid_obj) != Mod::AllObjects.end())
 			{

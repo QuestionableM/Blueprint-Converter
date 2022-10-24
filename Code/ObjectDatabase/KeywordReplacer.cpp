@@ -84,8 +84,8 @@ namespace SMBC
 
 				if (!(upgrade_key.is_string() && upgrade_val.is_string())) continue;
 
-				std::wstring upKeyWstr = String::ToWide(upgrade_key.get<std::string>());
-				std::wstring upValWstr = String::ToWide(upgrade_val.get<std::string>());
+				std::wstring upKeyWstr = String::ToWide(upgrade_key.get_ref<const std::string&>());
+				std::wstring upValWstr = String::ToWide(upgrade_val.get_ref<const std::string&>());
 
 				PathReplacer::CreateKey(upKeyWstr, upValWstr);
 

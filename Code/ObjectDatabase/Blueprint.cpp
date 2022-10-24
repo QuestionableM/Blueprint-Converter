@@ -79,14 +79,17 @@ namespace SMBC
 		const auto& bpName = Json::Get(bpDesc, "name");
 		const auto& bpType = Json::Get(bpDesc, "type");
 
-		if (!bpName.is_string() || !bpType.is_string()) return nullptr;
-		if (bpType.get<std::string>() != "Blueprint") return nullptr;
+		if (!bpName.is_string() || !bpType.is_string())
+			return nullptr;
+
+		if (bpType.get_ref<const std::string&>() != "Blueprint")
+			return nullptr;
 
 		const auto& file_id_obj = Json::Get(bpDesc, "fileId");
 		long long file_id = file_id_obj.is_number() ? file_id_obj.get<long long>() : 0ll;
 
 		Blueprint* new_bp = new Blueprint();
-		new_bp->Name = String::ToWide(bpName.get<std::string>());
+		new_bp->Name = String::ToWide(bpName.get_ref<const std::string&>());
 		new_bp->Path = bpJson;
 		new_bp->Folder = path;
 		new_bp->WorkshopId = (file_id > 0) ? std::to_wstring(file_id) : L"";

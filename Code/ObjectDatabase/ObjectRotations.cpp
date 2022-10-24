@@ -155,7 +155,7 @@ namespace SMBC
 					rotation_matrix = glm::rotate(rotation_matrix, glm::radians(rSetRef.oRotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
 					rotation_matrix = glm::rotate(rotation_matrix, glm::radians(rSetRef.oRotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
 
-					RotationEntry new_entry = { rotation_matrix, { rSetRef.oPosition.x, rSetRef.oPosition.y, rSetRef.oPosition.z } };
+					const RotationEntry new_entry = { rotation_matrix, { rSetRef.oPosition.x, rSetRef.oPosition.y, rSetRef.oPosition.z } };
 
 					rotation_group.insert(std::make_pair(zAxisRotGroup.first, new_entry));
 				}

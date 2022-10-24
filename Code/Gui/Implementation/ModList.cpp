@@ -72,7 +72,7 @@ namespace BlueprintConverter
 					const auto& uuid = SMBC::Json::Get(child, "shapeId");
 					if (!uuid.is_string()) continue;
 
-					SMBC::Uuid uuid_obj(uuid.get<std::string>());
+					const SMBC::Uuid uuid_obj(uuid.get_ref<const std::string&>());
 					SMBC::Mod* _ModPtr = this->FindModByObjUuid(uuid_obj);
 
 					this->AddModToList(_ModPtr);
@@ -92,7 +92,7 @@ namespace BlueprintConverter
 				const auto& uuid = SMBC::Json::Get(joint, "shapeId");
 				if (!uuid.is_string()) continue;
 
-				SMBC::Uuid uuid_obj(uuid.get<std::string>());
+				const SMBC::Uuid uuid_obj(uuid.get_ref<const std::string&>());
 				SMBC::Mod* _ModPtr = this->FindModByObjUuid(uuid_obj);
 
 				this->AddModToList(_ModPtr);

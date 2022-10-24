@@ -122,7 +122,7 @@ namespace SMBC
 		{
 			if (!v_curShapedb.is_string()) continue;
 
-			const std::wstring v_pathWide = String::ToWide(v_curShapedb.get<std::string>());
+			const std::wstring v_pathWide = String::ToWide(v_curShapedb.get_ref<const std::string&>());
 			const std::wstring v_fullPath = PathReplacer::ReplaceKey(v_pathWide);
 
 			this->LoadObjectFile(v_fullPath);
@@ -204,7 +204,7 @@ namespace SMBC
 		if (!v_descJson.is_object()) return nullptr;
 
 		const auto& v_modType = Json::Get(v_descJson, "type");
-		if (!v_modType.is_string() || v_modType.get<std::string>() != "Blocks and Parts")
+		if (!v_modType.is_string() || v_modType.get_ref<const std::string&>() != "Blocks and Parts")
 			return nullptr;
 
 		const auto& v_modName = Json::Get(v_descJson, "name");
@@ -214,28 +214,27 @@ namespace SMBC
 			return nullptr;
 
 		const auto& v_workshopIdStr = Json::Get(v_descJson, "fileId");
-		const unsigned __int64 v_workshopId = (v_workshopIdStr.is_number() ? v_workshopIdStr.get<unsigned __int64>() : 0ull);
-		const Uuid v_modUuid = v_modUuidStr.get<std::string>();
+		const Uuid v_modUuid(v_modUuidStr.get_ref<const std::string&>());
 
 		const ModDataMap::const_iterator v_iter = Mod::ModsMap.find(v_modUuid);
 		if (v_iter != Mod::ModsMap.end())
 		{
 			if (v_iter->second->m_isLocal && !is_local)
 			{
-				DebugOutL("A local version of this mod has already been loaded! (Uuid: ", v_modUuid.ToString(), ", Name: ", v_modName.get<std::string>(), ")");
+				DebugOutL("A local version of this mod has already been loaded! (Uuid: ", v_modUuid.ToString(), ", Name: ", v_modName.get_ref<const std::string&>(), ")");
 				return nullptr;
 			}
 
 			if (v_iter->second->m_isLocal == is_local)
 			{
-				DebugErrorL("Uuid conflict between 2 mods: \"", v_modName.get<std::string>(), "\" and \"", v_iter->second->m_Name, "\" (Uuid: ", v_modUuid.ToString(), ")");
+				DebugErrorL("Uuid conflict between 2 mods: \"", v_modName.get_ref<const std::string&>(), "\" and \"", v_iter->second->m_Name, "\" (Uuid: ", v_modUuid.ToString(), ")");
 				return nullptr;
 			}
 		}
 
 		Mod* v_newMod = new Mod();
 		v_newMod->m_Uuid = v_modUuid;
-		v_newMod->m_Name = String::ToWide(v_modName.get<std::string>());
+		v_newMod->m_Name = String::ToWide(v_modName.get_ref<const std::string&>());
 		v_newMod->m_WorkshopId = (v_workshopIdStr.is_number() ? v_workshopIdStr.get<unsigned __int64>() : 0ull);
 		v_newMod->m_Directory = dir;
 		v_newMod->m_isLocal = is_local;

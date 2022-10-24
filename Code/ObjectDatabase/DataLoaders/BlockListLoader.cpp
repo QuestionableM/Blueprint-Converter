@@ -40,7 +40,7 @@ namespace SMBC
 			{
 				std::wstring& strRef = tex.GetStringRef(a);
 
-				strRef = String::ToWide(bTexture.get<std::string>());
+				strRef = String::ToWide(bTexture.get_ref<const std::string&>());
 				strRef = PathReplacer::ReplaceKey(strRef);
 			}
 		}
@@ -61,7 +61,7 @@ namespace SMBC
 			const auto& b_tiling = Json::Get(l_block, "tiling");
 			const auto& b_color  = Json::Get(l_block, "color");
 
-			SMBC::Uuid uuid_obj(b_uuid.get<std::string>());
+			SMBC::Uuid uuid_obj(b_uuid.get_ref<const std::string&>());
 			if (Mod::AllObjects.find(uuid_obj) != Mod::AllObjects.end())
 			{
 				DebugWarningL("An object with this uuid already exists! (", uuid_obj.ToString(), ")");
