@@ -15,7 +15,7 @@ namespace SMBC
 {
 	std::string Part::GetMtlName(const std::wstring& mat_name, const std::size_t& mIdx) const
 	{
-		std::string out_str = pParent->Uuid.ToString();
+		std::string out_str = pParent->m_uuid.ToString();
 
 		{
 			if (ConvertSettings::MatByColor)
@@ -26,13 +26,13 @@ namespace SMBC
 
 		{
 			const SubMeshData* pSubMesh = pModel->subMeshData[mIdx];
-			const std::wstring tex_name = pParent->TextureList.PickString(mIdx, mat_name);
+			//const std::wstring tex_name = pParent->TextureList.PickString(mIdx, mat_name);
 
 			std::string material_idx = "m1";
 
 			ObjectTextureData oTexData;
-			if (pParent->TextureList.GetEntry(tex_name, oTexData.mTextures))
-				material_idx = MaterialManager::GetMaterialA(oTexData.mTextures.material);
+			if (pParent->m_textureList->GetEntry(mat_name, mIdx, &oTexData.mTextures))
+				material_idx = MaterialManager::GetMaterialA(oTexData.mTextures->material);
 
 			out_str.append(" " + material_idx);
 		}
@@ -42,7 +42,7 @@ namespace SMBC
 
 	void Part::FillTextureMap(std::unordered_map<std::string, ObjectTextureData>& tex_map) const
 	{
-		std::string mtl_first_part = pParent->Uuid.ToString() + " ";
+		std::string mtl_first_part = pParent->m_uuid.ToString() + " ";
 
 		if (ConvertSettings::MatByColor)
 			mtl_first_part.append(mColor.StringHex() + " ");
@@ -50,14 +50,13 @@ namespace SMBC
 		for (std::size_t a = 0; a < pModel->subMeshData.size(); a++)
 		{
 			const SubMeshData* pSubMesh = pModel->subMeshData[a];
-			const std::wstring tex_name = pParent->TextureList.PickString(a, pSubMesh->MaterialName);
 
 			ObjectTextureData oTexData;
-			if (pParent->TextureList.GetEntry(tex_name, oTexData.mTextures))
+			if (pParent->m_textureList->GetEntry(pSubMesh->MaterialName, a, &oTexData.mTextures))
 			{
 				oTexData.mColor = mColor;
 
-				const std::string mat_idx = MaterialManager::GetMaterialA(oTexData.mTextures.material);
+				const std::string mat_idx = MaterialManager::GetMaterialA(oTexData.mTextures->material);
 				const std::string mtl_name = mtl_first_part + std::to_string(a + 1) + " " + mat_idx;
 
 				if (tex_map.find(mtl_name) != tex_map.end())
@@ -73,7 +72,7 @@ namespace SMBC
 		const std::string mNameStr = String::ToUtf8(this->GetName());
 
 		if (mJson.find(mNameStr) == mJson.end())
-			mJson[mNameStr] = pParent->TextureList.ToJson();
+			mJson[mNameStr] = pParent->m_textureList->ToJson();
 
 		ConvData::ProgressValue++;
 	}
@@ -95,7 +94,7 @@ namespace SMBC
 		glm::mat4 model_matrix(1.0f);
 		model_matrix *= glm::translate(this->mPosition);
 		model_matrix *= axis_rotation;
-		model_matrix *= glm::translate(pParent->Bounds / 2.0f);
+		model_matrix *= glm::translate(pParent->m_bounds / 2.0f);
 
 		return model_matrix;
 	}

@@ -50,7 +50,6 @@
     <ClCompile Include="Code\ObjectDatabase\ModData.cpp" />
     <ClCompile Include="Code\ObjectDatabase\DatabaseLoader.cpp" />
     <ClCompile Include="Code\ObjectDatabase\ObjectRotations.cpp" />
-    <ClCompile Include="Code\ObjectDatabase\TextureDatabase.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Code\BlueprintConverter\BlueprintConverter.hpp" />

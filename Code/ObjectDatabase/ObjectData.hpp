@@ -21,62 +21,64 @@ namespace SMBC
 	class ObjectData
 	{
 	public:
-		Uuid Uuid;
-		std::wstring Name;
-		Mod* ModPtr;
+		Uuid m_uuid;
+		std::wstring m_name;
+		Mod* m_modPtr;
 
 		virtual ObjectType Type() const = 0;
+
+		ObjectData() = default;
 		virtual ~ObjectData() = default;
 	};
 
 	class BlockData : public ObjectData
 	{
 	public:
-		SMBC::Texture::TextureList TextureList;
-		int Tiling;
+		SMBC::Texture::TextureData* m_textureList;
+		int m_tiling;
 
 		inline ObjectType Type() const override { return ObjectType::Block; }
 
 		inline BlockData(const SMBC::Uuid& uuid,
 			const std::wstring& name,
-			SMBC::Texture::TextureList& textures,
+			SMBC::Texture::TextureData* textures,
 			const int& tiling,
 			Mod* pMod)
 		{
-			this->Uuid = uuid;
-			this->Name = name;
-			this->Tiling = tiling;
-			this->TextureList = textures;
-			this->ModPtr = pMod;
+			this->m_uuid = uuid;
+			this->m_name = name;
+			this->m_tiling = tiling;
+			this->m_textureList = textures;
+			this->m_modPtr = pMod;
 		}
 
-		~BlockData() = default;
+		inline ~BlockData() { delete m_textureList; }
 	};
 
 	class PartData : public ObjectData
 	{
 	public:
-		SMBC::Texture::Texture TextureList;
-		std::wstring Path;
-		glm::vec3 Bounds;
+		SMBC::Texture::SubMeshDataBase* m_textureList;
+		std::wstring m_path;
+		glm::vec3 m_bounds;
 
 		inline ObjectType Type() const override { return ObjectType::Part; }
 
 		PartData(const SMBC::Uuid& uuid,
 			const std::wstring& path,
 			const std::wstring& name,
-			SMBC::Texture::Texture& textures,
+			SMBC::Texture::SubMeshDataBase* textures,
 			const glm::vec3& bounds,
 			Mod* pMod)
 		{
-			this->Uuid = uuid;
-			this->Path = path;
-			this->Name = name;
-			this->TextureList = textures;
-			this->Bounds = bounds;
-			this->ModPtr = pMod;
+			this->m_uuid = uuid;
+			this->m_path = path;
+			this->m_name = name;
+			this->m_textureList = textures;
+			this->m_bounds = bounds;
+			this->m_modPtr = pMod;
 		}
 
-		~PartData() = default;
+		inline ~PartData() { delete m_textureList; }
 	};
 }

@@ -164,7 +164,7 @@ namespace BlueprintConverter
 		const SMBC::ObjectData* cur_object = SMBC::Mod::GetObject(uuid);
 		if (!cur_object) return nullptr;
 
-		return cur_object->ModPtr;
+		return cur_object->m_modPtr;
 	}
 
 	void ModList::AddModToList(SMBC::Mod* ModData)

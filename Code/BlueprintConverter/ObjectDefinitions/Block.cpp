@@ -18,12 +18,12 @@ namespace SMBC
 {
 	std::string Block::GetMtlName(const std::wstring& mat_name, const std::size_t& mIdx) const
 	{
-		std::string out_str = pParent->Uuid.ToString();
+		std::string out_str = pParent->m_uuid.ToString();
 
 		if (ConvertSettings::MatByColor)
 			out_str.append(" " + mColor.StringHex());
 
-		const std::string mat_idx = MaterialManager::GetMaterialA(pParent->TextureList.material);
+		const std::string mat_idx = MaterialManager::GetMaterialA(pParent->m_textureList->material);
 		out_str.append(" 1 " + mat_idx);
 
 		return out_str;
@@ -37,7 +37,7 @@ namespace SMBC
 			return;
 
 		ObjectTextureData oTexData;
-		oTexData.mTextures = pParent->TextureList;
+		oTexData.mTextures = pParent->m_textureList;
 		oTexData.mColor = this->mColor;
 
 		tex_map.insert(std::make_pair(mtl_name, oTexData));
@@ -48,7 +48,7 @@ namespace SMBC
 		const std::string mNameStr = String::ToUtf8(this->GetName());
 
 		if (mJson.find(mNameStr) == mJson.end())
-			mJson[mNameStr] = pParent->TextureList.ToJson();
+			mJson[mNameStr] = pParent->m_textureList->ToJson();
 
 		ConvData::ProgressValue++;
 	}
@@ -56,7 +56,7 @@ namespace SMBC
 	glm::vec3 Block::GetCenterPoint() const
 	{
 		Model new_block(L"BLOCK_INTERNAL");
-		BlockModel::CreateBlockModel(new_block, this->mPosition, this->mScale / 2.0f, pParent->Tiling);
+		BlockModel::CreateBlockModel(new_block, this->mPosition, this->mScale / 2.0f, pParent->m_tiling);
 
 		const glm::mat4 model_mat = this->GetTransformMatrix();
 
@@ -82,7 +82,7 @@ namespace SMBC
 		const glm::mat4 block_matrix = this->GetTransformMatrix();
 
 		Model new_block(L"BLOCK_INTERNAL");
-		BlockModel::CreateBlockModel(new_block, this->mPosition, this->mScale / 2.0f, pParent->Tiling);
+		BlockModel::CreateBlockModel(new_block, this->mPosition, this->mScale / 2.0f, pParent->m_tiling);
 
 		new_block.WriteToFile(file, block_matrix, mOffset, this);
 

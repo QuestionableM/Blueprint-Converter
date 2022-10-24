@@ -10,7 +10,7 @@ namespace SMBC
 
 	struct ObjectTextureData
 	{
-		SMBC::Texture::TextureList mTextures;
+		SMBC::Texture::TextureData* mTextures;
 		SMBC::Color mColor;
 	};
 

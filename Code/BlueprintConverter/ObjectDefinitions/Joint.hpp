@@ -32,10 +32,10 @@ namespace SMBC
 		glm::vec3 GetCenterPoint() const override;
 
 		glm::mat4 GetTransformMatrix() const override;
-		inline SMBC::Uuid GetUuid() const override { return pParent->Uuid; }
+		inline SMBC::Uuid GetUuid() const override { return pParent->m_uuid; }
 		inline std::wstring GetName() const override
 		{
-			return pParent->Name + L" (" + pParent->ModPtr->m_Name + L": " + pParent->Uuid.ToWstring() + L")";
+			return pParent->m_name + L" (" + pParent->m_modPtr->m_Name + L": " + pParent->m_uuid.ToWstring() + L")";
 		}
 	};
 }

@@ -9,7 +9,6 @@
     <ClCompile Include="Code\Gui\Implementation\SettingsGUI.cpp" />
     <ClCompile Include="Code\ObjectDatabase\KeywordReplacer.cpp" />
     <ClCompile Include="Code\ObjectDatabase\LanguageDatabase.cpp" />
-    <ClCompile Include="Code\ObjectDatabase\TextureDatabase.cpp" />
     <ClCompile Include="Code\Lib\File.cpp" />
     <ClCompile Include="Code\Lib\GuiLib.cpp" />
     <ClCompile Include="Code\Lib\Json.cpp" />

@@ -187,7 +187,7 @@ namespace SMBC
 			const SMBC::PartData* part_data = Mod::GetPart(mObjUuid);
 			if (!part_data) return;
 
-			SMBC::Model* pModel = ModelStorage::LoadModel(part_data->Path);
+			SMBC::Model* pModel = ModelStorage::LoadModel(part_data->m_path);
 			if (!pModel) return;
 
 			this->CollectionBindFunction(this, new Part(part_data, pModel, pPosVec, mAxisData, mObjColor, this->ObjectIndex));
@@ -236,7 +236,7 @@ namespace SMBC
 		const SMBC::PartData* joint_data = Mod::GetPart(jObjUuid);
 		if (!joint_data) return;
 
-		SMBC::Model* pModel = ModelStorage::LoadModel(joint_data->Path);
+		SMBC::Model* pModel = ModelStorage::LoadModel(joint_data->m_path);
 		if (!pModel) return;
 
 		{
@@ -346,11 +346,13 @@ namespace SMBC
 			output_str.append("\nillum 2");
 
 			{
-				const Texture::TextureList& tList = tDatum.second.mTextures;
-
-				if (!tList.nor.empty()) output_str.append("\nmap_Bump " + String::ToUtf8(tList.nor));
-				if (!tList.dif.empty()) output_str.append("\nmap_Kd "   + String::ToUtf8(tList.dif));
-				if (!tList.asg.empty()) output_str.append("\nmap_Ks "   + String::ToUtf8(tList.asg));
+				const Texture::TextureData* tList = tDatum.second.mTextures;
+				if (tList != nullptr)
+				{
+					if (!tList->m_texData[2].empty()) output_str.append("\nmap_Bump " + String::ToUtf8(tList->m_texData[2]));
+					if (!tList->m_texData[0].empty()) output_str.append("\nmap_Kd " + String::ToUtf8(tList->m_texData[0]));
+					if (!tList->m_texData[1].empty()) output_str.append("\nmap_Ks " + String::ToUtf8(tList->m_texData[1]));
+				}
 			}
 
 			output_str.append("\n\n");
