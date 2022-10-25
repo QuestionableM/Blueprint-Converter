@@ -41,7 +41,7 @@ namespace SMBC
 			return Json::m_NullObject;
 		}
 
-		static std::wstring GetWstr(nlohmann::json& json, const std::string& key);
+		static std::wstring GetWstr(const nlohmann::json& json, const std::string& key);
 
 	private:
 		inline const static nlohmann::json m_NullObject = nlohmann::json();

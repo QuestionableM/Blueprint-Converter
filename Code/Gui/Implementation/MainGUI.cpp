@@ -86,49 +86,53 @@ namespace BlueprintConverter
 
 	void MainGUI::Start_BTN_Click(System::Object^ sender, System::EventArgs^ e)
 	{
-		std::wstring _BlueprintPath = msclr::interop::marshal_as<std::wstring>(this->BPPath_TB->Text);
-		if (!SMBC::File::Exists(_BlueprintPath))
+		const std::wstring v_blueprintPath = msclr::interop::marshal_as<std::wstring>(this->BPPath_TB->Text);
+		if (!SMBC::File::Exists(v_blueprintPath))
 		{
 			SMBC::Gui::Warning("Invalid path", "The specified path doesn't exist!");
 			return;
 		}
 
-		std::wstring _BlueprintFile = L"";
-		std::wstring _BlueprintName = L"";
-		fs::directory_entry _DirEntr(_BlueprintPath);
+		std::wstring v_blueprintFile = L"";
+		std::wstring v_blueprintName = L"";
 
-		if (_DirEntr.is_directory())
+		const fs::directory_entry v_dirEntry(v_blueprintPath);
+		if (v_dirEntry.is_directory())
 		{
-			std::wstring _BPFileDesc = (_BlueprintPath + L"/description.json");
-
-			nlohmann::json _DescrJson = SMBC::Json::LoadParseJson(_BPFileDesc);
-			if (!_DescrJson.is_object())
+			const std::wstring v_bpDescFile = (v_blueprintPath + L"/description.json");
+			const nlohmann::json v_bpJson = SMBC::Json::LoadParseJson(v_bpDescFile);
+			if (!v_bpJson.is_object())
 			{
 				SMBC::Gui::Warning("Parse Error", "Couldn't parse \"description.json\"");
 				return;
 			}
 
-			std::wstring _BPType = SMBC::Json::GetWstr(_DescrJson, "type");
-			std::wstring _BPName = SMBC::Json::GetWstr(_DescrJson, "name");
+			const auto& v_bpTypeJson = SMBC::Json::Get(v_bpJson, "type");
+			const std::wstring v_bpName = SMBC::Json::GetWstr(v_bpJson, "name");
 
-			if (_BPType != L"Blueprint" || _BPName.empty())
+			if (!(v_bpTypeJson.is_string() && v_bpTypeJson.get_ref<const std::string&>() == "Blueprint") || v_bpName.empty())
 			{
 				SMBC::Gui::Warning("No Data", "The specified folder does not contain any information about the blueprint!");
 				return;
 			}
 
-			_BlueprintFile = (_BlueprintPath + L"/blueprint.json");
-			_BlueprintName = SMBC::Blueprint::FixBlueprintName(_BPName);
+			v_blueprintFile = (v_blueprintPath + L"/blueprint.json");
+			v_blueprintName = SMBC::Blueprint::FixBlueprintName(v_bpName);
 
-			if (_BlueprintFile.empty() || _BlueprintName.empty()) return;
+			if (v_blueprintFile.empty() || v_blueprintName.empty())
+				return;
 		}
-		else if (_DirEntr.is_regular_file())
+		else if (v_dirEntry.is_regular_file())
 		{
-			_BlueprintFile = _BlueprintPath;
-			if (_DirEntr.path().has_stem())
-				_BlueprintName = SMBC::Blueprint::FixBlueprintName(_DirEntr.path().stem().wstring());
+			v_blueprintFile = v_blueprintPath;
+			if (v_dirEntry.path().has_stem())
+			{
+				v_blueprintName = SMBC::Blueprint::FixBlueprintName(v_dirEntry.path().stem().wstring());
+			}
 			else
-				_BlueprintName = L"UnknownBlueprint";
+			{
+				v_blueprintName = L"UnknownBlueprint";
+			}
 		}
 		else
 		{
@@ -136,9 +140,9 @@ namespace BlueprintConverter
 			return;
 		}
 
-		if (!_BlueprintName.empty() && !_BlueprintFile.empty())
+		if (!v_blueprintName.empty() && !v_blueprintFile.empty())
 		{
-			BlueprintConverter::GeneratorSettings^ pGenSettings = gcnew BlueprintConverter::GeneratorSettings(_BlueprintName);
+			BlueprintConverter::GeneratorSettings^ pGenSettings = gcnew BlueprintConverter::GeneratorSettings(v_blueprintName);
 			this->MakeFormCentered(pGenSettings);
 			pGenSettings->ShowDialog();
 
@@ -148,14 +152,14 @@ namespace BlueprintConverter
 
 				System::Array^ _ThreadData = gcnew cli::array<System::Object^>(8);
 
-				_ThreadData->SetValue(gcnew System::String(_BlueprintFile.c_str()), (int)0);
-				_ThreadData->SetValue(pGenSettings->BlueprintName_TB->Text, (int)1);
-				_ThreadData->SetValue(pGenSettings->SeparationType_CB->SelectedIndex, (int)2);
-				_ThreadData->SetValue(pGenSettings->ApplyTextures_CB->Checked, (int)3);
-				_ThreadData->SetValue(pGenSettings->ExportTexPaths_CB->Checked, (int)4);
-				_ThreadData->SetValue(pGenSettings->MaterialsByColor_CB->Checked, (int)5);
-				_ThreadData->SetValue(pGenSettings->ExportNormals_CB->Checked, (int)6);
-				_ThreadData->SetValue(pGenSettings->ExportUVs_CB->Checked, (int)7);
+				_ThreadData->SetValue(gcnew System::String(v_blueprintFile.c_str()) , static_cast<int>(0));
+				_ThreadData->SetValue(pGenSettings->BlueprintName_TB->Text          , static_cast<int>(1));
+				_ThreadData->SetValue(pGenSettings->SeparationType_CB->SelectedIndex, static_cast<int>(2));
+				_ThreadData->SetValue(pGenSettings->ApplyTextures_CB->Checked       , static_cast<int>(3));
+				_ThreadData->SetValue(pGenSettings->ExportTexPaths_CB->Checked      , static_cast<int>(4));
+				_ThreadData->SetValue(pGenSettings->MaterialsByColor_CB->Checked    , static_cast<int>(5));
+				_ThreadData->SetValue(pGenSettings->ExportNormals_CB->Checked       , static_cast<int>(6));
+				_ThreadData->SetValue(pGenSettings->ExportUVs_CB->Checked           , static_cast<int>(7));
 
 				this->ObjectGenerator->RunWorkerAsync(_ThreadData);
 				this->GuiUpdater->Start();
@@ -174,16 +178,16 @@ namespace BlueprintConverter
 	{
 		System::Array^ _Data = safe_cast<System::Array^>(e->Argument);
 
-		System::String^ _BlueprintPathS = safe_cast<System::String^>(_Data->GetValue((int)0));
-		System::String^ _BlueprintNameS = safe_cast<System::String^>(_Data->GetValue((int)1));
+		System::String^ _BlueprintPathS = safe_cast<System::String^>(_Data->GetValue(static_cast<int>(0)));
+		System::String^ _BlueprintNameS = safe_cast<System::String^>(_Data->GetValue(static_cast<int>(1)));
 
-		int sSeparationMethod = safe_cast<int>(_Data->GetValue((int)2));
+		const int sSeparationMethod = safe_cast<int>(_Data->GetValue(static_cast<int>(2)));
 
-		bool sApplyTextures = safe_cast<bool>(_Data->GetValue((int)3));
-		bool sExportTexPaths = safe_cast<bool>(_Data->GetValue((int)4));
-		bool sMaterialsByColor = safe_cast<bool>(_Data->GetValue((int)5));
-		bool sExportNormals = safe_cast<bool>(_Data->GetValue((int)6));
-		bool sExportUvs = safe_cast<bool>(_Data->GetValue((int)7));
+		const bool sApplyTextures    = safe_cast<bool>(_Data->GetValue(static_cast<int>(3)));
+		const bool sExportTexPaths   = safe_cast<bool>(_Data->GetValue(static_cast<int>(4)));
+		const bool sMaterialsByColor = safe_cast<bool>(_Data->GetValue(static_cast<int>(5)));
+		const bool sExportNormals    = safe_cast<bool>(_Data->GetValue(static_cast<int>(6)));
+		const bool sExportUvs        = safe_cast<bool>(_Data->GetValue(static_cast<int>(7)));
 
 		std::wstring _BlueprintPath = msclr::interop::marshal_as<std::wstring>(_BlueprintPathS);
 		std::wstring _BlueprintName = msclr::interop::marshal_as<std::wstring>(_BlueprintNameS);
@@ -202,13 +206,13 @@ namespace BlueprintConverter
 		if (cError)
 		{
 			rArray = gcnew cli::array<System::Object^>(2);
-			rArray->SetValue(true, (int)0);
-			rArray->SetValue(gcnew System::String(cError.GetString().c_str()), (int)1);
+			rArray->SetValue(true, static_cast<int>(0));
+			rArray->SetValue(gcnew System::String(cError.GetString().c_str()), static_cast<int>(1));
 		}
 		else
 		{
 			rArray = gcnew cli::array<System::Object^>(1);
-			rArray->SetValue(false, (int)0);
+			rArray->SetValue(false, static_cast<int>(0));
 		}
 
 		e->Result = rArray;
@@ -221,18 +225,18 @@ namespace BlueprintConverter
 		std::wstring state_output = SMBC::ConvData::GetStateString();
 		if (SMBC::ConvData::StateHasNumbers())
 		{
-			std::size_t max_value = SMBC::ConvData::ProgressMax;
 			std::size_t cur_value = SMBC::ConvData::ProgressValue;
 
-			this->ActionProgress->Maximum = (int)max_value;
+			const std::size_t max_value = SMBC::ConvData::ProgressMax;
+			this->ActionProgress->Maximum = static_cast<int>(max_value);
 
-			std::size_t max_cast = this->ActionProgress->Maximum;
-			if (max_cast <cur_value)
+			const std::size_t max_cast = this->ActionProgress->Maximum;
+			if (max_cast < cur_value)
 			{
 				cur_value = max_cast;
 			}
 
-			this->ActionProgress->Value = (int)cur_value;
+			this->ActionProgress->Value = static_cast<int>(cur_value);
 
 			state_output += (L"(" + std::to_wstring(cur_value) + L" / " + std::to_wstring(max_value) + L")");
 		}
@@ -495,22 +499,22 @@ namespace BlueprintConverter
 
 		if (dpandbp)
 		{
-			bool _HasWorkshopId = false;
-			bool _HasBPFolder = false;
-			bool _HasBPPath = false;
+			bool v_hasWorkshopId = false;
+			bool v_hasBpFolder = false;
+			bool v_hasBpPath = false;
 
 			SMBC::Blueprint* cur_bp = this->GetCurrentBlueprint();
 			if (cur_bp != nullptr)
 			{
-				_HasWorkshopId = !cur_bp->WorkshopId.empty();
-				_HasBPFolder = !cur_bp->Folder.empty();
-				_HasBPPath = !cur_bp->Path.empty();
+				v_hasWorkshopId = !cur_bp->WorkshopId.empty();
+				v_hasBpFolder = !cur_bp->Folder.empty();
+				v_hasBpPath = !cur_bp->Path.empty();
 			}
 
-			this->BlueprintOptions_CMS->Enabled = (_HasBPFolder || _HasBPPath);
-			this->BP_OpenOutputDir_BTN->Enabled = _HasBPFolder;
-			this->BP_ShowModList_BTN->Enabled = _HasBPPath;
-			this->OpenInWorkshop_BTN->Enabled = _HasWorkshopId;
+			this->BlueprintOptions_CMS->Enabled = (v_hasBpFolder || v_hasBpPath);
+			this->BP_OpenOutputDir_BTN->Enabled = v_hasBpFolder;
+			this->BP_ShowModList_BTN->Enabled = v_hasBpPath;
+			this->OpenInWorkshop_BTN->Enabled = v_hasWorkshopId;
 		}
 		else
 		{
@@ -568,7 +572,7 @@ namespace BlueprintConverter
 
 		if (SMBC::Settings::PathToSM.empty())
 		{
-			WForms::DialogResult dr = SMBC::Gui::Question(
+			const WForms::DialogResult dr = SMBC::Gui::Question(
 				"Missing Path",
 				"This program requires a path to Scrap Mechanic to work properly\n\nWould you like to set it up right now?"
 			);
@@ -699,7 +703,7 @@ namespace BlueprintConverter
 	void MainGUI::UpdateBlueprintLabel(bool bp_loading)
 	{
 		std::vector<SMBC::Blueprint*>* cur_list = this->GetCurrentBPList();
-		bool _visible = (cur_list->empty() || bp_loading);
+		const bool _visible = (cur_list->empty() || bp_loading);
 
 		if (this->BPListStatus_LBL->Visible != _visible)
 			this->BPListStatus_LBL->Visible = _visible;
@@ -727,8 +731,8 @@ namespace BlueprintConverter
 
 	void MainGUI::UpdateLabelPosition()
 	{
-		int p_x = (this->BlueprintList->Location.X + this->BlueprintList->Size.Width) / 2;
-		int p_y = (this->BlueprintList->Location.Y + this->BlueprintList->Size.Height) / 2;
+		const int p_x = (this->BlueprintList->Location.X + this->BlueprintList->Size.Width) / 2;
+		const int p_y = (this->BlueprintList->Location.Y + this->BlueprintList->Size.Height) / 2;
 
 		this->BPListStatus_LBL->Location = System::Drawing::Point(
 			p_x - (this->BPListStatus_LBL->Size.Width / 2),

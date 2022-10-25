@@ -72,11 +72,12 @@ namespace SMBC
 		return nlohmann::json();
 	}
 
-	std::wstring Json::GetWstr(nlohmann::json& json, const std::string& key)
+	std::wstring Json::GetWstr(const nlohmann::json& json, const std::string& key)
 	{
-		if (json.contains(key))
+		const nlohmann::json::const_iterator v_iter = json.find(key);
+		if (v_iter != json.end())
 		{
-			const auto& v_value = json.at(key);
+			const auto& v_value = v_iter.value();
 
 			if (v_value.is_string())
 				return SMBC::String::ToWide(v_value.get_ref<const std::string&>());
