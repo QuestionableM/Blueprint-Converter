@@ -27,7 +27,7 @@ namespace SMBC
 
 	void Mod::LoadObjectFile(const std::wstring& path)
 	{
-		nlohmann::json mObjectFile = Json::LoadParseJson(path);
+		const nlohmann::json mObjectFile = Json::LoadParseJson(path);
 		if (!mObjectFile.is_object())
 		{
 			DebugErrorL("Couldn't load object database: ", path);

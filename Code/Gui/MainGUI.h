@@ -19,9 +19,10 @@ namespace BlueprintConverter {
 		bool LoadedDatabase = false;
 		bool isCancelled = false;
 		int SelItemIndex = -1;
+		int v_lastSearchLength = 0;
 		std::vector<SMBC::Blueprint*>* Blueprints = nullptr;
-	public:
 		std::vector<SMBC::Blueprint*>* TempBPTable = nullptr;
+
 		MainGUI(void);
 	protected:
 		~MainGUI();

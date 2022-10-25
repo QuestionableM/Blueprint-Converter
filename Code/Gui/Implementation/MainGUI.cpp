@@ -381,20 +381,38 @@ namespace BlueprintConverter
 		this->BP_ShowModList_BTN->Enabled = false;
 		this->BlueprintOptions_CMS->Enabled = false;
 
-		if (this->TempBPTable->size() > 0) this->TempBPTable->clear();
-
+		const int v_newTextLength = this->SearchTB->TextLength;
 		this->SelItemIndex = -1;
-		if (this->SearchTB->TextLength > 0 && !this->Blueprints->empty())
+		if (v_newTextLength > 0 && !this->Blueprints->empty())
 		{
-			std::wstring l_SearchWstr = msclr::interop::marshal_as<std::wstring>(this->SearchTB->Text);
-			SMBC::String::ToLowerR(l_SearchWstr);
+			std::wstring v_searchWstr = msclr::interop::marshal_as<std::wstring>(this->SearchTB->Text);
+			SMBC::String::ToLowerR(v_searchWstr);
 
-			for (SMBC::Blueprint*& _Blueprint : *this->Blueprints)
+			if (v_lastSearchLength != 0 && v_newTextLength > v_lastSearchLength)
 			{
-				if (_Blueprint->LowerName.find(l_SearchWstr) != std::wstring::npos)
-					this->TempBPTable->push_back(_Blueprint);
+				std::size_t v_newCacheSize = 0;
+
+				for (SMBC::Blueprint*& v_curBp : *this->TempBPTable)
+				{
+					if (v_curBp->LowerName.find(v_searchWstr) != std::wstring::npos)
+						(*this->TempBPTable)[v_newCacheSize++] = v_curBp;
+				}
+
+				this->TempBPTable->resize(v_newCacheSize);
+			}
+			else
+			{
+				this->TempBPTable->clear();
+
+				for (SMBC::Blueprint*& v_curBp : *this->Blueprints)
+				{
+					if (v_curBp->LowerName.find(v_searchWstr) != std::wstring::npos)
+						this->TempBPTable->push_back(v_curBp);
+				}
 			}
 		}
+
+		v_lastSearchLength = this->SearchTB->TextLength;
 
 		std::vector<SMBC::Blueprint*>* cur_list = this->GetCurrentBPList();
 		if (!cur_list->empty() || (cur_list->empty() && this->BlueprintList->Items->Count > 0))
