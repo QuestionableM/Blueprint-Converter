@@ -252,13 +252,13 @@ namespace BlueprintConverter
 		this->ActionProgress->Value = this->ActionProgress->Maximum;
 
 		System::Array^ res_array = safe_cast<System::Array^>(e->Result);
-		const bool has_errors = safe_cast<bool>(res_array->GetValue((int)0));
+		const bool has_errors = safe_cast<bool>(res_array->GetValue(static_cast<int>(0)));
 
 		if (has_errors)
 		{
 			SMBC::ConvData::SetState(SMBC::ConvState::CV_Failure, 0);
 
-			System::String^ mErrorMsg = safe_cast<System::String^>(res_array->GetValue((int)1));
+			System::String^ mErrorMsg = safe_cast<System::String^>(res_array->GetValue(static_cast<int>(1)));
 
 			SMBC::Gui::Error("Conversion Error", mErrorMsg);
 		}
