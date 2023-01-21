@@ -1,5 +1,8 @@
-# Blueprint-Converter
-Allows you to convert Scrap Mechanic blueprints into 3D models
+# Blueprint-Converter [Deprecated]
+Allows you to convert Scrap Mechanic blueprints into 3D models.
+
+# New Version is available
+Tile Converter and Blueprint Converter have been merged into [SM Converter](https://github.com/QuestionableM/SM-Converter)
 
 # How to use
 In order for this program to work, you have to have Scrap Mechanic installed!
